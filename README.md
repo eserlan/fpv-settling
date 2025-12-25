@@ -40,6 +40,12 @@ Unlock powerful upgrades through research:
 
 ## 🛠️ Development Setup
 
+**New to the project? Start here:**
+- 🚀 [Quick Start Guide](QUICKSTART.md) - Get running in 5 minutes
+- 📖 [Setup Guide](SETUP.md) - Detailed development environment setup
+- 🏗️ [Technical Overview](TECHNICAL.md) - Architecture and system design
+- 🤝 [Contributing Guide](CONTRIBUTING.md) - How to contribute
+
 ### Prerequisites
 - [Rojo](https://rojo.space/) - Syncs project files with Roblox Studio
 - Roblox Studio
