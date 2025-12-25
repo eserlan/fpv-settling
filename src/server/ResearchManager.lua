@@ -126,12 +126,17 @@ function ResearchManager:GetCurrentResearch()
 end
 
 -- Get tech modifier for a specific effect
+-- Note: Currently uses multiplicative stacking for all effects
+-- Future improvement: Use additive stacking for cost reduction effects
 function ResearchManager:GetModifier(effectType)
 	local modifier = 1
 	
 	for _, techName in ipairs(self.ResearchedTechs) do
 		local tech = TechTree[techName]
 		if tech.Effect == effectType and tech.Modifier then
+			-- Multiplicative stacking (e.g., 1.25 * 1.5 = 1.875)
+			-- Works well for speed/production bonuses
+			-- For cost reduction, consider additive in future versions
 			modifier = modifier * tech.Modifier
 		end
 	end

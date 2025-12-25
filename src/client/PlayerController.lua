@@ -17,7 +17,9 @@ local mouseSensitivity = 0.003
 local cameraAngleX = 0
 local cameraAngleY = 0
 
--- Lock and hide mouse
+-- Lock and hide mouse for first-person view
+-- Note: This is a dedicated FPV game, so mouse is always locked
+-- Future: Add pause menu to unlock mouse temporarily
 UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
 UserInputService.MouseIconEnabled = false
 
