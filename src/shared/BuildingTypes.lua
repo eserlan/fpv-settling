@@ -1,6 +1,4 @@
 -- Building types that can be constructed
-local ResourceTypes = require(script.Parent.ResourceTypes)
-
 local BuildingTypes = {
 	Road = {
 		Name = "Road",

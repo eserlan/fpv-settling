@@ -6,7 +6,7 @@ print("FPV Settling - Server Starting")
 print("===========================================")
 
 -- Initialize the game manager
-local GameManager = require(script.Parent.Server.GameManager)
+local GameManager = require(script.GameManager)
 
 print("Game Manager loaded successfully!")
 print("===========================================")

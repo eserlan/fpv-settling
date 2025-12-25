@@ -12,8 +12,8 @@ local player = Players.LocalPlayer
 player.CharacterAdded:Wait()
 
 -- Initialize client systems
-local PlayerController = require(script.Parent.Client.PlayerController)
-local UIManager = require(script.Parent.Client.UIManager)
+local PlayerController = require(script.PlayerController)
+local UIManager = require(script.UIManager)
 
 print("Client systems loaded successfully!")
 print("===========================================")
