@@ -1,0 +1,26 @@
+# Rojo build files
+*.rbxlx.lock
+*.rbxl.lock
+
+# Roblox Studio files
+*.rbxl
+*.rbxlx
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+tmp/
+temp/
