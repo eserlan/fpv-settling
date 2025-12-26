@@ -1,5 +1,6 @@
 -- Server-side NPC Manager
 local NPCTypes = require(game.ReplicatedStorage.Shared.NPCTypes)
+local Network = require(game.ReplicatedStorage.Shared.Network)
 
 local NPCManager = {}
 NPCManager.__index = NPCManager
@@ -51,6 +52,8 @@ function NPCManager:HireNPC(npcType, position)
 	
 	-- Create physical NPC model
 	self:CreateNPCModel(npc)
+	
+	Network:FireClient(self.Player, "NPCHired", npc.Id, npcType, position)
 	
 	return true, npc.Id
 end

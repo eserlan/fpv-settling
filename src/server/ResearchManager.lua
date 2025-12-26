@@ -1,5 +1,6 @@
 -- Server-side Research Manager
 local TechTree = require(game.ReplicatedStorage.Shared.TechTree)
+local Network = require(game.ReplicatedStorage.Shared.Network)
 
 local ResearchManager = {}
 ResearchManager.__index = ResearchManager
@@ -56,6 +57,8 @@ function ResearchManager:StartResearch(techName)
 	self.CurrentResearch = techName
 	self.ResearchProgress = 0
 	
+	Network:FireClient(self.Player, "ResearchStarted", techName, tech.ResearchTime)
+	
 	return true, techName
 end
 
@@ -85,6 +88,8 @@ function ResearchManager:CompleteResearch(techName)
 	
 	self.CurrentResearch = nil
 	self.ResearchProgress = 0
+	
+	Network:FireClient(self.Player, "ResearchCompleted", techName)
 end
 
 -- Apply technology effect

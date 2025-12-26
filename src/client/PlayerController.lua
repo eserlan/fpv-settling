@@ -1,4 +1,5 @@
 -- Client-side Player Controller
+local Network = require(game.ReplicatedStorage.Shared.Network)
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -75,18 +76,63 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	
 	-- Place building with left mouse button
 	if buildMode and input.UserInputType == Enum.UserInputType.MouseButton1 then
-		if buildingPreview then
-			-- Send placement request to server (would use RemoteEvents in full implementation)
-			print("Placing building at:", buildingPreview.Position)
+		if buildingPreview and currentBuildingType then
+			Network:FireServer("PlaceBuilding", currentBuildingType, buildingPreview.Position)
+			print("Requested building placement at:", buildingPreview.Position)
 		end
+	end
+	
+	-- Hire Worker with 'H' key
+	if input.KeyCode == Enum.KeyCode.H then
+		Network:FireServer("HireNPC", "Worker", player.Character.PrimaryPart.Position + player.Character.PrimaryPart.CFrame.LookVector * 5)
+		print("Requested worker hire")
+	end
+	
+	-- Hire Guard with 'G' key
+	if input.KeyCode == Enum.KeyCode.G then
+		Network:FireServer("HireNPC", "Guard", player.Character.PrimaryPart.Position + player.Character.PrimaryPart.CFrame.LookVector * 5)
+		print("Requested guard hire")
+	end
+	
+	-- Open Research with 'R' key (placeholder for now, just starts first tech)
+	if input.KeyCode == Enum.KeyCode.R then
+		Network:FireServer("StartResearch", "ImprovedTools")
+		print("Requested research: ImprovedTools")
 	end
 end)
 
 -- Update building preview
 RunService.RenderStepped:Connect(function()
-	if buildMode and currentBuildingType then
-		-- Create or update building preview
-		-- This would show where the building will be placed
+	if buildMode then
+		-- Set default building type if none selected
+		if not currentBuildingType then
+			currentBuildingType = "House"
+		end
+		
+		-- Create preview part if it doesn't exist
+		if not buildingPreview then
+			buildingPreview = Instance.new("Part")
+			buildingPreview.Name = "BuildingPreview"
+			buildingPreview.Anchored = true
+			buildingPreview.CanCollide = false
+			buildingPreview.Transparency = 0.5
+			buildingPreview.BrickColor = BrickColor.new("Electric blue")
+			buildingPreview.Size = Vector3.new(10, 8, 10)
+			buildingPreview.Parent = workspace
+		end
+		
+		-- Position preview 10 units in front of player
+		local character = player.Character
+		if character and character.PrimaryPart then
+			local lookVector = character.PrimaryPart.CFrame.LookVector
+			buildingPreview.Position = character.PrimaryPart.Position + lookVector * 15
+		end
+	else
+		-- Remove preview if it exists
+		if buildingPreview then
+			buildingPreview:Destroy()
+			buildingPreview = nil
+		end
 	end
 end)
 

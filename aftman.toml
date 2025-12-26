@@ -2,4 +2,4 @@
 # Install Aftman from: https://github.com/LPGhatguy/aftman
 
 [tools]
-rojo = "rojo-rbx/rojo@7.4.1"
+rojo = "rojo-rbx/rojo@7.7.0-rc.1"

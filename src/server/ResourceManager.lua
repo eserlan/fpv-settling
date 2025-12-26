@@ -1,5 +1,6 @@
 -- Server-side Resource Manager
 local ResourceTypes = require(game.ReplicatedStorage.Shared.ResourceTypes)
+local Network = require(game.ReplicatedStorage.Shared.Network)
 
 local ResourceManager = {}
 ResourceManager.__index = ResourceManager
@@ -42,6 +43,7 @@ function ResourceManager:AddResource(resourceType, amount)
 		return addedAmount
 	else
 		self.Resources[resourceType] = currentAmount + amount
+		Network:FireClient(self.Player, "ResourceUpdate", self.Resources)
 		return amount
 	end
 end
@@ -55,6 +57,7 @@ function ResourceManager:RemoveResource(resourceType, amount)
 	
 	if self.Resources[resourceType] >= amount then
 		self.Resources[resourceType] = self.Resources[resourceType] - amount
+		Network:FireClient(self.Player, "ResourceUpdate", self.Resources)
 		return true
 	end
 	

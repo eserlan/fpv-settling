@@ -1,5 +1,6 @@
 -- Server-side Building Manager
 local BuildingTypes = require(game.ReplicatedStorage.Shared.BuildingTypes)
+local Network = require(game.ReplicatedStorage.Shared.Network)
 
 local BuildingManager = {}
 BuildingManager.__index = BuildingManager
@@ -48,6 +49,8 @@ function BuildingManager:StartBuilding(buildingType, position)
 	
 	table.insert(self.BuildingInProgress, building)
 	
+	Network:FireClient(self.Player, "ConstructionStarted", buildingId, buildingType, position)
+	
 	return true, buildingId
 end
 
@@ -72,6 +75,8 @@ function BuildingManager:OnBuildingComplete(building)
 	print("Building completed:", building.Type, "for player:", self.Player.Name)
 	-- Create physical building in workspace
 	self:CreateBuildingModel(building)
+	
+	Network:FireClient(self.Player, "ConstructionCompleted", building.Id, building.Type)
 end
 
 -- Create the physical building model

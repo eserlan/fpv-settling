@@ -19,6 +19,7 @@ This document provides a technical overview of the FPV Settling game architectur
 - Starting resources (50 Wood, 30 Stone, 20 Food, 100 Gold)
 
 **API**:
+
 ```lua
 ResourceManager.new(player) -- Create manager for player
 manager:AddResource(type, amount) -- Add resources
@@ -49,6 +50,7 @@ manager:GetResource(type) -- Get specific resource amount
 6. On completion, physical model created in workspace
 
 **API**:
+
 ```lua
 BuildingManager.new(player, resourceManager)
 manager:StartBuilding(type, position) -- Begin construction
@@ -81,6 +83,7 @@ manager:GetBuildings() -- Get completed buildings
 5. Fire/remove when no longer needed
 
 **API**:
+
 ```lua
 NPCManager.new(player, resourceManager)
 manager:HireNPC(type, position) -- Hire new NPC
@@ -111,6 +114,7 @@ manager:FireNPC(id) -- Remove NPC
 5. Apply modifiers on completion
 
 **API**:
+
 ```lua
 ResearchManager.new(player, resourceManager)
 manager:StartResearch(techName) -- Begin research
@@ -170,24 +174,28 @@ Every 60 seconds:
 ## Data Flow
 
 ### Resource Transaction Flow
+
 ```
 Player Action → Server Validation → Resource Check → 
 Transaction Execute → Update State → (Future: Notify Client)
 ```
 
 ### Building Construction Flow
+
 ```
 Place Request → Cost Check → Deduct Resources → 
 Queue Building → Update Progress → Complete → Spawn Model
 ```
 
 ### NPC Hiring Flow
+
 ```
 Hire Request → Cost Check → Deduct Resources → 
 Create NPC → Spawn Model → Add to Management
 ```
 
 ### Research Flow
+
 ```
 Research Request → Prerequisite Check → Cost Check → 
 Deduct Resources → Progress Over Time → Complete → Apply Effects

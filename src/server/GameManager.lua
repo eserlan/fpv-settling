@@ -6,6 +6,7 @@ local ResourceManager = require(script.Parent.ResourceManager)
 local BuildingManager = require(script.Parent.BuildingManager)
 local NPCManager = require(script.Parent.NPCManager)
 local ResearchManager = require(script.Parent.ResearchManager)
+local NetworkHandler = require(script.Parent.NetworkHandler)
 
 local GameManager = {}
 GameManager.PlayerData = {}
@@ -82,6 +83,9 @@ Players.PlayerRemoving:Connect(onPlayerRemoving)
 for _, player in ipairs(Players:GetPlayers()) do
 	onPlayerAdded(player)
 end
+
+-- Initialize Network Handler
+NetworkHandler.Init(GameManager)
 
 print("Game Manager initialized!")
 

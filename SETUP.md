@@ -5,8 +5,9 @@ This guide will help you set up the development environment and start working on
 ## Prerequisites
 
 Before you begin, ensure you have:
-- **Roblox Studio** installed ([Download here](https://www.roblox.com/create))
+- **Roblox Studio** installed (via **Vinegar** on Linux)
 - **Rojo** for syncing files between your file system and Roblox Studio
+- **Aftman** (Highly recommended for Linux/Nobara)
 
 ## Step 1: Install Rojo
 
@@ -36,6 +37,13 @@ Extract and add to your PATH.
 rojo --version
 ```
 
+### Nobara/Fedora Specific (Alternative)
+On Nobara, you can also install via `cargo` (ensure you have `gcc-c++` and `openssl-devel`):
+```bash
+sudo dnf install gcc-c++ openssl-devel
+cargo install rojo
+```
+
 ## Step 2: Clone the Repository
 
 ```bash
@@ -43,13 +51,28 @@ git clone https://github.com/eserlan/fpv-settling.git
 cd fpv-settling
 ```
 
-## Step 3: Install Rojo Plugin in Roblox Studio
+## Step 3: Install Roblox Studio & Rojo Plugin
 
-1. Open Roblox Studio
-2. Navigate to the Roblox marketplace
-3. Install the **Rojo 7** plugin from:
-   https://www.roblox.com/library/13916111004/Rojo-7
-4. Restart Roblox Studio after installation
+### Windows/macOS
+1. Download from [Roblox Create](https://www.roblox.com/create).
+2. Install the **Rojo 7** plugin.
+
+### Linux (Nobara/Fedora) - Using Vinegar
+Roblox Studio is not officially supported on Linux, but **Vinegar** is the recommended choice for Nobara:
+
+1. **Install Vinegar via Flatpak**:
+   ```bash
+   flatpak install flathub org.vinegarhq.Vinegar
+   ```
+2. **Setup Studio**:
+   - Open Vinegar from your application menu.
+   - Select **Install Studio**.
+   - Note: If using the Flatpak version, ensure it has permissions to access your project directory (use `Flatseal` to manage permissions if needed).
+
+3. **Install Rojo Plugin in Studio**:
+   - Once Studio is open via Vinegar, navigate to the Roblox marketplace.
+   - Install the **Rojo 7** plugin from: [Rojo 7 Plugin](https://www.roblox.com/library/13916111004/Rojo-7)
+   - Restart Roblox Studio after installation.
 
 ## Step 4: Start Rojo Server
 
@@ -153,7 +176,12 @@ git push origin main
 ### Rojo won't connect
 - Ensure Rojo server is running (`rojo serve`)
 - Check that port 34872 is not blocked by firewall
+- **Linux Tip**: If using Vinegar/Flatpak, ensure the browser and Studio can "see" each other. Usually `localhost` works, but some network namespaces in Flatpak might require using `127.0.0.1` or checking your `hosts` file.
 - Try restarting Roblox Studio
+
+### Linux: Studio Performance on Nobara
+- If you experience lag, check Vinegar's settings to use **Vulkan** instead of OpenGL.
+- Ensure your GPU drivers (Nvidia/AMD) are up to date via the Nobara Update System.
 
 ### Changes not appearing in Studio
 - Verify Rojo shows "Connected" in Studio
