@@ -8,12 +8,16 @@ local NPCManager = require(script.Parent.NPCManager)
 local ResearchManager = require(script.Parent.ResearchManager)
 local NetworkHandler = require(script.Parent.NetworkHandler)
 local MapGenerator = require(script.Parent.MapGenerator)
+local PulseManager = require(script.Parent.PulseManager)
 
 local GameManager = {}
 GameManager.PlayerData = {}
 
 -- Generate the procedural map
-MapGenerator.Generate() -- Generate exactly one hexagon for testing shape
+MapGenerator.Generate()
+
+-- Initialize the Pulse system
+PulseManager.Initialize()
 
 -- Initialize player data when they join
 local function onPlayerAdded(player)
@@ -58,6 +62,9 @@ RunService.Heartbeat:Connect(function()
 	local currentTime = tick()
 	local deltaTime = currentTime - lastUpdate
 	lastUpdate = currentTime
+	
+	-- Update the Pulse system (global timer)
+	PulseManager.Update(deltaTime)
 	
 	-- Update all player systems
 	for userId, playerData in pairs(GameManager.PlayerData) do

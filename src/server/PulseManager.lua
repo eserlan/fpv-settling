@@ -1,0 +1,287 @@
+-- THE PULSE - Resource Collection System
+-- Every 60 seconds, a global dice roll happens and resources spawn on matching tiles
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local TileTypes = require(ReplicatedStorage.Shared.TileTypes)
+local ResourceTypes = require(ReplicatedStorage.Shared.ResourceTypes)
+
+local PulseManager = {}
+
+-- Configuration
+local PULSE_INTERVAL = 60 -- Seconds between pulses
+local DICE_ROLL_DURATION = 3 -- Seconds for dice animation
+
+-- Catan-style number distribution (excludes 7 - robber)
+-- Numbers 6 and 8 are most common, 2 and 12 are rare
+local NUMBER_DISTRIBUTION = {2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12}
+
+-- State
+local pulseTimer = PULSE_INTERVAL
+local isRolling = false
+local tileNumbers = {} -- Maps tile coordinates to numbers
+
+-- Events
+local Events = ReplicatedStorage:FindFirstChild("Events") or Instance.new("Folder", ReplicatedStorage)
+Events.Name = "Events"
+
+local PulseEvent = Events:FindFirstChild("PulseEvent") or Instance.new("RemoteEvent", Events)
+PulseEvent.Name = "PulseEvent"
+
+local TimerEvent = Events:FindFirstChild("TimerEvent") or Instance.new("RemoteEvent", Events)
+TimerEvent.Name = "TimerEvent"
+
+-- Roll 2d6 dice
+local function rollDice()
+	local die1 = math.random(1, 6)
+	local die2 = math.random(1, 6)
+	return die1, die2, die1 + die2
+end
+
+-- Assign numbers to tiles (called after map generation)
+function PulseManager.AssignTileNumbers()
+	local mapFolder = workspace:FindFirstChild("Map")
+	if not mapFolder then return end
+	
+	-- Create a shuffled copy of the number distribution
+	local numbers = {}
+	for _, n in ipairs(NUMBER_DISTRIBUTION) do
+		table.insert(numbers, n)
+	end
+	
+	-- Shuffle
+	for i = #numbers, 2, -1 do
+		local j = math.random(1, i)
+		numbers[i], numbers[j] = numbers[j], numbers[i]
+	end
+	
+	local numberIndex = 1
+	
+	for _, tile in ipairs(mapFolder:GetChildren()) do
+		if tile:IsA("Model") and tile.PrimaryPart then
+			local tileType = tile.PrimaryPart:GetAttribute("TileType")
+			
+			-- Desert gets no number
+			if tileType ~= "Desert" then
+				local q = tile.PrimaryPart:GetAttribute("Q")
+				local r = tile.PrimaryPart:GetAttribute("R")
+				local key = q .. "_" .. r
+				
+				local number = numbers[numberIndex] or numbers[1]
+				tileNumbers[key] = number
+				tile.PrimaryPart:SetAttribute("DiceNumber", number)
+				
+				-- Create visual number token on tile
+				PulseManager.CreateNumberToken(tile, number)
+				
+				numberIndex = (numberIndex % #numbers) + 1
+			end
+		end
+	end
+	
+	print("[PulseManager] Assigned numbers to tiles")
+end
+
+-- Create a visual number token on a tile
+function PulseManager.CreateNumberToken(tile, number)
+	local tokenPart = Instance.new("Part")
+	tokenPart.Name = "NumberToken"
+	tokenPart.Size = Vector3.new(8, 1, 8)
+	tokenPart.Shape = Enum.PartType.Cylinder
+	tokenPart.Anchored = true
+	tokenPart.CanCollide = false
+	
+	-- Color based on probability (6 and 8 are red/high probability)
+	if number == 6 or number == 8 then
+		tokenPart.Color = Color3.fromRGB(200, 50, 50)
+	else
+		tokenPart.Color = Color3.fromRGB(230, 210, 180)
+	end
+	
+	tokenPart.Material = Enum.Material.SmoothPlastic
+	
+	-- Position above tile center
+	local tilePos = tile.PrimaryPart.Position
+	tokenPart.CFrame = CFrame.new(tilePos + Vector3.new(0, 6, 0)) * CFrame.Angles(0, 0, math.rad(90))
+	tokenPart.Parent = tile
+	
+	-- Add number label
+	local billboard = Instance.new("BillboardGui")
+	billboard.Size = UDim2.new(0, 50, 0, 50)
+	billboard.StudsOffset = Vector3.new(0, 0, 0)
+	billboard.AlwaysOnTop = false
+	billboard.Adornee = tokenPart
+	billboard.Parent = tokenPart
+	
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.new(0, 0, 0)
+	label.TextScaled = true
+	label.Font = Enum.Font.GothamBold
+	label.Text = tostring(number)
+	label.Parent = billboard
+	
+	-- Add dots for probability indicator
+	local dots = ""
+	local prob = 6 - math.abs(7 - number) -- 6,8=5 dots, 5,9=4, etc.
+	for i = 1, prob do
+		dots = dots .. "•"
+	end
+	
+	local dotsLabel = Instance.new("TextLabel")
+	dotsLabel.Size = UDim2.new(1, 0, 0.3, 0)
+	dotsLabel.Position = UDim2.new(0, 0, 0.7, 0)
+	dotsLabel.BackgroundTransparency = 1
+	dotsLabel.TextColor3 = Color3.new(0, 0, 0)
+	dotsLabel.TextScaled = true
+	dotsLabel.Font = Enum.Font.GothamBold
+	dotsLabel.Text = dots
+	dotsLabel.Parent = billboard
+end
+
+-- Get tiles that match a dice roll
+function PulseManager.GetMatchingTiles(diceTotal)
+	local matching = {}
+	local mapFolder = workspace:FindFirstChild("Map")
+	if not mapFolder then return matching end
+	
+	for _, tile in ipairs(mapFolder:GetChildren()) do
+		if tile:IsA("Model") and tile.PrimaryPart then
+			local number = tile.PrimaryPart:GetAttribute("DiceNumber")
+			if number == diceTotal then
+				table.insert(matching, tile)
+			end
+		end
+	end
+	
+	return matching
+end
+
+-- Execute a pulse (dice roll and resource spawn)
+function PulseManager.ExecutePulse()
+	if isRolling then return end
+	isRolling = true
+	
+	-- Roll the dice
+	local die1, die2, total = rollDice()
+	
+	print("[PulseManager] THE PULSE! Rolled " .. die1 .. " + " .. die2 .. " = " .. total)
+	
+	-- Broadcast to all clients for visual effects
+	PulseEvent:FireAllClients("RollStart", die1, die2, total)
+	
+	-- Wait for animation
+	task.wait(DICE_ROLL_DURATION)
+	
+	-- Get matching tiles and spawn resources
+	local matchingTiles = PulseManager.GetMatchingTiles(total)
+	
+	if total == 7 then
+		-- Robber! (TODO: Implement robber mechanics)
+		print("[PulseManager] ROBBER! No resources this pulse.")
+		PulseEvent:FireAllClients("Robber")
+	else
+		print("[PulseManager] " .. #matchingTiles .. " tiles match!")
+		
+		for _, tile in ipairs(matchingTiles) do
+			local tileType = tile.PrimaryPart:GetAttribute("TileType")
+			local resourceKey, resourceData = ResourceTypes.GetByTileType(tileType)
+			
+			if resourceKey then
+				-- TODO: Check if player has settlement/city on this tile
+				-- For now, just spawn resources on all matching tiles
+				PulseManager.SpawnResource(tile, resourceKey, resourceData)
+			end
+		end
+		
+		PulseEvent:FireAllClients("RollComplete", die1, die2, total, #matchingTiles)
+	end
+	
+	isRolling = false
+	pulseTimer = PULSE_INTERVAL
+end
+
+-- Spawn a physical resource on a tile
+function PulseManager.SpawnResource(tile, resourceKey, resourceData)
+	local tilePos = tile.PrimaryPart.Position
+	
+	-- Random position on the tile
+	local angle = math.random() * math.pi * 2
+	local dist = math.random(5, 20)
+	local spawnPos = tilePos + Vector3.new(math.cos(angle) * dist, 10, math.sin(angle) * dist)
+	
+	-- Create physical resource
+	local resource = Instance.new("Part")
+	resource.Name = "Resource_" .. resourceKey
+	resource.Size = Vector3.new(3, 3, 3)
+	resource.Position = spawnPos
+	resource.Color = resourceData.Color
+	resource.Material = resourceData.Material
+	resource.Anchored = false -- Will fall and can be picked up
+	resource.CanCollide = true
+	
+	-- Add attributes for collection
+	resource:SetAttribute("ResourceType", resourceKey)
+	resource:SetAttribute("Amount", 1)
+	
+	-- Add glow effect
+	local light = Instance.new("PointLight")
+	light.Color = resourceData.Color
+	light.Brightness = 2
+	light.Range = 8
+	light.Parent = resource
+	
+	-- Add to resources folder
+	local resourcesFolder = workspace:FindFirstChild("Resources") or Instance.new("Folder", workspace)
+	resourcesFolder.Name = "Resources"
+	resource.Parent = resourcesFolder
+	
+	-- Auto-destroy after 60 seconds if not collected
+	task.delay(60, function()
+		if resource and resource.Parent then
+			resource:Destroy()
+		end
+	end)
+	
+	print("[PulseManager] Spawned " .. resourceKey .. " at tile")
+end
+
+-- Update loop (called from GameManager)
+function PulseManager.Update(deltaTime)
+	if isRolling then return end
+	
+	pulseTimer = pulseTimer - deltaTime
+	
+	-- Broadcast timer to clients every second
+	if math.floor(pulseTimer) ~= math.floor(pulseTimer + deltaTime) then
+		TimerEvent:FireAllClients(math.floor(pulseTimer))
+	end
+	
+	if pulseTimer <= 0 then
+		PulseManager.ExecutePulse()
+	end
+end
+
+-- Initialize
+function PulseManager.Initialize()
+	print("[PulseManager] Initialized - Pulse every " .. PULSE_INTERVAL .. " seconds")
+	
+	-- Assign numbers after a short delay to ensure map is generated
+	task.delay(1, function()
+		PulseManager.AssignTileNumbers()
+	end)
+end
+
+-- Get current timer value
+function PulseManager.GetTimer()
+	return pulseTimer
+end
+
+-- Force a pulse (for testing)
+function PulseManager.ForcePulse()
+	pulseTimer = 0
+end
+
+return PulseManager
