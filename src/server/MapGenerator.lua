@@ -240,24 +240,55 @@ function MapGenerator.Generate(rings)
 				end
 				
 			elseif tileData.Name == "Pasture" then
-				-- Add bushes and grass for pasture
-				for i = 1, 3 do
-					local angle = math.rad(i * 120 + math.random(-15, 15))
-					local dist = math.random(8, 20)
-					local pos = worldPos + Vector3.new(math.cos(angle) * dist, baseY, math.sin(angle) * dist)
+				-- Add sheep from asset pack (4-9 sheep)
+				local sheepCount = math.random(4, 9)
+				local placedPositions = {}
+				local minDistance = 8 -- Minimum distance between sheep
+				
+				for i = 1, sheepCount do
+					local pos
+					local attempts = 0
+					local maxAttempts = 20
 					
-					local bushType = (i % 2 == 0) and "Bushes/Purple Bush" or "Bushes/Red Bush"
-					local bush = placeAsset(bushType, pos)
-					if not bush then
-						-- Fallback: basic sheep shape
-						local body = Instance.new("Part")
-						body.Shape = Enum.PartType.Ball
-						body.Size = Vector3.new(6, 4, 8)
-						body.Position = pos + Vector3.new(0, 2, 0)
-						body.Color = Color3.fromRGB(255, 255, 255)
-						body.Material = Enum.Material.SmoothPlastic
-						body.Anchored = true
-						body.Parent = hex
+					-- Try to find a position that doesn't overlap with existing sheep
+					repeat
+						local angle = math.rad(math.random(0, 360))
+						local dist = math.random(5, 25)
+						pos = worldPos + Vector3.new(math.cos(angle) * dist, baseY, math.sin(angle) * dist)
+						
+						local tooClose = false
+						for _, existingPos in ipairs(placedPositions) do
+							if (pos - existingPos).Magnitude < minDistance then
+								tooClose = true
+								break
+							end
+						end
+						
+						attempts = attempts + 1
+					until not tooClose or attempts >= maxAttempts
+					
+					-- Only place if we found a valid position
+					if attempts < maxAttempts then
+						table.insert(placedPositions, pos)
+						
+						local sheep = placeAsset("Animals/Sheep", pos)
+						if sheep then
+							-- Apply random Y rotation using PivotTo
+							local randomAngle = math.rad(math.random(0, 360))
+							local currentPivot = sheep:GetPivot()
+							local rotatedCFrame = CFrame.new(currentPivot.Position) * CFrame.Angles(0, randomAngle, 0)
+							sheep:PivotTo(rotatedCFrame)
+						else
+							-- Fallback: basic sheep shape
+							local body = Instance.new("Part")
+							body.Shape = Enum.PartType.Ball
+							body.Size = Vector3.new(6, 4, 8)
+							body.Position = pos + Vector3.new(0, 2, 0)
+							body.Color = Color3.fromRGB(255, 255, 255)
+							body.Material = Enum.Material.SmoothPlastic
+							body.Anchored = true
+							body.Parent = hex
+						end
 					end
 				end
 				
