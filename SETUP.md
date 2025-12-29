@@ -70,9 +70,42 @@ Roblox Studio is not officially supported on Linux, but **Vinegar** is the recom
    - Note: If using the Flatpak version, ensure it has permissions to access your project directory (use `Flatseal` to manage permissions if needed).
 
 3. **Install Rojo Plugin in Studio**:
-   - Once Studio is open via Vinegar, navigate to the Roblox marketplace.
-   - Install the **Rojo 7** plugin from: [Rojo 7 Plugin](https://www.roblox.com/library/13916111004/Rojo-7)
-   - Restart Roblox Studio after installation.
+   
+   There are several ways to install the Rojo plugin:
+
+   #### Option A: From Roblox Marketplace (Easiest)
+   - Open Roblox Studio via Vinegar.
+   - In a web browser, visit the [Rojo 7 Plugin](https://www.roblox.com/library/13916111004/Rojo-7) page.
+   - Click **Get** to add the plugin to your account.
+   - Restart Roblox Studio—the plugin should appear in the **Plugins** toolbar.
+
+   #### Option B: Manual Installation from GitHub (Recommended for Linux)
+   If the marketplace doesn't work properly on Linux, install manually:
+
+   1. **Download the plugin file**:
+      - Go to the [Rojo Releases page](https://github.com/rojo-rbx/rojo/releases).
+      - Download the file named `Rojo.rbxm` from the latest release's **Assets** section.
+
+   2. **Locate your Roblox plugins folder**:
+      - **Vinegar (Flatpak)**: The plugins folder is typically at:
+        ```
+        ~/.var/app/org.vinegarhq.Vinegar/data/vinegar/prefixes/studio/drive_c/users/<username>/AppData/Local/Roblox/Plugins
+        ```
+      - **Note**: Replace `<username>` with your Wine username (often `steamuser` or your Linux username).
+      - You can also check Vinegar's Studio Data directory via its settings/logs.
+
+   3. **Copy the plugin**:
+      ```bash
+      # Example for Flatpak Vinegar (adjust path as needed)
+      cp ~/Downloads/Rojo.rbxm ~/.var/app/org.vinegarhq.Vinegar/data/vinegar/prefixes/studio/drive_c/users/steamuser/AppData/Local/Roblox/Plugins/
+      ```
+
+   4. **Restart Roblox Studio** to load the plugin.
+
+   #### Verify Plugin Installation
+   - Open Roblox Studio.
+   - Look for a **Rojo** button in the **Plugins** tab of the ribbon toolbar.
+   - If you see it, the plugin is installed correctly!
 
 ## Step 4: Start Rojo Server
 
@@ -135,8 +168,18 @@ fpv-settling/
 │       ├── ResourceTypes.lua     # Resource definitions
 │       ├── BuildingTypes.lua     # Building definitions
 │       ├── NPCTypes.lua          # NPC definitions
-│       └── TechTree.lua          # Tech tree data
+│       ├── TechTree.lua          # Tech tree data
+│       └── TileTypes.lua         # Terrain/Resource definitions
 └── README.md
+
+## Procedural World Generation
+
+The game now features a **Settlers-inspired procedural map**:
+- **Hexagonal Grid**: Built on an axial coordinate system.
+- **Biomes**: Includes Forest, Fields, Pasture, Hills, Mountains, and Desert.
+- **Resource Distribution**: Tile frequency matches strategy board game standards for balanced early-to-mid game play.
+- **Dynamic Elevation**: Mountains and hills have physical height in the world to aid navigation and visual appeal.
+- **Attribute System**: Each tile part has attributes (`TileType`, `Resource`, `Q`, `R`) that systems can query.
 ```
 
 ## Development Workflow
@@ -170,6 +213,43 @@ git commit -m "Description of changes"
 # Push
 git push origin main
 ```
+
+## Rojo CLI Deployment Workflow
+
+For Linux developers using **Sober** or wanting to deploy directly to a Roblox server, use the standalone Rojo CLI.
+
+### 1. Configure Authentication
+Create a `.env` file in the project root to store your credentials (already ignored in `.gitignore`):
+
+```bash
+ROBLOX_COOKIE="your_full_roblosecurity_cookie"
+DEV_PLACE_ID="your_target_place_id"
+```
+
+#### How to get your credentials:
+- **ROBLOX_COOKIE**:
+    1. Log into your Roblox account in a web browser.
+    2. Open Developer Tools (`F12` or `Ctrl+Shift+I`).
+    3. Navigate to the **Application** (or **Storage**) tab and select **Cookies** -> `https://www.roblox.com`.
+    4. Find the `.ROBLOSECURITY` cookie and copy its **entire** value (it starts with `_|WARNING:-DO-NOT-SHARE`).
+- **DEV_PLACE_ID**:
+    1. Open your game's page on the Roblox website.
+    2. The ID is the long string of numbers in the URL: `roblox.com/games/123456789/...`
+    3. Alternatively, find it in the **Creator Dashboard** under the game's **Experiences** tab.
+
+> [!CAUTION]
+> Never share your `.ROBLOSECURITY` cookie with anyone. It gives full access to your account.
+
+### 2. VS Code Task Integration
+The project includes a VS Code build task in `.vscode/tasks.json`.
+
+- **Push/Upload**: Press `Ctrl + Shift + B`
+- This runs: `source .env && rojo upload --asset-id $DEV_PLACE_ID --cookie "$ROBLOX_COOKIE"`
+
+### 3. Linux/Sober Workflow
+1. Edit code in VS Code.
+2. Press `Ctrl + Shift + B` to push changes to your Dev Place.
+3. Launch **Sober** to playtest on the live server.
 
 ## Troubleshooting
 

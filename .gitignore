@@ -11,7 +11,6 @@
 Thumbs.db
 
 # IDE files
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -24,3 +23,4 @@ Thumbs.db
 *.tmp
 tmp/
 temp/
+.env

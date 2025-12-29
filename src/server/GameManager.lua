@@ -7,9 +7,13 @@ local BuildingManager = require(script.Parent.BuildingManager)
 local NPCManager = require(script.Parent.NPCManager)
 local ResearchManager = require(script.Parent.ResearchManager)
 local NetworkHandler = require(script.Parent.NetworkHandler)
+local MapGenerator = require(script.Parent.MapGenerator)
 
 local GameManager = {}
 GameManager.PlayerData = {}
+
+-- Generate the procedural map
+MapGenerator.Generate() -- Generate exactly one hexagon for testing shape
 
 -- Initialize player data when they join
 local function onPlayerAdded(player)
