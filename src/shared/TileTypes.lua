@@ -1,4 +1,4 @@
--- Tile types for procedural generation
+-- Tile types for procedural generation (Catan-style)
 local TileTypes = {
 	Forest = {
 		Name = "Forest",
@@ -8,25 +8,25 @@ local TileTypes = {
 	},
 	Fields = {
 		Name = "Fields",
-		Resource = "Food",
+		Resource = "Wheat",
 		Color = Color3.fromHex("#DAA520"), -- Goldenrod (Wheat)
 		Frequency = 4,
 	},
 	Pasture = {
 		Name = "Pasture",
-		Resource = "Food",
+		Resource = "Wool",
 		Color = Color3.fromHex("#7CFC00"), -- Lawn Green
 		Frequency = 4,
 	},
 	Hills = {
 		Name = "Hills",
-		Resource = "Stone",
+		Resource = "Brick",
 		Color = Color3.fromHex("#B87333"), -- Copper/Terracotta
 		Frequency = 3,
 	},
 	Mountains = {
 		Name = "Mountains",
-		Resource = "Stone", -- Or Gold
+		Resource = "Ore",
 		Color = Color3.fromHex("#808080"), -- Grey
 		Frequency = 3,
 	},

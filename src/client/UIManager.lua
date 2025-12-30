@@ -38,7 +38,7 @@ titleLabel.TextSize = 20
 titleLabel.Parent = resourceFrame
 
 -- Resource labels
-local resources = {"Wood", "Stone", "Food", "Gold"}
+local resources = {"Wood", "Brick", "Wheat", "Ore", "Wool"}
 for i, resourceName in ipairs(resources) do
 	local label = Instance.new("TextLabel")
 	label.Name = resourceName .. "Label"
@@ -124,3 +124,5 @@ end
 Network:OnEvent("ResourceUpdate", updateResourceDisplay)
 
 Logger.Info("UIManager", "Initialized")
+
+return {}

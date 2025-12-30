@@ -1,14 +1,14 @@
--- NPC Types (Workers and Guards)
+-- NPC Types (Workers and Guards) - Updated for Catan-style resources
 local NPCTypes = {
 	Worker = {
 		Name = "Worker",
 		Description = "Gathers resources and constructs buildings",
 		HireCost = {
-			Gold = 50,
-			Food = 10
+			Wheat = 2,
+			Ore = 1
 		},
 		MaintenanceCost = {
-			Food = 1 -- per minute
+			Wheat = 1 -- per minute
 		},
 		GatherRate = 5, -- resources per minute
 		Health = 50,
@@ -18,11 +18,11 @@ local NPCTypes = {
 		Name = "Guard",
 		Description = "Defends settlements from threats",
 		HireCost = {
-			Gold = 100,
-			Food = 15
+			Wheat = 3,
+			Ore = 2
 		},
 		MaintenanceCost = {
-			Food = 2 -- per minute
+			Wheat = 2 -- per minute
 		},
 		Health = 100,
 		Speed = 18,

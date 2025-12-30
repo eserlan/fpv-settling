@@ -141,15 +141,15 @@ end
 
 -- Pay maintenance costs for all NPCs
 function NPCManager:PayMaintenance(minutes)
-	local totalFood = 0
+	local totalWheat = 0
 	
 	for _, npc in ipairs(self.NPCs) do
-		totalFood = totalFood + (npc.Data.MaintenanceCost.Food * minutes)
+		totalWheat = totalWheat + (npc.Data.MaintenanceCost.Wheat * minutes)
 	end
 	
 	-- Check if player has enough food
-	if self.ResourceManager:GetResource("Food") >= totalFood then
-		self.ResourceManager:RemoveResource("Food", totalFood)
+	if self.ResourceManager:GetResource("Wheat") >= totalWheat then
+		self.ResourceManager:RemoveResource("Wheat", totalWheat)
 		return true
 	else
 		-- Not enough food - NPCs might leave or become unhappy

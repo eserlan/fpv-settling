@@ -1,9 +1,10 @@
 -- Logger module - Unified logging for client and server
 -- Client: Sends logs via RemoteEvent to server
--- Server: Posts logs to external Python server via HTTP
+-- Server: Uses LogService to send via HTTP
 
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local HttpService = game:GetService("HttpService")
 
 local Logger = {}
 
@@ -14,6 +15,9 @@ Logger.Level = {
 	WARN = "WARN",
 	ERROR = "ERROR"
 }
+
+-- Configuration
+local LOG_SERVER_URL = "http://localhost:8765/log"
 
 -- Will be set when LogEvent is available
 local LogEvent = nil
@@ -31,13 +35,22 @@ local function ensureLogEvent()
 	return LogEvent ~= nil
 end
 
--- Send log to server (client only)
-local function sendToServer(level, source, message)
-	if isServer then return end -- Server logs differently
+-- Send log to HTTP server (server-side only)
+local function sendToHttpServer(level, source, message)
+	if not isServer then return end
 	
-	if ensureLogEvent() then
-		LogEvent:FireServer(level, source, message)
-	end
+	local success, err = pcall(function()
+		HttpService:PostAsync(LOG_SERVER_URL, HttpService:JSONEncode({
+			level = level,
+			source = source,
+			message = message,
+			player = "SERVER",
+			timestamp = os.time(),
+			isServer = true
+		}), Enum.HttpContentType.ApplicationJson)
+	end)
+	
+	-- Silent fail - HTTP might not be enabled
 end
 
 -- Log with level
@@ -55,28 +68,16 @@ function Logger.Log(level, source, message)
 	
 	-- Send to external logger
 	if isServer then
-		-- Server: Use LogService directly (imported where needed)
-		-- This avoids circular dependency
-		local LogService = ReplicatedStorage:FindFirstChild("Shared") and 
-			ReplicatedStorage.Shared:FindFirstChild("LogService")
-		-- LogService handles its own HTTP posting
-		-- For now, server logs are handled by LogService when required
-		
-		-- Alternative: queue for later
+		-- Server: Send directly via HTTP
 		task.spawn(function()
-			if ensureLogEvent() then
-				-- Server can also use the batching system
-				local Events = ReplicatedStorage:FindFirstChild("Events")
-				if Events then
-					local ServerLogEvent = Events:FindFirstChild("ServerLogEvent")
-					-- Server logs are handled by LogService directly
-				end
-			end
+			sendToHttpServer(level, source, message)
 		end)
 	else
-		-- Client: Send via RemoteEvent
+		-- Client: Send via RemoteEvent to server
 		task.spawn(function()
-			sendToServer(level, source, message)
+			if ensureLogEvent() then
+				LogEvent:FireServer(level, source, message)
+			end
 		end)
 	end
 end

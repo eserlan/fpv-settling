@@ -1,45 +1,47 @@
--- Technology research tree
+-- Technology research tree - Updated for Catan-style resources
 local TechTree = {
 	ImprovedTools = {
 		Name = "Improved Tools",
 		Description = "Workers gather resources 25% faster",
 		Cost = {
-			Gold = 100
+			Ore = 3,
+			Wheat = 2
 		},
 		ResearchTime = 60,
 		Prerequisites = {},
 		Effect = "GatherSpeed",
 		Modifier = 1.25
 	},
-	StoneWork = {
-		Name = "Stone Work",
-		Description = "Unlock stone buildings and better fortifications",
+	BrickMasonry = {
+		Name = "Brick Masonry",
+		Description = "Unlock brick buildings and better fortifications",
 		Cost = {
-			Gold = 150,
-			Stone = 50
+			Brick = 4,
+			Ore = 2
 		},
 		ResearchTime = 90,
 		Prerequisites = {},
 		Effect = "UnlockBuilding",
-		Unlocks = {"StoneWall", "StoneTower"}
+		Unlocks = {"BrickWall", "BrickTower"}
 	},
 	Agriculture = {
 		Name = "Agriculture",
-		Description = "Food production increases by 50%",
+		Description = "Wheat production increases by 50%",
 		Cost = {
-			Gold = 120,
-			Wood = 30
+			Wheat = 3,
+			Wood = 2
 		},
 		ResearchTime = 75,
 		Prerequisites = {},
-		Effect = "FoodProduction",
+		Effect = "WheatProduction",
 		Modifier = 1.5
 	},
 	Military = {
 		Name = "Military Training",
 		Description = "Guards are 30% more effective in combat",
 		Cost = {
-			Gold = 200
+			Ore = 4,
+			Wheat = 3
 		},
 		ResearchTime = 120,
 		Prerequisites = {},
@@ -50,11 +52,11 @@ local TechTree = {
 		Name = "Advanced Engineering",
 		Description = "Buildings cost 20% less resources",
 		Cost = {
-			Gold = 250,
-			Stone = 100
+			Ore = 5,
+			Brick = 4
 		},
 		ResearchTime = 150,
-		Prerequisites = {"StoneWork", "ImprovedTools"},
+		Prerequisites = {"BrickMasonry", "ImprovedTools"},
 		Effect = "BuildingCost",
 		Modifier = 0.8
 	},
@@ -62,7 +64,8 @@ local TechTree = {
 		Name = "Trading",
 		Description = "Unlock trading posts and better resource exchange rates",
 		Cost = {
-			Gold = 180
+			Wool = 3,
+			Wheat = 2
 		},
 		ResearchTime = 90,
 		Prerequisites = {},

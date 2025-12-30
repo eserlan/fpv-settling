@@ -18,11 +18,12 @@ function ResourceManager.new(player)
 		self.Resources[resourceName] = 0
 	end
 	
-	-- Give starting resources
-	self.Resources.Wood = 50
-	self.Resources.Stone = 30
-	self.Resources.Food = 20
-	self.Resources.Gold = 100
+	-- Give starting resources (Catan-style)
+	self.Resources.Wood = 5
+	self.Resources.Brick = 5
+	self.Resources.Wheat = 5
+	self.Resources.Ore = 5
+	self.Resources.Wool = 5
 	
 	return self
 end

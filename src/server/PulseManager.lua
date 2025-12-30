@@ -165,6 +165,9 @@ function PulseManager.SpawnResource(tile, resourceKey, resourceData)
 	-- Add attributes for collection
 	resource:SetAttribute("ResourceType", resourceKey)
 	resource:SetAttribute("Amount", 1)
+	resource:SetAttribute("TileQ", tile.PrimaryPart:GetAttribute("Q"))
+	resource:SetAttribute("TileR", tile.PrimaryPart:GetAttribute("R"))
+	resource:SetAttribute("SpawnTime", os.time())
 	
 	-- Add glow effect
 	local light = Instance.new("PointLight")
@@ -178,12 +181,8 @@ function PulseManager.SpawnResource(tile, resourceKey, resourceData)
 	resourcesFolder.Name = "Resources"
 	resource.Parent = resourcesFolder
 	
-	-- Auto-destroy after 60 seconds if not collected
-	task.delay(60, function()
-		if resource and resource.Parent then
-			resource:Destroy()
-		end
-	end)
+	-- Resources NO LONGER auto-destroy - they persist until collected
+	-- Tile ownership will be checked by CollectionManager
 	
 	Logger.Debug("PulseManager", "Spawned " .. resourceKey .. " at tile")
 end

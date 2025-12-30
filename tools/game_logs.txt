@@ -17,3 +17,107 @@
 [18:54:34] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
 [18:54:34] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
 [18:54:34] [INFO ] [SERVER] [Client] ===========================================
+[18:57:14] [INFO ] [SERVER] [Server] ===========================================
+[18:57:14] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[18:57:14] [INFO ] [SERVER] [Server] ===========================================
+[18:57:14] [INFO ] [SERVER] [CollectionManager] Initialized
+[18:57:14] [INFO ] [SERVER] [PulseManager] Initialized - Pulse every 60 seconds
+[18:57:14] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[18:57:14] [INFO ] [SERVER] [Server] ===========================================
+[18:57:14] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[18:57:14] [INFO ] [SERVER] [Server] ===========================================
+[18:57:14] [INFO ] [SERVER] [NetworkHandler] Initialized
+[18:57:14] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[18:57:14] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09
+[18:57:16] [INFO ] [SERVER] [Client] ===========================================
+[18:57:16] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[18:57:16] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[18:57:16] [INFO ] [SERVER] [Client] ===========================================
+[18:57:16] [INFO ] [SERVER] [Client] Waiting for character...
+[18:57:17] [INFO ] [SERVER] [Client] Character loaded!
+[18:57:17] [INFO ] [SERVER] [PlayerController] Initialized
+[18:57:17] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[18:57:17] [INFO ] [SERVER] [UIManager] Initialized
+[18:57:17] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[18:57:17] [INFO ] [SERVER] [PulseUI] Initialized
+[18:57:17] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[18:57:17] [INFO ] [SERVER] [InventoryUI] Initialized
+[18:57:17] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[18:57:17] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[18:57:17] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[18:57:17] [INFO ] [SERVER] [Client] ===========================================
+[18:57:17] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[18:57:17] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[18:57:17] [INFO ] [SERVER] [Client] ===========================================
+[18:58:14] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 4 + 2 = 6
+[18:58:14] [WARN ] [SERVER] [ResourceManager] Invalid resource type: Food
+[18:58:17] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[18:58:17] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[18:58:17] [DEBUG] [SERVER] [PulseManager] Spawned Ore at tile
+[18:59:14] [WARN ] [SERVER] [ResourceManager] Invalid resource type: Food
+[18:59:17] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 3 + 2 = 5
+[18:59:20] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[18:59:20] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[18:59:20] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[18:59:32] [DEBUG] [SERVER] [CollectionManager] eserlan09 collected 1 Brick
+[19:00:14] [WARN ] [SERVER] [ResourceManager] Invalid resource type: Food
+[19:00:20] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 6 + 2 = 8
+[19:00:20] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[19:21:19] [INFO ] [SERVER] [Server] ===========================================
+[19:21:19] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[19:21:19] [INFO ] [SERVER] [Server] ===========================================
+[19:21:19] [INFO ] [SERVER] [CollectionManager] Initialized
+[19:21:19] [INFO ] [SERVER] [PulseManager] Initialized - Pulse every 60 seconds
+[19:21:19] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[19:21:19] [INFO ] [SERVER] [Server] ===========================================
+[19:21:19] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[19:21:19] [INFO ] [SERVER] [Server] ===========================================
+[19:21:19] [INFO ] [SERVER] [NetworkHandler] Initialized
+[19:21:19] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[19:21:19] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09
+[19:21:21] [INFO ] [SERVER] [Client] ===========================================
+[19:21:21] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[19:21:21] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[19:21:21] [INFO ] [SERVER] [Client] ===========================================
+[19:21:22] [INFO ] [SERVER] [Client] Waiting for character...
+[19:21:22] [INFO ] [SERVER] [Client] Character loaded!
+[19:21:22] [INFO ] [SERVER] [PlayerController] Initialized
+[19:21:22] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[19:21:22] [INFO ] [SERVER] [UIManager] Initialized
+[19:21:22] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[19:21:22] [INFO ] [SERVER] [PulseUI] Initialized
+[19:21:22] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[19:21:22] [INFO ] [SERVER] [InventoryUI] Initialized
+[19:21:22] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[19:21:22] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[19:21:22] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[19:21:22] [INFO ] [SERVER] [Client] ===========================================
+[19:21:23] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[19:21:23] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[19:21:23] [INFO ] [SERVER] [Client] ===========================================
+[19:21:35] [INFO ] [SERVER] [PulseManager] Force pulse triggered by eserlan09
+[19:21:35] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 4 + 1 = 5
+[19:21:38] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[19:21:38] [DEBUG] [SERVER] [PulseManager] Spawned Wool at tile
+[19:21:38] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[19:21:47] [DEBUG] [SERVER] [CollectionManager] eserlan09 collected 1 Wool
+[19:22:38] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 6 + 4 = 10
+[19:22:41] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[19:22:41] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[19:22:41] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[19:22:48] [DEBUG] [SERVER] [CollectionManager] eserlan09 collected 1 Wheat
+[19:23:41] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 1 + 1 = 2
+[19:23:44] [INFO ] [SERVER] [PulseManager] 1 tiles match!
+[19:23:44] [DEBUG] [SERVER] [PulseManager] Spawned Ore at tile
+[19:24:44] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 3 + 2 = 5
+[19:24:47] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[19:24:47] [DEBUG] [SERVER] [PulseManager] Spawned Wool at tile
+[19:24:47] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[19:25:47] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 5 + 5 = 10
+[19:25:50] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[19:25:50] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[19:25:50] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[19:26:50] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 6 + 4 = 10
+[19:26:53] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[19:26:53] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[19:26:53] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile

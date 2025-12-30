@@ -126,8 +126,20 @@ function CollectionManager.TryCollect(player, resource)
 	-- Get resource info
 	local resourceType = resource:GetAttribute("ResourceType")
 	local amount = resource:GetAttribute("Amount") or 1
+	local tileQ = resource:GetAttribute("TileQ")
+	local tileR = resource:GetAttribute("TileR")
 	
 	if not resourceType then return false end
+	
+	-- Check tile ownership (if TileOwnershipManager exists)
+	local TileOwnershipManager = script.Parent:FindFirstChild("TileOwnershipManager")
+	if TileOwnershipManager and tileQ and tileR then
+		local ownershipModule = require(TileOwnershipManager)
+		if not ownershipModule.PlayerOwnsTile(player, tileQ, tileR) then
+			-- Player doesn't own this tile - can't collect
+			return false
+		end
+	end
 	
 	-- Add to inventory
 	if CollectionManager.AddResource(player, resourceType, amount) then

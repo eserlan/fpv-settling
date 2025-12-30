@@ -138,3 +138,5 @@ RunService.RenderStepped:Connect(function()
 end)
 
 Logger.Info("PlayerController", "Initialized")
+
+return {}
