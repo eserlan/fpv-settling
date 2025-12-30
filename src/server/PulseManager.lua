@@ -72,73 +72,12 @@ function PulseManager.AssignTileNumbers()
 				tileNumbers[key] = number
 				tile.PrimaryPart:SetAttribute("DiceNumber", number)
 				
-				-- Create visual number token on tile
-				PulseManager.CreateNumberToken(tile, number)
-				
 				numberIndex = (numberIndex % #numbers) + 1
 			end
 		end
 	end
 	
 	print("[PulseManager] Assigned numbers to tiles")
-end
-
--- Create a visual number token on a tile
-function PulseManager.CreateNumberToken(tile, number)
-	local tokenPart = Instance.new("Part")
-	tokenPart.Name = "NumberToken"
-	tokenPart.Size = Vector3.new(8, 1, 8)
-	tokenPart.Shape = Enum.PartType.Cylinder
-	tokenPart.Anchored = true
-	tokenPart.CanCollide = false
-	
-	-- Color based on probability (6 and 8 are red/high probability)
-	if number == 6 or number == 8 then
-		tokenPart.Color = Color3.fromRGB(200, 50, 50)
-	else
-		tokenPart.Color = Color3.fromRGB(230, 210, 180)
-	end
-	
-	tokenPart.Material = Enum.Material.SmoothPlastic
-	
-	-- Position above tile center
-	local tilePos = tile.PrimaryPart.Position
-	tokenPart.CFrame = CFrame.new(tilePos + Vector3.new(0, 6, 0)) * CFrame.Angles(0, 0, math.rad(90))
-	tokenPart.Parent = tile
-	
-	-- Add number label
-	local billboard = Instance.new("BillboardGui")
-	billboard.Size = UDim2.new(0, 50, 0, 50)
-	billboard.StudsOffset = Vector3.new(0, 0, 0)
-	billboard.AlwaysOnTop = false
-	billboard.Adornee = tokenPart
-	billboard.Parent = tokenPart
-	
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1, 0, 1, 0)
-	label.BackgroundTransparency = 1
-	label.TextColor3 = Color3.new(0, 0, 0)
-	label.TextScaled = true
-	label.Font = Enum.Font.GothamBold
-	label.Text = tostring(number)
-	label.Parent = billboard
-	
-	-- Add dots for probability indicator
-	local dots = ""
-	local prob = 6 - math.abs(7 - number) -- 6,8=5 dots, 5,9=4, etc.
-	for i = 1, prob do
-		dots = dots .. "•"
-	end
-	
-	local dotsLabel = Instance.new("TextLabel")
-	dotsLabel.Size = UDim2.new(1, 0, 0.3, 0)
-	dotsLabel.Position = UDim2.new(0, 0, 0.7, 0)
-	dotsLabel.BackgroundTransparency = 1
-	dotsLabel.TextColor3 = Color3.new(0, 0, 0)
-	dotsLabel.TextScaled = true
-	dotsLabel.Font = Enum.Font.GothamBold
-	dotsLabel.Text = dots
-	dotsLabel.Parent = billboard
 end
 
 -- Get tiles that match a dice roll
@@ -283,5 +222,16 @@ end
 function PulseManager.ForcePulse()
 	pulseTimer = 0
 end
+
+-- Dev panel event handler
+local DevEvent = Events:FindFirstChild("DevEvent") or Instance.new("RemoteEvent", Events)
+DevEvent.Name = "DevEvent"
+
+DevEvent.OnServerEvent:Connect(function(player, action, data)
+	if action == "ForcePulse" then
+		print("[PulseManager] Force pulse triggered by " .. player.Name)
+		PulseManager.ForcePulse()
+	end
+end)
 
 return PulseManager
