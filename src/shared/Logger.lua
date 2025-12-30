@@ -1,14 +1,11 @@
--- Logger module - sends logs to local server via HTTP
--- Also prints to Roblox Output
+-- Logger module - Unified logging for client and server
+-- Client: Sends logs via RemoteEvent to server
+-- Server: Posts logs to external Python server via HTTP
 
-local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Logger = {}
-
--- Configuration
-local LOG_SERVER_URL = "http://localhost:8765/log"
-local ENABLE_HTTP_LOGGING = true -- Set to false if log server not running
 
 -- Log levels
 Logger.Level = {
@@ -18,23 +15,28 @@ Logger.Level = {
 	ERROR = "ERROR"
 }
 
--- Internal: send log to server
+-- Will be set when LogEvent is available
+local LogEvent = nil
+local isServer = RunService:IsServer()
+
+-- Initialize log event (called after events are created)
+local function ensureLogEvent()
+	if LogEvent then return true end
+	
+	local Events = ReplicatedStorage:FindFirstChild("Events")
+	if Events then
+		LogEvent = Events:FindFirstChild("LogEvent")
+	end
+	
+	return LogEvent ~= nil
+end
+
+-- Send log to server (client only)
 local function sendToServer(level, source, message)
-	if not ENABLE_HTTP_LOGGING then return end
+	if isServer then return end -- Server logs differently
 	
-	-- Only works in Studio with HttpService enabled for localhost
-	local success, err = pcall(function()
-		HttpService:PostAsync(LOG_SERVER_URL, HttpService:JSONEncode({
-			level = level,
-			source = source,
-			message = message,
-			timestamp = os.time()
-		}), Enum.HttpContentType.ApplicationJson)
-	end)
-	
-	if not success then
-		-- Silently fail - log server might not be running
-		-- warn("[Logger] Failed to send to log server: " .. tostring(err))
+	if ensureLogEvent() then
+		LogEvent:FireServer(level, source, message)
 	end
 end
 
@@ -44,17 +46,39 @@ function Logger.Log(level, source, message)
 	
 	-- Print to Roblox Output
 	if level == Logger.Level.ERROR then
-		error(formattedMessage, 0)
+		warn("[ERROR] " .. formattedMessage)
 	elseif level == Logger.Level.WARN then
 		warn(formattedMessage)
 	else
 		print(formattedMessage)
 	end
 	
-	-- Send to local server
-	task.spawn(function()
-		sendToServer(level, source, message)
-	end)
+	-- Send to external logger
+	if isServer then
+		-- Server: Use LogService directly (imported where needed)
+		-- This avoids circular dependency
+		local LogService = ReplicatedStorage:FindFirstChild("Shared") and 
+			ReplicatedStorage.Shared:FindFirstChild("LogService")
+		-- LogService handles its own HTTP posting
+		-- For now, server logs are handled by LogService when required
+		
+		-- Alternative: queue for later
+		task.spawn(function()
+			if ensureLogEvent() then
+				-- Server can also use the batching system
+				local Events = ReplicatedStorage:FindFirstChild("Events")
+				if Events then
+					local ServerLogEvent = Events:FindFirstChild("ServerLogEvent")
+					-- Server logs are handled by LogService directly
+				end
+			end
+		end)
+	else
+		-- Client: Send via RemoteEvent
+		task.spawn(function()
+			sendToServer(level, source, message)
+		end)
+	end
 end
 
 -- Convenience methods
@@ -77,11 +101,6 @@ end
 -- Quick log (uses calling script as source)
 function Logger.Print(message)
 	Logger.Info("Game", message)
-end
-
--- Toggle HTTP logging
-function Logger.SetHttpLogging(enabled)
-	ENABLE_HTTP_LOGGING = enabled
 end
 
 return Logger

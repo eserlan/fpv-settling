@@ -1,0 +1,19 @@
+[18:54:32] [INFO ] [SERVER] [Client] ===========================================
+[18:54:33] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[18:54:33] [INFO ] [SERVER] [Client] ===========================================
+[18:54:33] [INFO ] [SERVER] [Client] Waiting for character...
+[18:54:33] [INFO ] [SERVER] [Client] Character loaded!
+[18:54:33] [INFO ] [SERVER] [PlayerController] Initialized
+[18:54:33] [ERROR] [SERVER] [Client] Failed to load PlayerController: Module code did not return exactly one value
+[18:54:33] [INFO ] [SERVER] [UIManager] Initialized
+[18:54:33] [ERROR] [SERVER] [Client] Failed to load UIManager: Module code did not return exactly one value
+[18:54:33] [INFO ] [SERVER] [PulseUI] Initialized
+[18:54:33] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[18:54:33] [INFO ] [SERVER] [InventoryUI] Initialized
+[18:54:33] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[18:54:33] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[18:54:34] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[18:54:34] [INFO ] [SERVER] [Client] ===========================================
+[18:54:34] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[18:54:34] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[18:54:34] [INFO ] [SERVER] [Client] ===========================================

@@ -10,57 +10,49 @@ local Logger = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Lo
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
--- First-person camera settings
+-- Camera settings
 camera.FieldOfView = 80
-camera.CameraType = Enum.CameraType.Custom
 
--- Mouse sensitivity
-local mouseSensitivity = 0.003
+-- Zoom threshold - below this distance, lock mouse (FPV mode)
+local ZOOM_THRESHOLD = 5 -- studs
 
--- Camera angles
-local cameraAngleX = 0
-local cameraAngleY = 0
+-- Track current mode
+local isFirstPerson = false
 
--- Lock and hide mouse for first-person view
--- Note: This is a dedicated FPV game, so mouse is always locked
--- Future: Add pause menu to unlock mouse temporarily
-UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-UserInputService.MouseIconEnabled = false
-
--- Handle mouse movement for first-person camera
-UserInputService.InputChanged:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		local delta = input.Delta
-		
-		cameraAngleX = cameraAngleX - delta.X * mouseSensitivity
-		cameraAngleY = math.clamp(cameraAngleY - delta.Y * mouseSensitivity, -math.pi/2 + 0.1, math.pi/2 - 0.1)
-	end
-end)
-
--- Update camera every frame
-RunService.RenderStepped:Connect(function()
+-- Function to update mouse lock based on camera distance
+local function updateMouseMode()
 	local character = player.Character
 	if not character then return end
 	
-	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 	local head = character:FindFirstChild("Head")
+	if not head then return end
 	
-	if humanoidRootPart and head then
-		-- Position camera at head position
-		local headPosition = head.Position
+	-- Calculate distance from camera to character head
+	local distance = (camera.CFrame.Position - head.Position).Magnitude
+	
+	-- Check if we should be in first-person mode
+	local shouldBeFirstPerson = distance < ZOOM_THRESHOLD
+	
+	if shouldBeFirstPerson ~= isFirstPerson then
+		isFirstPerson = shouldBeFirstPerson
 		
-		-- Calculate camera orientation based on mouse movement
-		local rotation = CFrame.Angles(0, cameraAngleX, 0) * CFrame.Angles(cameraAngleY, 0, 0)
-		
-		-- Set camera CFrame
-		camera.CFrame = CFrame.new(headPosition) * rotation
-		
-		-- Update character orientation to face camera direction
-		local lookVector = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z).Unit
-		humanoidRootPart.CFrame = CFrame.new(humanoidRootPart.Position, humanoidRootPart.Position + lookVector)
+		if isFirstPerson then
+			-- First-person mode: lock mouse
+			UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+			UserInputService.MouseIconEnabled = false
+			Logger.Debug("PlayerController", "Entered first-person mode")
+		else
+			-- Third-person mode: free mouse
+			UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+			UserInputService.MouseIconEnabled = true
+			Logger.Debug("PlayerController", "Entered third-person mode (mouse unlocked)")
+		end
 	end
+end
+
+-- Update every frame
+RunService.RenderStepped:Connect(function()
+	updateMouseMode()
 end)
 
 -- Building placement system
@@ -87,14 +79,20 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	
 	-- Hire Worker with 'H' key
 	if input.KeyCode == Enum.KeyCode.H then
-		Network:FireServer("HireNPC", "Worker", player.Character.PrimaryPart.Position + player.Character.PrimaryPart.CFrame.LookVector * 5)
-		Logger.Debug("PlayerController", "Requested worker hire")
+		local character = player.Character
+		if character and character.PrimaryPart then
+			Network:FireServer("HireNPC", "Worker", character.PrimaryPart.Position + character.PrimaryPart.CFrame.LookVector * 5)
+			Logger.Debug("PlayerController", "Requested worker hire")
+		end
 	end
 	
 	-- Hire Guard with 'G' key
 	if input.KeyCode == Enum.KeyCode.G then
-		Network:FireServer("HireNPC", "Guard", player.Character.PrimaryPart.Position + player.Character.PrimaryPart.CFrame.LookVector * 5)
-		Logger.Debug("PlayerController", "Requested guard hire")
+		local character = player.Character
+		if character and character.PrimaryPart then
+			Network:FireServer("HireNPC", "Guard", character.PrimaryPart.Position + character.PrimaryPart.CFrame.LookVector * 5)
+			Logger.Debug("PlayerController", "Requested guard hire")
+		end
 	end
 	
 	-- Open Research with 'R' key (placeholder for now, just starts first tech)

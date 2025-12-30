@@ -10,6 +10,7 @@ local NetworkHandler = require(script.Parent.NetworkHandler)
 local MapGenerator = require(script.Parent.MapGenerator)
 local PulseManager = require(script.Parent.PulseManager)
 local CollectionManager = require(script.Parent.CollectionManager)
+local LogService = require(script.Parent.LogService)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Logger = require(ReplicatedStorage.Shared.Logger)
