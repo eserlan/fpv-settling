@@ -121,3 +121,8 @@
 [19:26:53] [INFO ] [SERVER] [PulseManager] 2 tiles match!
 [19:26:53] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
 [19:26:53] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[19:27:53] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 2 + 6 = 8
+[19:27:56] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[19:27:56] [DEBUG] [SERVER] [PulseManager] Spawned Ore at tile
+[19:27:56] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[19:28:34] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09

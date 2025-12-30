@@ -107,7 +107,7 @@ RunService.RenderStepped:Connect(function()
 	if buildMode then
 		-- Set default building type if none selected
 		if not currentBuildingType then
-			currentBuildingType = "House"
+			currentBuildingType = "Settlement" -- Default to Settlement for new players
 		end
 		
 		-- Create preview part if it doesn't exist

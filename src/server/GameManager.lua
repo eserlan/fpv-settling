@@ -25,46 +25,6 @@ MapGenerator.Generate()
 -- Initialize the Pulse system
 PulseManager.Initialize()
 
--- Create a starting settlement for a player
-local function createStartingSettlement(player, spawnPosition)
-	-- Create simple settlement model
-	local settlement = Instance.new("Model")
-	settlement.Name = player.Name .. "_Settlement"
-	
-	local base = Instance.new("Part")
-	base.Name = "Base"
-	base.Size = Vector3.new(10, 2, 10)
-	base.Position = spawnPosition + Vector3.new(5, 1, 5)
-	base.Anchored = true
-	base.Color = Color3.fromRGB(139, 90, 43) -- Brown
-	base.Material = Enum.Material.Wood
-	base.Parent = settlement
-	
-	local roof = Instance.new("Part")
-	roof.Name = "Roof"
-	roof.Size = Vector3.new(12, 1, 12)
-	roof.Position = base.Position + Vector3.new(0, 4, 0)
-	roof.Anchored = true
-	roof.Color = Color3.fromRGB(178, 102, 59) -- Terracotta
-	roof.Material = Enum.Material.Brick
-	roof.Parent = settlement
-	
-	settlement.PrimaryPart = base
-	
-	-- Put in Settlements folder
-	local settlementsFolder = workspace:FindFirstChild("Settlements") or Instance.new("Folder", workspace)
-	settlementsFolder.Name = "Settlements"
-	settlement.Parent = settlementsFolder
-	
-	-- Claim nearby tiles for this player
-	local settlementId = player.UserId .. "_" .. os.time()
-	TileOwnershipManager.ClaimTilesNearSettlement(player, base.Position, settlementId)
-	
-	Logger.Info("GameManager", "Created starting settlement for " .. player.Name)
-	
-	return settlement
-end
-
 -- Initialize player data when they join
 local function onPlayerAdded(player)
 	Logger.Info("GameManager", "Player joined: " .. player.Name)
@@ -85,20 +45,19 @@ local function onPlayerAdded(player)
 		NPCManager = npcManager,
 		ResearchManager = researchManager,
 		GameTime = 0,
-		Settlement = nil
+		Settlements = {},
+		NeedsFirstSettlement = true -- Player must place first settlement
 	}
 	
-	-- Setup player character and create starting settlement
+	-- Setup player character
 	player.CharacterAdded:Connect(function(character)
 		local humanoid = character:WaitForChild("Humanoid")
 		humanoid.WalkSpeed = 16
 		
-		-- Create starting settlement near spawn (only once)
+		-- Notify player they need to place their first settlement
 		local playerData = GameManager.PlayerData[player.UserId]
-		if playerData and not playerData.Settlement then
-			task.wait(0.5) -- Wait for character to fully spawn
-			local spawnPos = character:WaitForChild("HumanoidRootPart").Position
-			playerData.Settlement = createStartingSettlement(player, spawnPos)
+		if playerData and playerData.NeedsFirstSettlement then
+			Logger.Info("GameManager", player.Name .. " needs to place first settlement (Press B)")
 		end
 	end)
 end
