@@ -9,7 +9,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 local DevPanel = {}
 
 -- Configuration
-local TOGGLE_KEY = Enum.KeyCode.F9 -- Press F9 to toggle dev panel
+local TOGGLE_KEY = Enum.KeyCode.C -- Press Alt+C to toggle dev panel
 
 -- State
 local showDiceNumbers = false
@@ -33,7 +33,7 @@ panelFrame.Position = UDim2.new(1, -270, 0, 20)
 panelFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 panelFrame.BackgroundTransparency = 0.1
 panelFrame.BorderSizePixel = 0
-panelFrame.Visible = false
+panelFrame.Visible = false -- Hidden by default, Alt+C to toggle
 panelFrame.Parent = screenGui
 
 local panelCorner = Instance.new("UICorner")
@@ -198,32 +198,16 @@ local function togglePanel()
 	panelFrame.Visible = not panelFrame.Visible
 end
 
--- Hint label (always visible)
-local hintLabel = Instance.new("TextLabel")
-hintLabel.Name = "Hint"
-hintLabel.Size = UDim2.new(0, 150, 0, 25)
-hintLabel.Position = UDim2.new(1, -160, 0, 5)
-hintLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-hintLabel.BackgroundTransparency = 0.5
-hintLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-hintLabel.TextScaled = true
-hintLabel.Font = Enum.Font.Gotham
-hintLabel.Text = "F9: Dev Panel"
-hintLabel.Parent = screenGui
-
-local hintCorner = Instance.new("UICorner")
-hintCorner.CornerRadius = UDim.new(0, 8)
-hintCorner.Parent = hintLabel
-
--- Key input
+-- Key input (Alt+C)
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
 	
-	if input.KeyCode == TOGGLE_KEY then
+	-- Check for Alt+C combination
+	if input.KeyCode == TOGGLE_KEY and UserInputService:IsKeyDown(Enum.KeyCode.LeftAlt) then
 		togglePanel()
 	end
 end)
 
-print("[DevPanel] Initialized - Press F9 to open")
+print("[DevPanel] Initialized - Press Alt+C to open")
 
 return DevPanel
