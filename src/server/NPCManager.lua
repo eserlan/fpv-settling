@@ -1,6 +1,8 @@
 -- Server-side NPC Manager
-local NPCTypes = require(game.ReplicatedStorage.Shared.NPCTypes)
-local Network = require(game.ReplicatedStorage.Shared.Network)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local NPCTypes = require(ReplicatedStorage.Shared.NPCTypes)
+local Network = require(ReplicatedStorage.Shared.Network)
+local Logger = require(ReplicatedStorage.Shared.Logger)
 
 local NPCManager = {}
 NPCManager.__index = NPCManager
@@ -19,7 +21,7 @@ end
 -- Hire a new NPC
 function NPCManager:HireNPC(npcType, position)
 	if not NPCTypes[npcType] then
-		warn("Invalid NPC type:", npcType)
+		Logger.Warn("NPCManager", "Invalid NPC type: " .. tostring(npcType))
 		return false, "Invalid NPC type"
 	end
 	
@@ -151,7 +153,7 @@ function NPCManager:PayMaintenance(minutes)
 		return true
 	else
 		-- Not enough food - NPCs might leave or become unhappy
-		warn("Not enough food to maintain NPCs!")
+		Logger.Warn("NPCManager", "Not enough food to maintain NPCs!")
 		return false
 	end
 end

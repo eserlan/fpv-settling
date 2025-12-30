@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
 local ResourceTypes = require(ReplicatedStorage.Shared.ResourceTypes)
+local Logger = require(ReplicatedStorage.Shared.Logger)
 
 local CollectionManager = {}
 
@@ -36,7 +37,7 @@ function CollectionManager.InitPlayer(player)
 	}
 	playerCooldowns[player.UserId] = 0
 	
-	print("[CollectionManager] Initialized inventory for " .. player.Name)
+	Logger.Debug("CollectionManager", "Initialized inventory for " .. player.Name)
 end
 
 -- Remove player inventory on leave
@@ -142,7 +143,7 @@ function CollectionManager.TryCollect(player, resource)
 		-- Destroy the resource
 		resource:Destroy()
 		
-		print("[CollectionManager] " .. player.Name .. " collected " .. amount .. " " .. resourceType)
+		Logger.Debug("CollectionManager", player.Name .. " collected " .. amount .. " " .. resourceType)
 		return true
 	end
 	
@@ -225,6 +226,6 @@ CollectEvent.OnServerEvent:Connect(function(player, action)
 	end
 end)
 
-print("[CollectionManager] Initialized")
+Logger.Info("CollectionManager", "Initialized")
 
 return CollectionManager

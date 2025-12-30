@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 
 local TileTypes = require(ReplicatedStorage.Shared.TileTypes)
 local ResourceTypes = require(ReplicatedStorage.Shared.ResourceTypes)
+local Logger = require(ReplicatedStorage.Shared.Logger)
 
 local PulseManager = {}
 
@@ -77,7 +78,7 @@ function PulseManager.AssignTileNumbers()
 		end
 	end
 	
-	print("[PulseManager] Assigned numbers to tiles")
+	Logger.Info("PulseManager", "Assigned numbers to tiles")
 end
 
 -- Get tiles that match a dice roll
@@ -106,7 +107,7 @@ function PulseManager.ExecutePulse()
 	-- Roll the dice
 	local die1, die2, total = rollDice()
 	
-	print("[PulseManager] THE PULSE! Rolled " .. die1 .. " + " .. die2 .. " = " .. total)
+	Logger.Info("PulseManager", "THE PULSE! Rolled " .. die1 .. " + " .. die2 .. " = " .. total)
 	
 	-- Broadcast to all clients for visual effects
 	PulseEvent:FireAllClients("RollStart", die1, die2, total)
@@ -119,10 +120,10 @@ function PulseManager.ExecutePulse()
 	
 	if total == 7 then
 		-- Robber! (TODO: Implement robber mechanics)
-		print("[PulseManager] ROBBER! No resources this pulse.")
+		Logger.Warn("PulseManager", "ROBBER! No resources this pulse.")
 		PulseEvent:FireAllClients("Robber")
 	else
-		print("[PulseManager] " .. #matchingTiles .. " tiles match!")
+		Logger.Info("PulseManager", #matchingTiles .. " tiles match!")
 		
 		for _, tile in ipairs(matchingTiles) do
 			local tileType = tile.PrimaryPart:GetAttribute("TileType")
@@ -184,7 +185,7 @@ function PulseManager.SpawnResource(tile, resourceKey, resourceData)
 		end
 	end)
 	
-	print("[PulseManager] Spawned " .. resourceKey .. " at tile")
+	Logger.Debug("PulseManager", "Spawned " .. resourceKey .. " at tile")
 end
 
 -- Update loop (called from GameManager)
@@ -205,7 +206,7 @@ end
 
 -- Initialize
 function PulseManager.Initialize()
-	print("[PulseManager] Initialized - Pulse every " .. PULSE_INTERVAL .. " seconds")
+	Logger.Info("PulseManager", "Initialized - Pulse every " .. PULSE_INTERVAL .. " seconds")
 	
 	-- Assign numbers after a short delay to ensure map is generated
 	task.delay(1, function()
@@ -229,7 +230,7 @@ DevEvent.Name = "DevEvent"
 
 DevEvent.OnServerEvent:Connect(function(player, action, data)
 	if action == "ForcePulse" then
-		print("[PulseManager] Force pulse triggered by " .. player.Name)
+		Logger.Info("PulseManager", "Force pulse triggered by " .. player.Name)
 		PulseManager.ForcePulse()
 	end
 end)

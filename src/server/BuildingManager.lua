@@ -1,6 +1,8 @@
 -- Server-side Building Manager
-local BuildingTypes = require(game.ReplicatedStorage.Shared.BuildingTypes)
-local Network = require(game.ReplicatedStorage.Shared.Network)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local BuildingTypes = require(ReplicatedStorage.Shared.BuildingTypes)
+local Network = require(ReplicatedStorage.Shared.Network)
+local Logger = require(ReplicatedStorage.Shared.Logger)
 
 local BuildingManager = {}
 BuildingManager.__index = BuildingManager
@@ -19,7 +21,7 @@ end
 -- Start building construction
 function BuildingManager:StartBuilding(buildingType, position)
 	if not BuildingTypes[buildingType] then
-		warn("Invalid building type:", buildingType)
+		Logger.Warn("BuildingManager", "Invalid building type: " .. tostring(buildingType))
 		return false, "Invalid building type"
 	end
 	
@@ -72,7 +74,7 @@ end
 
 -- Called when a building is completed
 function BuildingManager:OnBuildingComplete(building)
-	print("Building completed:", building.Type, "for player:", self.Player.Name)
+	Logger.Info("BuildingManager", "Building completed: " .. building.Type .. " for player: " .. self.Player.Name)
 	-- Create physical building in workspace
 	self:CreateBuildingModel(building)
 	

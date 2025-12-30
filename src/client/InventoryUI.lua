@@ -6,6 +6,8 @@ local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
+local Logger = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Logger"))
+
 local InventoryUI = {}
 
 -- Wait for events
@@ -151,6 +153,6 @@ task.delay(1, function()
 	CollectEvent:FireServer("GetInventory")
 end)
 
-print("[InventoryUI] Initialized")
+Logger.Info("InventoryUI", "Initialized")
 
 return InventoryUI

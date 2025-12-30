@@ -1,7 +1,9 @@
 -- Server-side Network Handler
 -- Routes requests from clients to the appropriate managers
 
-local Network = require(game.ReplicatedStorage.Shared.Network)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Network = require(ReplicatedStorage.Shared.Network)
+local Logger = require(ReplicatedStorage.Shared.Logger)
 
 local NetworkHandler = {}
 
@@ -24,7 +26,7 @@ function NetworkHandler.Init(gameManager)
 		end
 	end)
 	
-	print("Network Handler initialized!")
+	Logger.Info("NetworkHandler", "Initialized")
 end
 
 return NetworkHandler

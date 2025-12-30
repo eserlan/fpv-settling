@@ -1,8 +1,11 @@
 -- Client-side Player Controller
-local Network = require(game.ReplicatedStorage.Shared.Network)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Network = require(ReplicatedStorage.Shared.Network)
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+
+local Logger = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Logger"))
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -71,33 +74,33 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	
 	if input.KeyCode == Enum.KeyCode.B then
 		buildMode = not buildMode
-		print("Build mode:", buildMode)
+		Logger.Debug("PlayerController", "Build mode: " .. tostring(buildMode))
 	end
 	
 	-- Place building with left mouse button
 	if buildMode and input.UserInputType == Enum.UserInputType.MouseButton1 then
 		if buildingPreview and currentBuildingType then
 			Network:FireServer("PlaceBuilding", currentBuildingType, buildingPreview.Position)
-			print("Requested building placement at:", buildingPreview.Position)
+			Logger.Debug("PlayerController", "Requested building placement at: " .. tostring(buildingPreview.Position))
 		end
 	end
 	
 	-- Hire Worker with 'H' key
 	if input.KeyCode == Enum.KeyCode.H then
 		Network:FireServer("HireNPC", "Worker", player.Character.PrimaryPart.Position + player.Character.PrimaryPart.CFrame.LookVector * 5)
-		print("Requested worker hire")
+		Logger.Debug("PlayerController", "Requested worker hire")
 	end
 	
 	-- Hire Guard with 'G' key
 	if input.KeyCode == Enum.KeyCode.G then
 		Network:FireServer("HireNPC", "Guard", player.Character.PrimaryPart.Position + player.Character.PrimaryPart.CFrame.LookVector * 5)
-		print("Requested guard hire")
+		Logger.Debug("PlayerController", "Requested guard hire")
 	end
 	
 	-- Open Research with 'R' key (placeholder for now, just starts first tech)
 	if input.KeyCode == Enum.KeyCode.R then
 		Network:FireServer("StartResearch", "ImprovedTools")
-		print("Requested research: ImprovedTools")
+		Logger.Debug("PlayerController", "Requested research: ImprovedTools")
 	end
 end)
 
@@ -136,4 +139,4 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
-print("Player Controller initialized!")
+Logger.Info("PlayerController", "Initialized")

@@ -6,6 +6,8 @@ local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
+local Logger = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Logger"))
+
 local PulseUI = {}
 
 -- Wait for events
@@ -159,6 +161,6 @@ PulseEvent.OnClientEvent:Connect(function(eventType, die1, die2, total, matching
 	end
 end)
 
-print("[PulseUI] Initialized")
+Logger.Info("PulseUI", "Initialized")
 
 return PulseUI

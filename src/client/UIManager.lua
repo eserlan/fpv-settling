@@ -1,6 +1,10 @@
 -- Client-side UI Manager
-local Network = require(game.ReplicatedStorage.Shared.Network)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Network = require(ReplicatedStorage.Shared.Network)
 local Players = game:GetService("Players")
+
+local Logger = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Logger"))
+
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
@@ -119,4 +123,4 @@ end
 -- Listen for resource updates from server
 Network:OnEvent("ResourceUpdate", updateResourceDisplay)
 
-print("UI Manager initialized!")
+Logger.Info("UIManager", "Initialized")

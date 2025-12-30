@@ -1,17 +1,20 @@
 -- Main Client Initialization Script
 -- Place this in StarterPlayerScripts
 
-print("===========================================")
-print("FPV Settling - Client Starting")
-print("===========================================")
-
--- Wait for character to load
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-print("[Client] Waiting for character...")
+-- Wait for Logger to be available
+local Logger = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Logger"))
+
+Logger.Info("Client", "===========================================")
+Logger.Info("Client", "FPV Settling - Client Starting")
+Logger.Info("Client", "===========================================")
+
+Logger.Info("Client", "Waiting for character...")
 player.CharacterAdded:Wait()
-print("[Client] Character loaded!")
+Logger.Info("Client", "Character loaded!")
 
 -- Initialize client systems with error handling
 local function safeRequire(name, module)
@@ -19,10 +22,10 @@ local function safeRequire(name, module)
 		return require(module)
 	end)
 	if success then
-		print("[Client] Loaded: " .. name)
+		Logger.Debug("Client", "Loaded: " .. name)
 		return result
 	else
-		warn("[Client] Failed to load " .. name .. ": " .. tostring(result))
+		Logger.Error("Client", "Failed to load " .. name .. ": " .. tostring(result))
 		return nil
 	end
 end
@@ -33,7 +36,7 @@ local PulseUI = safeRequire("PulseUI", script.PulseUI)
 local InventoryUI = safeRequire("InventoryUI", script.InventoryUI)
 local DevPanel = safeRequire("DevPanel", script.DevPanel)
 
-print("===========================================")
-print("Welcome to FPV Settling!")
-print("Click 'Dev Panel' button (top right) for dev tools")
-print("===========================================")
+Logger.Info("Client", "===========================================")
+Logger.Info("Client", "Welcome to FPV Settling!")
+Logger.Info("Client", "Press Alt+C to open dev panel")
+Logger.Info("Client", "===========================================")

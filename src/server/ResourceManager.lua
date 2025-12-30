@@ -1,6 +1,8 @@
 -- Server-side Resource Manager
-local ResourceTypes = require(game.ReplicatedStorage.Shared.ResourceTypes)
-local Network = require(game.ReplicatedStorage.Shared.Network)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ResourceTypes = require(ReplicatedStorage.Shared.ResourceTypes)
+local Network = require(ReplicatedStorage.Shared.Network)
+local Logger = require(ReplicatedStorage.Shared.Logger)
 
 local ResourceManager = {}
 ResourceManager.__index = ResourceManager
@@ -28,7 +30,7 @@ end
 -- Add resources to player inventory
 function ResourceManager:AddResource(resourceType, amount)
 	if not ResourceTypes[resourceType] then
-		warn("Invalid resource type:", resourceType)
+		Logger.Warn("ResourceManager", "Invalid resource type: " .. tostring(resourceType))
 		return false
 	end
 	
@@ -51,7 +53,7 @@ end
 -- Remove resources from player inventory
 function ResourceManager:RemoveResource(resourceType, amount)
 	if not ResourceTypes[resourceType] then
-		warn("Invalid resource type:", resourceType)
+		Logger.Warn("ResourceManager", "Invalid resource type: " .. tostring(resourceType))
 		return false
 	end
 	

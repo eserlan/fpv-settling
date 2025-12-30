@@ -11,6 +11,9 @@ local MapGenerator = require(script.Parent.MapGenerator)
 local PulseManager = require(script.Parent.PulseManager)
 local CollectionManager = require(script.Parent.CollectionManager)
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Logger = require(ReplicatedStorage.Shared.Logger)
+
 local GameManager = {}
 GameManager.PlayerData = {}
 
@@ -22,7 +25,7 @@ PulseManager.Initialize()
 
 -- Initialize player data when they join
 local function onPlayerAdded(player)
-	print("Player joined:", player.Name)
+	Logger.Info("GameManager", "Player joined: " .. player.Name)
 	
 	-- Initialize collection/inventory for this player
 	CollectionManager.InitPlayer(player)
@@ -42,21 +45,21 @@ local function onPlayerAdded(player)
 		GameTime = 0
 	}
 	
-	-- Setup player character for first-person view
+	-- Setup player character
 	player.CharacterAdded:Connect(function(character)
 		local humanoid = character:WaitForChild("Humanoid")
 		humanoid.WalkSpeed = 16
 		
-		-- Set camera to first person
-		player.CameraMode = Enum.CameraMode.LockFirstPerson
-		player.CameraMaxZoomDistance = 0.5
-		player.CameraMinZoomDistance = 0.5
+		-- FPV lock disabled for development
+		-- player.CameraMode = Enum.CameraMode.LockFirstPerson
+		-- player.CameraMaxZoomDistance = 0.5
+		-- player.CameraMinZoomDistance = 0.5
 	end)
 end
 
 -- Clean up player data when they leave
 local function onPlayerRemoving(player)
-	print("Player leaving:", player.Name)
+	Logger.Info("GameManager", "Player leaving: " .. player.Name)
 	CollectionManager.RemovePlayer(player)
 	GameManager.PlayerData[player.UserId] = nil
 end
@@ -106,6 +109,6 @@ end
 -- Initialize Network Handler
 NetworkHandler.Init(GameManager)
 
-print("Game Manager initialized!")
+Logger.Info("GameManager", "Game Manager initialized!")
 
 return GameManager

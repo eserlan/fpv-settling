@@ -1,6 +1,8 @@
 -- Server-side Research Manager
-local TechTree = require(game.ReplicatedStorage.Shared.TechTree)
-local Network = require(game.ReplicatedStorage.Shared.Network)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TechTree = require(ReplicatedStorage.Shared.TechTree)
+local Network = require(ReplicatedStorage.Shared.Network)
+local Logger = require(ReplicatedStorage.Shared.Logger)
 
 local ResearchManager = {}
 ResearchManager.__index = ResearchManager
@@ -20,7 +22,7 @@ end
 -- Start researching a technology
 function ResearchManager:StartResearch(techName)
 	if not TechTree[techName] then
-		warn("Invalid technology:", techName)
+		Logger.Warn("ResearchManager", "Invalid technology: " .. tostring(techName))
 		return false, "Invalid technology"
 	end
 	
@@ -80,7 +82,7 @@ end
 -- Complete research
 function ResearchManager:CompleteResearch(techName)
 	table.insert(self.ResearchedTechs, techName)
-	print("Research completed:", techName, "for player:", self.Player.Name)
+	Logger.Info("ResearchManager", "Research completed: " .. techName .. " for player: " .. self.Player.Name)
 	
 	-- Apply effects
 	local tech = TechTree[techName]
@@ -97,7 +99,7 @@ function ResearchManager:ApplyTechEffect(techName, tech)
 	-- Tech effects are passive and are checked when needed
 	-- For example, building costs are reduced when constructing
 	-- This method could trigger events or update player stats
-	print("Applied tech effect:", tech.Effect, "with modifier:", tech.Modifier or "N/A")
+	Logger.Debug("ResearchManager", "Applied tech effect: " .. tostring(tech.Effect) .. " with modifier: " .. tostring(tech.Modifier or "N/A"))
 end
 
 -- Check if a technology has been researched

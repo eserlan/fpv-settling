@@ -6,6 +6,8 @@ local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
+local Logger = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Logger"))
+
 local DevPanel = {}
 
 -- Configuration
@@ -208,6 +210,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	end
 end)
 
-print("[DevPanel] Initialized - Press Alt+C to open")
+Logger.Info("DevPanel", "Initialized - Press Alt+C to open")
 
 return DevPanel
