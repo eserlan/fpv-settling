@@ -9,6 +9,7 @@ local ResearchManager = require(script.Parent.ResearchManager)
 local NetworkHandler = require(script.Parent.NetworkHandler)
 local MapGenerator = require(script.Parent.MapGenerator)
 local PulseManager = require(script.Parent.PulseManager)
+local CollectionManager = require(script.Parent.CollectionManager)
 
 local GameManager = {}
 GameManager.PlayerData = {}
@@ -22,6 +23,9 @@ PulseManager.Initialize()
 -- Initialize player data when they join
 local function onPlayerAdded(player)
 	print("Player joined:", player.Name)
+	
+	-- Initialize collection/inventory for this player
+	CollectionManager.InitPlayer(player)
 	
 	-- Create managers for this player
 	local resourceManager = ResourceManager.new(player)
@@ -53,6 +57,7 @@ end
 -- Clean up player data when they leave
 local function onPlayerRemoving(player)
 	print("Player leaving:", player.Name)
+	CollectionManager.RemovePlayer(player)
 	GameManager.PlayerData[player.UserId] = nil
 end
 
@@ -65,6 +70,9 @@ RunService.Heartbeat:Connect(function()
 	
 	-- Update the Pulse system (global timer)
 	PulseManager.Update(deltaTime)
+	
+	-- Update resource collection
+	CollectionManager.Update(deltaTime)
 	
 	-- Update all player systems
 	for userId, playerData in pairs(GameManager.PlayerData) do

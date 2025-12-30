@@ -15,6 +15,7 @@ player.CharacterAdded:Wait()
 local PlayerController = require(script.PlayerController)
 local UIManager = require(script.UIManager)
 local PulseUI = require(script.PulseUI)
+local InventoryUI = require(script.InventoryUI)
 
 print("Client systems loaded successfully!")
 print("===========================================")
