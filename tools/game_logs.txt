@@ -1424,3 +1424,61 @@
 [15:24:45] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
 [15:24:45] [INFO ] [SERVER] [System] 🎲 Rolled 3! Spawned: 1x Wood, 1x Wool
 [15:24:54] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[15:26:13] [INFO ] [SERVER] [Server] ===========================================
+[15:26:13] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[15:26:13] [INFO ] [SERVER] [Server] ===========================================
+[15:26:13] [INFO ] [SERVER] [CollectionManager] Initialized
+[15:26:13] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[15:26:13] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[15:26:13] [INFO ] [SERVER] [NetworkHandler] Initialized
+[15:26:13] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[15:26:13] [INFO ] [SERVER] [Server] ===========================================
+[15:26:13] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[15:26:13] [INFO ] [SERVER] [Server] ===========================================
+[15:26:14] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[15:26:14] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09 with starting resources
+[15:26:15] [INFO ] [SERVER] [Client] ===========================================
+[15:26:15] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[15:26:15] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[15:26:15] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[15:26:16] [INFO ] [SERVER] [Client] ===========================================
+[15:26:16] [INFO ] [SERVER] [Client] Waiting for character...
+[15:26:17] [INFO ] [SERVER] [Client] Character loaded!
+[15:26:17] [INFO ] [SERVER] [BlueprintBookUI] Initialized
+[15:26:17] [INFO ] [SERVER] [PlayerController] Initialized
+[15:26:18] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[15:26:18] [INFO ] [SERVER] [UIManager] Chat system ready
+[15:26:18] [INFO ] [SERVER] [UIManager] Initialized
+[15:26:18] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[15:26:18] [INFO ] [SERVER] [PulseUI] Initialized
+[15:26:18] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[15:26:18] [INFO ] [SERVER] [InventoryUI] Initialized
+[15:26:18] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[15:26:18] [DEBUG] [SERVER] [Client] Loaded: BlueprintBookUI
+[15:26:18] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[15:26:18] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[15:26:18] [INFO ] [SERVER] [Client] ===========================================
+[15:26:18] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[15:26:18] [INFO ] [SERVER] [Client] Press B to open Blueprint Book
+[15:26:18] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[15:26:18] [INFO ] [SERVER] [Client] ===========================================
+[15:27:01] [INFO ] [SERVER] [BlueprintBook] Opened
+[15:27:03] [INFO ] [SERVER] [BlueprintBook] Closed
+[15:27:03] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[15:27:03] [INFO ] [SERVER] [BlueprintBook] Selected: Settlement
+[15:27:04] [INFO ] [SERVER] [BuildingManager] eserlan09 placing FREE first settlement!
+[15:27:04] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[15:27:04] [DEBUG] [SERVER] [TileOwnership] Vertex Vertex_38 has 3 adjacent tiles
+[15:27:04] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile -2_2
+[15:27:04] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile -1_1
+[15:27:04] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile -1_2
+[15:27:04] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 3 tiles with settlement at vertex Vertex_38
+[15:27:04] [INFO ] [SERVER] [BuildingManager] Settlement claimed 3 tiles
+[15:27:04] [INFO ] [SERVER] [PulseManager] All players ready! Starting pulse timer...
+[15:27:04] [INFO ] [SERVER] [PlayerController] Placed foundation for Settlement at vertex Vertex_38
+[15:27:05] [DEBUG] [SERVER] [PlayerController] Exited placement mode
+[15:28:04] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 4 + 1 = 5
+[15:28:07] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[15:28:07] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[15:28:07] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[15:28:07] [INFO ] [SERVER] [System] 🎲 Rolled 5! Spawned: 1x Wood, 1x Wheat

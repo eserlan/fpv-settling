@@ -112,29 +112,8 @@ function BuildingManager:PlaceFoundation(blueprintName, position)
 		return false, "Invalid blueprint"
 	end
 	
-	-- First settlement is free
-	local isFreeFirst = blueprintName == "Settlement" and not self.HasPlacedFirstSettlement
-	
-	-- Check resources (unless free first settlement)
-	if not isFreeFirst then
-		for resource, required in pairs(blueprint.Cost) do
-			local has = self.ResourceManager:GetResource(resource) or 0
-			if has < required then
-				Logger.Warn("BuildingManager", self.Player.Name .. " can't afford " .. blueprintName)
-				Network:FireClient(self.Player, "BuildingError", "Not enough resources")
-				return false, "Not enough resources"
-			end
-		end
-		
-		-- Deduct resources
-		for resource, required in pairs(blueprint.Cost) do
-			self.ResourceManager:RemoveResource(resource, required)
-		end
-	else
-		Logger.Info("BuildingManager", self.Player.Name .. " placing FREE first settlement!")
-	end
-	
 	-- Create the foundation/ghost building
+	-- Note: Resources are not deducted here - they're deposited one by one via DepositResource
 	local foundationId = #self.Buildings + 1
 	local foundation = {
 		Id = foundationId,
@@ -156,15 +135,6 @@ function BuildingManager:PlaceFoundation(blueprintName, position)
 		foundation.DepositedResources[resource] = 0
 	end
 	
-	-- First settlement is free - auto-deposit all resources
-	if isFreeFirst then
-		for resource, amount in pairs(blueprint.Cost) do
-			foundation.DepositedResources[resource] = amount
-		end
-		foundation.Progress = 1
-		foundation.Completed = true
-	end
-	
 	-- Create physical foundation model
 	self:CreateFoundationModel(foundation)
 	
@@ -174,14 +144,9 @@ function BuildingManager:PlaceFoundation(blueprintName, position)
 	self.FoundationsById = self.FoundationsById or {}
 	self.FoundationsById[foundationId] = foundation
 	
-	-- Mark first settlement as placed
+	-- Mark first settlement as placed (for tracking, not for free resources)
 	if blueprintName == "Settlement" and not self.HasPlacedFirstSettlement then
 		self.HasPlacedFirstSettlement = true
-	end
-	
-	-- Complete immediately if free first settlement
-	if foundation.Completed then
-		self:OnBuildingComplete(foundation)
 	end
 	
 	-- Notify client about new foundation
