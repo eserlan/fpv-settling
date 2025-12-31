@@ -383,8 +383,10 @@ function MapGenerator.CreateVertices(mapFolder)
 				local vx = center.X + HEX_SIZE * math.cos(angle)
 				local vz = center.Z + HEX_SIZE * math.sin(angle)
 				
-				-- Round to avoid floating point duplicates (within 1 stud)
-				local key = math.floor(vx / 2 + 0.5) .. "_" .. math.floor(vz / 2 + 0.5)
+				-- Round to nearest integer for deduplication
+				local keyX = math.floor(vx + 0.5)
+				local keyZ = math.floor(vz + 0.5)
+				local key = keyX .. "_" .. keyZ
 				
 				if not vertices[key] then
 					vertices[key] = {
@@ -399,42 +401,60 @@ function MapGenerator.CreateVertices(mapFolder)
 		end
 	end
 	
-	-- Create visible vertex markers - ONLY where 3 hexes meet
-	local vertexId = 1
+	-- Count vertices by adjacency for debugging
+	local countByAdj = {}
 	for key, data in pairs(vertices) do
-		-- Only create markers where exactly 3 hexes meet (true intersections)
-		if #data.AdjacentTiles >= 3 then
-			local marker = Instance.new("Part")
-			marker.Name = "Vertex_" .. vertexId
-			marker.Shape = Enum.PartType.Cylinder
-			marker.Size = Vector3.new(1, 4, 4) -- Small cylinder
-			marker.Position = data.Position
-			marker.Rotation = Vector3.new(0, 0, 90) -- Stand upright
-			marker.Anchored = true
-			marker.CanCollide = false
-			marker.Color = Color3.fromRGB(255, 255, 255) -- White markers
-			marker.Material = Enum.Material.Neon
-			marker.Transparency = 0.3
-			marker.Parent = vertexFolder
-			
-			-- Store vertex data as attributes
-			marker:SetAttribute("VertexId", vertexId)
-			marker:SetAttribute("Key", key)
-			
-			-- Store adjacent tile info (exactly 3 tiles)
-			for i, tileInfo in ipairs(data.AdjacentTiles) do
-				if i <= 3 then
-					marker:SetAttribute("Tile" .. i .. "Q", tileInfo.Q)
-					marker:SetAttribute("Tile" .. i .. "R", tileInfo.R)
-				end
-			end
-			marker:SetAttribute("AdjacentTileCount", math.min(#data.AdjacentTiles, 3))
-		
-			vertexId = vertexId + 1
-		end
+		local count = #data.AdjacentTiles
+		countByAdj[count] = (countByAdj[count] or 0) + 1
+	end
+	for adj, count in pairs(countByAdj) do
+		print("[MapGenerator] Vertices with " .. adj .. " adjacent tiles: " .. count)
 	end
 	
-	print("[MapGenerator] Created " .. (vertexId - 1) .. " vertices")
+	-- Create visible vertex markers - color based on adjacency
+	local vertexId = 1
+	for key, data in pairs(vertices) do
+		local adjCount = #data.AdjacentTiles
+		
+		local marker = Instance.new("Part")
+		marker.Name = "Vertex_" .. vertexId
+		marker.Shape = Enum.PartType.Ball
+		marker.Size = Vector3.new(3, 3, 3) -- Small sphere
+		marker.Position = data.Position
+		marker.Anchored = true
+		marker.CanCollide = false
+		marker.Material = Enum.Material.Neon
+		
+		-- Color based on how many hexes meet here
+		if adjCount >= 3 then
+			-- Valid settlement spot (3+ hexes meet)
+			marker.Color = Color3.fromRGB(255, 255, 255) -- White
+			marker.Transparency = 0.2
+		else
+			-- Edge or corner (only 1-2 hexes)
+			marker.Color = Color3.fromRGB(100, 100, 100) -- Grey
+			marker.Transparency = 0.7
+		end
+		
+		marker.Parent = vertexFolder
+		
+		-- Store vertex data as attributes
+		marker:SetAttribute("VertexId", vertexId)
+		marker:SetAttribute("Key", key)
+		marker:SetAttribute("AdjacentTileCount", adjCount)
+		
+		-- Store adjacent tile info
+		for i, tileInfo in ipairs(data.AdjacentTiles) do
+			if i <= 3 then
+				marker:SetAttribute("Tile" .. i .. "Q", tileInfo.Q)
+				marker:SetAttribute("Tile" .. i .. "R", tileInfo.R)
+			end
+		end
+		
+		vertexId = vertexId + 1
+	end
+	
+	print("[MapGenerator] Created " .. (vertexId - 1) .. " total vertices")
 end
 
 -- Get all vertices (for building placement)
