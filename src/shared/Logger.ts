@@ -15,6 +15,8 @@ const Logger = {
 	},
 };
 
+export const Level = Logger.Level;
+
 type LoggerLevel = (typeof Logger.Level)[keyof typeof Logger.Level];
 
 // Configuration
@@ -64,7 +66,7 @@ const sendToHttpServer = (level: LoggerLevel, source: string, message: string) =
 };
 
 // Log with level
-const Log = (level: LoggerLevel, source: string, message: string) => {
+export const Log = (level: LoggerLevel, source: string, message: string) => {
 	const formattedMessage = `[${source}] ${message}`;
 
 	// Print to Roblox Output
@@ -93,33 +95,23 @@ const Log = (level: LoggerLevel, source: string, message: string) => {
 };
 
 // Convenience methods
-const Debug = (source: string, message: string) => {
+export const Debug = (source: string, message: string) => {
 	Log(Logger.Level.DEBUG, source, message);
 };
 
-const Info = (source: string, message: string) => {
+export const Info = (source: string, message: string) => {
 	Log(Logger.Level.INFO, source, message);
 };
 
-const Warn = (source: string, message: string) => {
+export const Warn = (source: string, message: string) => {
 	Log(Logger.Level.WARN, source, message);
 };
 
-const Error = (source: string, message: string) => {
+export const Error = (source: string, message: string) => {
 	Log(Logger.Level.ERROR, source, message);
 };
 
 // Quick log (uses calling script as source)
-const Print = (message: string) => {
+export const Print = (message: string) => {
 	Info("Game", message);
-};
-
-export default {
-	Level: Logger.Level,
-	Log,
-	Debug,
-	Info,
-	Warn,
-	Error,
-	Print,
 };

@@ -4,9 +4,9 @@
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
 const Players = game.GetService("Players");
 
-const TileTypes = require(ReplicatedStorage.Shared.TileTypes) as typeof import("shared/TileTypes");
-const ResourceTypes = require(ReplicatedStorage.Shared.ResourceTypes) as typeof import("shared/ResourceTypes");
-const Logger = require(ReplicatedStorage.Shared.Logger) as typeof import("shared/Logger");
+import TileTypes from "shared/TileTypes";
+import ResourceTypes from "shared/ResourceTypes";
+import * as Logger from "shared/Logger";
 
 // Configuration
 const PULSE_INTERVAL = 60; // Seconds between pulses
@@ -19,6 +19,7 @@ const NUMBER_DISTRIBUTION = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 
 // State
 let pulseTimer = PULSE_INTERVAL;
 let isRolling = false;
+let waitTimer = 0;
 const tileNumbers: Record<string, number> = {}; // Maps tile coordinates to numbers
 let gameStarted = false; // Pulse doesn't start until all players place settlements
 let GameManagerRef: { PlayerData: Record<number, { BuildingManager: { HasPlacedFirstSettlement: boolean } }> } | undefined;
@@ -46,7 +47,7 @@ const rollDice = () => {
 const PulseManager = {
 	// Assign numbers to tiles (called after map generation)
 	AssignTileNumbers() {
-		const mapFolder = workspace.FindFirstChild("Map");
+		const mapFolder = game.Workspace.FindFirstChild("Map");
 		if (!mapFolder) {
 			return;
 		}
@@ -107,7 +108,7 @@ const PulseManager = {
 	// Get tiles that match a dice roll
 	GetMatchingTiles(diceTotal: number) {
 		const matching = new Array<Model>();
-		const mapFolder = workspace.FindFirstChild("Map");
+		const mapFolder = game.Workspace.FindFirstChild("Map");
 		if (!mapFolder) {
 			return matching;
 		}
@@ -195,12 +196,12 @@ const PulseManager = {
 		// Random position on the tile
 		const angle = math.random() * math.pi * 2;
 		const dist = math.random(5, 20);
-		const spawnPos = tilePos.add(Vector3.new(math.cos(angle) * dist, 10, math.sin(angle) * dist));
+		const spawnPos = tilePos.add(new Vector3(math.cos(angle) * dist, 10, math.sin(angle) * dist));
 
 		// Create physical resource
 		const resource = new Instance("Part");
 		resource.Name = `Resource_${resourceKey}`;
-		resource.Size = Vector3.new(3, 3, 3);
+		resource.Size = new Vector3(3, 3, 3);
 		resource.Position = spawnPos;
 		resource.Color = resourceData.Color;
 		resource.Material = resourceData.Material;
@@ -222,7 +223,7 @@ const PulseManager = {
 		light.Parent = resource;
 
 		// Add to resources folder
-		const resourcesFolder = (workspace.FindFirstChild("Resources") as Folder) ?? new Instance("Folder", workspace);
+		const resourcesFolder = (game.Workspace.FindFirstChild("Resources") as Folder) ?? new Instance("Folder", game.Workspace);
 		resourcesFolder.Name = "Resources";
 		resource.Parent = resourcesFolder;
 
@@ -239,16 +240,20 @@ const PulseManager = {
 
 		// Check if game has started (all players placed settlements)
 		if (!gameStarted) {
-			if (allPlayersReady()) {
-				gameStarted = true;
-				pulseTimer = PULSE_INTERVAL;
-				Logger.Info("PulseManager", "All players ready! Starting pulse timer...");
-				TimerEvent.FireAllClients(math.floor(pulseTimer));
-			} else {
-				// Show "waiting for players" status
-				TimerEvent.FireAllClients(-1); // -1 means waiting
-				return;
+			waitTimer += deltaTime;
+			if (waitTimer >= 1) {
+				waitTimer = 0;
+				if (allPlayersReady()) {
+					gameStarted = true;
+					pulseTimer = PULSE_INTERVAL;
+					Logger.Info("PulseManager", "All players ready! Starting pulse timer...");
+					TimerEvent.FireAllClients(math.floor(pulseTimer));
+				} else {
+					// Show "waiting for players" status
+					TimerEvent.FireAllClients(-1); // -1 means waiting
+				}
 			}
+			return;
 		}
 
 		pulseTimer -= deltaTime;

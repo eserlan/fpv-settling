@@ -1,8 +1,8 @@
 // Server-side Research Manager
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
-const TechTree = require(ReplicatedStorage.Shared.TechTree) as typeof import("shared/TechTree");
-const Network = require(ReplicatedStorage.Shared.Network) as typeof import("shared/Network");
-const Logger = require(ReplicatedStorage.Shared.Logger) as typeof import("shared/Logger");
+import TechTree from "shared/TechTree";
+import Network from "shared/Network";
+import * as Logger from "shared/Logger";
 
 class ResearchManager {
 	Player: Player;

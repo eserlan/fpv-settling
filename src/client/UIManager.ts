@@ -2,7 +2,7 @@
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
 const Players = game.GetService("Players");
 
-const Logger = require(ReplicatedStorage.WaitForChild("Shared").WaitForChild("Logger")) as typeof import("shared/Logger");
+import * as Logger from "shared/Logger";
 
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
@@ -18,8 +18,8 @@ screenGui.Parent = playerGui;
 // Building Menu
 const buildingFrame = new Instance("Frame");
 buildingFrame.Name = "BuildingMenu";
-buildingFrame.Size = UDim2.new(0, 250, 0, 300);
-buildingFrame.Position = UDim2.new(1, -260, 0, 10);
+buildingFrame.Size = new UDim2(0, 250, 0, 300);
+buildingFrame.Position = new UDim2(1, -260, 0, 10);
 buildingFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40);
 buildingFrame.BackgroundTransparency = 0.3;
 buildingFrame.BorderSizePixel = 2;
@@ -28,7 +28,7 @@ buildingFrame.Parent = screenGui;
 
 const buildingTitle = new Instance("TextLabel");
 buildingTitle.Name = "Title";
-buildingTitle.Size = UDim2.new(1, 0, 0, 30);
+buildingTitle.Size = new UDim2(1, 0, 0, 30);
 buildingTitle.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
 buildingTitle.BorderSizePixel = 0;
 buildingTitle.Text = "Buildings";
@@ -40,8 +40,8 @@ buildingTitle.Parent = buildingFrame;
 // Help text
 const helpFrame = new Instance("Frame");
 helpFrame.Name = "HelpDisplay";
-helpFrame.Size = UDim2.new(0, 300, 0, 140);
-helpFrame.Position = UDim2.new(0, 10, 1, -150); // Lower left corner
+helpFrame.Size = new UDim2(0, 300, 0, 140);
+helpFrame.Position = new UDim2(0, 10, 1, -150); // Lower left corner
 helpFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40);
 helpFrame.BackgroundTransparency = 0.3;
 helpFrame.BorderSizePixel = 2;
@@ -50,7 +50,7 @@ helpFrame.Parent = screenGui;
 
 const helpTitle = new Instance("TextLabel");
 helpTitle.Name = "Title";
-helpTitle.Size = UDim2.new(1, 0, 0, 25);
+helpTitle.Size = new UDim2(1, 0, 0, 25);
 helpTitle.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
 helpTitle.BorderSizePixel = 0;
 helpTitle.Text = "Controls";
@@ -61,8 +61,8 @@ helpTitle.Parent = helpFrame;
 
 const helpText = new Instance("TextLabel");
 helpText.Name = "HelpText";
-helpText.Size = UDim2.new(1, -20, 1, -35);
-helpText.Position = UDim2.new(0, 10, 0, 30);
+helpText.Size = new UDim2(1, -20, 1, -35);
+helpText.Position = new UDim2(0, 10, 0, 30);
 helpText.BackgroundTransparency = 1;
 helpText.Text = "WASD - Move\nShift - Sprint\nB - Blueprints\nE - Deposit Resources\nMouse - Look Around";
 helpText.TextColor3 = Color3.fromRGB(255, 255, 255);
@@ -85,7 +85,7 @@ task.spawn(() => {
 		const [success] = pcall(() => {
 			StarterGui.SetCore("ChatMakeSystemMessage", {
 				Text: "",
-				Color: Color3.new(1, 1, 1),
+				Color: new Color3(1, 1, 1),
 			});
 		});
 		if (success) {

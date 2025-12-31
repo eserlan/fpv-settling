@@ -3,7 +3,7 @@
 
 const RunService = game.GetService("RunService");
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
-const Logger = require(ReplicatedStorage.WaitForChild("Shared").WaitForChild("Logger")) as typeof import("shared/Logger");
+import * as Logger from "shared/Logger";
 
 let events = ReplicatedStorage.FindFirstChild("Events");
 if (!events) {

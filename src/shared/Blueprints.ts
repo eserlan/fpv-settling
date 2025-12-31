@@ -43,7 +43,7 @@ const Blueprints: BlueprintState = {
 				Wheat: 1,
 				Wool: 1,
 			},
-			Size: Vector3.new(5, 4, 5),
+			Size: new Vector3(5, 4, 5),
 			ClaimsTiles: true,
 			FirstIsFree: true, // First settlement is free for new players
 		},
@@ -57,7 +57,7 @@ const Blueprints: BlueprintState = {
 				Wheat: 2,
 				Ore: 3,
 			},
-			Size: Vector3.new(7, 6, 7),
+			Size: new Vector3(7, 6, 7),
 			ProductionMultiplier: 2,
 		},
 		Road: {
@@ -69,7 +69,7 @@ const Blueprints: BlueprintState = {
 				Wood: 1,
 				Brick: 1,
 			},
-			Size: Vector3.new(2, 1, 8),
+			Size: new Vector3(2, 1, 8),
 			RequiresConnection: true, // Must connect to existing road or settlement
 		},
 	},

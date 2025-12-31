@@ -2,19 +2,19 @@
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
 
-const ResourceManager = require(script.Parent!.WaitForChild("ResourceManager")) as typeof import("./ResourceManager");
-const BuildingManager = require(script.Parent!.WaitForChild("BuildingManager")) as typeof import("./BuildingManager");
-const NPCManager = require(script.Parent!.WaitForChild("NPCManager")) as typeof import("./NPCManager");
-const ResearchManager = require(script.Parent!.WaitForChild("ResearchManager")) as typeof import("./ResearchManager");
-const NetworkHandler = require(script.Parent!.WaitForChild("NetworkHandler")) as typeof import("./NetworkHandler");
-const MapGenerator = require(script.Parent!.WaitForChild("MapGenerator")) as typeof import("./MapGenerator");
-const PulseManager = require(script.Parent!.WaitForChild("PulseManager")) as typeof import("./PulseManager");
-const CollectionManager = require(script.Parent!.WaitForChild("CollectionManager")) as typeof import("./CollectionManager");
-const LogService = require(script.Parent!.WaitForChild("LogService")) as typeof import("./LogService");
-const TileOwnershipManager = require(script.Parent!.WaitForChild("TileOwnershipManager")) as typeof import("./TileOwnershipManager");
+import ResourceManager = require("./ResourceManager");
+import BuildingManager = require("./BuildingManager");
+import NPCManager = require("./NPCManager");
+import ResearchManager = require("./ResearchManager");
+import NetworkHandler = require("./NetworkHandler");
+import MapGenerator = require("./MapGenerator");
+import PulseManager = require("./PulseManager");
+import CollectionManager = require("./CollectionManager");
+import LogService = require("./LogService");
+import TileOwnershipManager = require("./TileOwnershipManager");
 
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
-const Logger = require(ReplicatedStorage.Shared.Logger) as typeof import("shared/Logger");
+import * as Logger from "shared/Logger";
 
 type PlayerData = {
 	Player: Player;

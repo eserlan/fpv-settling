@@ -2,21 +2,22 @@
 // Handles construction of buildings including settlements that claim tiles
 
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
-const BuildingTypes = require(ReplicatedStorage.Shared.BuildingTypes) as typeof import("shared/BuildingTypes");
-const Network = require(ReplicatedStorage.Shared.Network) as typeof import("shared/Network");
-const Logger = require(ReplicatedStorage.Shared.Logger) as typeof import("shared/Logger");
+import BuildingTypes from "shared/BuildingTypes";
+import Network from "shared/Network";
+import * as Logger from "shared/Logger";
+import Blueprints from "shared/Blueprints";
 
 // TileOwnershipManager will be required when needed to avoid circular deps
 let TileOwnershipManager: typeof import("./TileOwnershipManager") | undefined;
 const getTileOwnershipManager = () => {
 	if (!TileOwnershipManager) {
-		TileOwnershipManager = require(script.Parent!.WaitForChild("TileOwnershipManager")) as typeof import("./TileOwnershipManager");
+		TileOwnershipManager = require(script.Parent!.WaitForChild("TileOwnershipManager") as ModuleScript) as typeof import("./TileOwnershipManager");
 	}
 	return TileOwnershipManager;
 };
 
 // MapGenerator provides vertex snapping
-const MapGenerator = require(script.Parent!.WaitForChild("MapGenerator")) as typeof import("./MapGenerator");
+import MapGenerator = require("./MapGenerator");
 
 type BuildingRecord = {
 	Id: number;
@@ -128,7 +129,6 @@ class BuildingManager {
 
 	// New Blueprint Building System: Place a foundation
 	PlaceFoundation(blueprintName: string, position: Vector3, rotation?: Vector3, snapKey?: string) {
-		const Blueprints = require(ReplicatedStorage.Shared.Blueprints) as typeof import("shared/Blueprints");
 		const blueprint = Blueprints.Buildings[blueprintName];
 
 		if (!blueprint) {
@@ -143,7 +143,7 @@ class BuildingManager {
 			Id: foundationId,
 			Type: blueprintName,
 			Position: position,
-			Rotation: rotation ?? Vector3.new(0, 0, 0),
+			Rotation: rotation ?? new Vector3(0, 0, 0),
 			SnapKey: snapKey,
 			Blueprint: blueprint,
 			IsFoundation: true,
@@ -263,9 +263,9 @@ class BuildingManager {
 			const fill = foundation.Model.FindFirstChild("Fill");
 			if (fill && fill.IsA("BasePart")) {
 				const fillWidth = math.max(0.1, progressBar.Size.X * foundation.Progress);
-				fill.Size = Vector3.new(fillWidth, fill.Size.Y, fill.Size.Z);
+				fill.Size = new Vector3(fillWidth, fill.Size.Y, fill.Size.Z);
 				// Move fill to correct position
-				fill.Position = progressBar.Position.sub(Vector3.new((progressBar.Size.X - fillWidth) / 2, 0, 0));
+				fill.Position = progressBar.Position.sub(new Vector3((progressBar.Size.X - fillWidth) / 2, 0, 0));
 			}
 		}
 
@@ -274,7 +274,6 @@ class BuildingManager {
 		if (resourceDisplay && resourceDisplay.IsA("BillboardGui")) {
 			const resourceLabel = resourceDisplay.FindFirstChild("Resources");
 			if (resourceLabel && resourceLabel.IsA("TextLabel")) {
-				const Blueprints = require(ReplicatedStorage.Shared.Blueprints) as typeof import("shared/Blueprints");
 				let resourceText = "Needs:\n";
 				for (const [resource, required] of pairs(foundation.RequiredResources ?? {})) {
 					const icon = Blueprints.ResourceIcons[resource] ?? "";
@@ -305,13 +304,13 @@ class BuildingManager {
 		const model = new Instance("Model");
 		model.Name = `${this.Player.Name}_Foundation_${foundation.Type}_${foundation.Id}`;
 
-		const size = foundation.Blueprint?.Size ?? Vector3.new(5, 4, 5);
+		const size = foundation.Blueprint?.Size ?? new Vector3(5, 4, 5);
 
 		// Main ghost building
 		const part = new Instance("Part");
 		part.Name = "FoundationBase";
 		part.Size = size;
-		part.CFrame = CFrame.new(foundation.Position.add(Vector3.new(0, size.Y / 2, 0))).mul(
+		part.CFrame = new CFrame(foundation.Position.add(new Vector3(0, size.Y / 2, 0))).mul(
 			CFrame.Angles(
 				math.rad(foundation.Rotation?.X ?? 0),
 				math.rad(foundation.Rotation?.Y ?? 0),
@@ -328,8 +327,8 @@ class BuildingManager {
 		// Progress bar background
 		const progressBg = new Instance("Part");
 		progressBg.Name = "ProgressBar";
-		progressBg.Size = Vector3.new(6, 0.3, 0.3);
-		progressBg.Position = foundation.Position.add(Vector3.new(0, size.Y + 2, 0));
+		progressBg.Size = new Vector3(6, 0.3, 0.3);
+		progressBg.Position = foundation.Position.add(new Vector3(0, size.Y + 2, 0));
 		progressBg.Anchored = true;
 		progressBg.CanCollide = false;
 		progressBg.Color = Color3.fromRGB(50, 50, 50);
@@ -339,8 +338,8 @@ class BuildingManager {
 		// Progress bar fill
 		const progressFill = new Instance("Part");
 		progressFill.Name = "Fill";
-		progressFill.Size = Vector3.new(0.1, 0.4, 0.4); // Starts small
-		progressFill.Position = progressBg.Position.sub(Vector3.new(progressBg.Size.X / 2 - 0.05, 0, 0));
+		progressFill.Size = new Vector3(0.1, 0.4, 0.4); // Starts small
+		progressFill.Position = progressBg.Position.sub(new Vector3(progressBg.Size.X / 2 - 0.05, 0, 0));
 		progressFill.Anchored = true;
 		progressFill.CanCollide = false;
 		progressFill.Color = Color3.fromRGB(100, 255, 100); // Green
@@ -350,25 +349,24 @@ class BuildingManager {
 		// Billboard for resource requirements
 		const billboard = new Instance("BillboardGui");
 		billboard.Name = "ResourceDisplay";
-		billboard.Size = UDim2.new(0, 150, 0, 80);
-		billboard.StudsOffset = Vector3.new(0, size.Y + 4, 0);
+		billboard.Size = new UDim2(0, 150, 0, 80);
+		billboard.StudsOffset = new Vector3(0, size.Y + 4, 0);
 		billboard.AlwaysOnTop = true;
 		billboard.Adornee = part;
 		billboard.Parent = part;
 
 		const resourceLabel = new Instance("TextLabel");
 		resourceLabel.Name = "Resources";
-		resourceLabel.Size = UDim2.new(1, 0, 1, 0);
+		resourceLabel.Size = new UDim2(1, 0, 1, 0);
 		resourceLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
 		resourceLabel.BackgroundTransparency = 0.3;
-		resourceLabel.TextColor3 = Color3.new(1, 1, 1);
+		resourceLabel.TextColor3 = new Color3(1, 1, 1);
 		resourceLabel.Font = Enum.Font.GothamBold;
 		resourceLabel.TextSize = 14;
 		resourceLabel.TextWrapped = true;
 		resourceLabel.Parent = billboard;
 
 		// Build resource text
-		const Blueprints = require(ReplicatedStorage.Shared.Blueprints) as typeof import("shared/Blueprints");
 		let resourceText = "Needs:\n";
 		for (const [resource, amount] of pairs(foundation.RequiredResources ?? {})) {
 			const icon = Blueprints.ResourceIcons[resource] ?? "";
@@ -379,7 +377,7 @@ class BuildingManager {
 
 		// Put in appropriate folder
 		const folderName = foundation.IsSettlement ? "Settlements" : "Buildings";
-		const folder = (workspace.FindFirstChild(folderName) as Folder) ?? new Instance("Folder", workspace);
+		const folder = (game.Workspace.FindFirstChild(folderName) as Folder) ?? new Instance("Folder", game.Workspace);
 		folder.Name = folderName;
 		model.Parent = folder;
 		model.PrimaryPart = part;
@@ -417,7 +415,7 @@ class BuildingManager {
 			building.Model = undefined;
 		}
 
-		// Create physical building in workspace
+		// Create physical building in game.Workspace
 		this.CreateBuildingModel(building);
 
 		// If it's a settlement, claim nearby tiles
@@ -440,10 +438,10 @@ class BuildingManager {
 
 		// Get size from Blueprint (new system) or Data (old system)
 		const buildingData = building.Blueprint ?? building.Data ?? {};
-		const size = (buildingData as { Size?: Vector3 }).Size ?? Vector3.new(5, 4, 5);
+		const size = (buildingData as { Size?: Vector3 }).Size ?? new Vector3(5, 4, 5);
 
 		// Base CFrame for entire building
-		let baseCFrame = CFrame.new(building.Position);
+		let baseCFrame = new CFrame(building.Position);
 		if (building.Rotation) {
 			baseCFrame = baseCFrame.mul(
 				CFrame.Angles(math.rad(building.Rotation.X), math.rad(building.Rotation.Y), math.rad(building.Rotation.Z)),
@@ -452,7 +450,7 @@ class BuildingManager {
 
 		const part = new Instance("Part");
 		part.Size = size;
-		part.CFrame = baseCFrame.mul(CFrame.new(0, size.Y / 2, 0));
+		part.CFrame = baseCFrame.mul(new CFrame(0, size.Y / 2, 0));
 		part.Anchored = true;
 		part.Parent = model;
 
@@ -460,8 +458,8 @@ class BuildingManager {
 		if (building.Type === "Settlement") {
 			// Create a proper house shape!
 			// Base/walls
-			part.Size = Vector3.new(5, 4, 5);
-			part.CFrame = baseCFrame.mul(CFrame.new(0, 2, 0));
+			part.Size = new Vector3(5, 4, 5);
+			part.CFrame = baseCFrame.mul(new CFrame(0, 2, 0));
 			part.Color = Color3.fromRGB(220, 200, 160); // Cream walls
 			part.Material = Enum.Material.SmoothPlastic;
 
@@ -471,8 +469,8 @@ class BuildingManager {
 
 			// Left side of roof
 			const roof1 = new Instance("WedgePart");
-			roof1.Size = Vector3.new(5 + roofOverhang * 2, roofHeight, 3);
-			roof1.CFrame = baseCFrame.mul(CFrame.new(0, 4 + roofHeight / 2, -1.5));
+			roof1.Size = new Vector3(5 + roofOverhang * 2, roofHeight, 3);
+			roof1.CFrame = baseCFrame.mul(new CFrame(0, 4 + roofHeight / 2, -1.5));
 			roof1.Anchored = true;
 			roof1.Color = Color3.fromRGB(139, 69, 19); // Brown roof
 			roof1.Material = Enum.Material.Wood;
@@ -480,8 +478,8 @@ class BuildingManager {
 
 			// Right side of roof (rotated 180 degrees around Y)
 			const roof2 = new Instance("WedgePart");
-			roof2.Size = Vector3.new(5 + roofOverhang * 2, roofHeight, 3);
-			roof2.CFrame = baseCFrame.mul(CFrame.new(0, 4 + roofHeight / 2, 1.5)).mul(CFrame.Angles(0, math.pi, 0));
+			roof2.Size = new Vector3(5 + roofOverhang * 2, roofHeight, 3);
+			roof2.CFrame = baseCFrame.mul(new CFrame(0, 4 + roofHeight / 2, 1.5)).mul(CFrame.Angles(0, math.pi, 0));
 			roof2.Anchored = true;
 			roof2.Color = Color3.fromRGB(139, 69, 19); // Brown roof
 			roof2.Material = Enum.Material.Wood;
@@ -489,8 +487,8 @@ class BuildingManager {
 
 			// Door
 			const door = new Instance("Part");
-			door.Size = Vector3.new(1.2, 2.5, 0.3);
-			door.CFrame = baseCFrame.mul(CFrame.new(0, 1.25, 2.6));
+			door.Size = new Vector3(1.2, 2.5, 0.3);
+			door.CFrame = baseCFrame.mul(new CFrame(0, 1.25, 2.6));
 			door.Anchored = true;
 			door.Color = Color3.fromRGB(101, 67, 33); // Dark wood door
 			door.Material = Enum.Material.Wood;
@@ -498,8 +496,8 @@ class BuildingManager {
 
 			// Window
 			const window = new Instance("Part");
-			window.Size = Vector3.new(1, 1, 0.2);
-			window.CFrame = baseCFrame.mul(CFrame.new(1.5, 2.5, 2.6));
+			window.Size = new Vector3(1, 1, 0.2);
+			window.CFrame = baseCFrame.mul(new CFrame(1.5, 2.5, 2.6));
 			window.Anchored = true;
 			window.Color = Color3.fromRGB(135, 206, 235); // Light blue glass
 			window.Material = Enum.Material.Glass;
@@ -509,8 +507,8 @@ class BuildingManager {
 			part.Color = Color3.fromRGB(80, 80, 80); // Stone grey
 			part.Material = Enum.Material.Slate;
 		} else if (building.Type === "Road") {
-			part.Size = Vector3.new(37, 1, 3);
-			part.CFrame = baseCFrame.mul(CFrame.new(0, 0.1, 0));
+			part.Size = new Vector3(37, 1, 3);
+			part.CFrame = baseCFrame.mul(new CFrame(0, 0.1, 0));
 			part.Color = Color3.fromRGB(100, 80, 60); // Dirt road
 			part.Material = Enum.Material.Ground;
 		} else if (building.Type === "House") {
@@ -523,7 +521,7 @@ class BuildingManager {
 
 		// Put in appropriate folder
 		const folderName = building.IsSettlement ? "Settlements" : "Buildings";
-		const folder = (workspace.FindFirstChild(folderName) as Folder) ?? new Instance("Folder", workspace);
+		const folder = (game.Workspace.FindFirstChild(folderName) as Folder) ?? new Instance("Folder", game.Workspace);
 		folder.Name = folderName;
 		model.Parent = folder;
 		model.PrimaryPart = part;

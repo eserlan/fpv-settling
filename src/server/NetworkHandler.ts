@@ -2,13 +2,24 @@
 // Routes requests from clients to the appropriate managers
 
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
-const Network = require(ReplicatedStorage.Shared.Network) as typeof import("shared/Network");
-const Logger = require(ReplicatedStorage.Shared.Logger) as typeof import("shared/Logger");
+import Network from "shared/Network";
+import * as Logger from "shared/Logger";
+import CollectionManager = require("./CollectionManager");
+
+type BuildingManager = InstanceType<typeof import("./BuildingManager")>;
+type NPCManager = InstanceType<typeof import("./NPCManager")>;
+type ResearchManager = InstanceType<typeof import("./ResearchManager")>;
+
+interface PlayerData {
+	BuildingManager: BuildingManager;
+	NPCManager: NPCManager;
+	ResearchManager: ResearchManager;
+}
 
 const NetworkHandler = {
-	Init(gameManager: { PlayerData: Record<number, any> }) {
+	Init(gameManager: { PlayerData: Record<number, PlayerData> }) {
 		Network.OnEvent("ClientRequest", (player, actionType, ...args) => {
-			const playerData = gameManager.PlayerData[player.UserId];
+			const playerData = gameManager.PlayerData[(player as Player).UserId];
 			if (!playerData) {
 				return;
 			}
@@ -25,24 +36,24 @@ const NetworkHandler = {
 				const [foundationId, resourceType] = args as [number, string];
 				Logger.Debug(
 					"NetworkHandler",
-					`${player.Name} requesting deposit of ${resourceType} into foundation ${foundationId}`,
+					`${(player as Player).Name} requesting deposit of ${resourceType} into foundation ${foundationId}`,
 				);
 
 				// First check if player has the resource
-				const CollectionManager = require(script.Parent!.WaitForChild("CollectionManager")) as typeof import("./CollectionManager");
-				const inventory = CollectionManager.GetInventory(player);
+				const inventory = CollectionManager.GetInventory(player as Player);
 
 				if (inventory && inventory[resourceType] && inventory[resourceType] > 0) {
 					// Try to deposit
-					const [success] = playerData.BuildingManager.DepositResource(foundationId, resourceType);
+					const result = playerData.BuildingManager.DepositResource(foundationId, resourceType) as LuaTuple<[boolean, string]>;
+					const success = result[0];
 					if (success) {
 						// Remove from player inventory
-						CollectionManager.RemoveResource(player, resourceType, 1);
+						CollectionManager.RemoveResource(player as Player, resourceType, 1);
 					}
 				} else {
 					Logger.Warn(
 						"NetworkHandler",
-						`${player.Name} tried to deposit ${resourceType} but doesn't have any`,
+						`${(player as Player).Name} tried to deposit ${resourceType} but doesn't have any`,
 					);
 				}
 			} else if (actionType === "HireNPC") {

@@ -1,8 +1,8 @@
 // Server-side NPC Manager
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
-const NPCTypes = require(ReplicatedStorage.Shared.NPCTypes) as typeof import("shared/NPCTypes");
-const Network = require(ReplicatedStorage.Shared.Network) as typeof import("shared/Network");
-const Logger = require(ReplicatedStorage.Shared.Logger) as typeof import("shared/Logger");
+import NPCTypes from "shared/NPCTypes";
+import Network from "shared/Network";
+import * as Logger from "shared/Logger";
 
 type NPCRecord = {
 	Id: number;
@@ -51,7 +51,7 @@ class NPCManager {
 		const npc: NPCRecord = {
 			Id: this.NextNPCId,
 			Type: npcType,
-			Position: position ?? Vector3.new(0, 5, 0),
+			Position: position ?? new Vector3(0, 5, 0),
 			Health: npcInfo.Health,
 			MaxHealth: npcInfo.Health,
 			State: "Idle",
@@ -78,7 +78,7 @@ class NPCManager {
 		// Create simple humanoid model
 		const torso = new Instance("Part");
 		torso.Name = "Torso";
-		torso.Size = Vector3.new(2, 2, 1);
+		torso.Size = new Vector3(2, 2, 1);
 		torso.Position = npc.Position;
 		torso.Anchored = false;
 
@@ -93,9 +93,9 @@ class NPCManager {
 
 		const head = new Instance("Part");
 		head.Name = "Head";
-		head.Size = Vector3.new(1, 1, 1);
+		head.Size = new Vector3(1, 1, 1);
 		head.Shape = Enum.PartType.Ball;
-		head.Position = npc.Position.add(Vector3.new(0, 1.5, 0));
+		head.Position = npc.Position.add(new Vector3(0, 1.5, 0));
 		head.BrickColor = new BrickColor("Light orange");
 		head.Parent = model;
 
@@ -112,7 +112,7 @@ class NPCManager {
 		humanoid.WalkSpeed = npc.Data.Speed;
 		humanoid.Parent = model;
 
-		model.Parent = workspace;
+		model.Parent = game.Workspace;
 		model.PrimaryPart = torso;
 		npc.Model = model;
 

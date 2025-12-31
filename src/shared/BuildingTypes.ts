@@ -25,7 +25,7 @@ const BuildingTypes: Record<string, BuildingInfo> = {
 			Wool: 1,
 		},
 		BuildTime: 0, // Instant for first settlement
-		Size: Vector3.new(10, 8, 10),
+		Size: new Vector3(10, 8, 10),
 		ClaimRadius: 30, // Studs - claims tiles within this radius
 		IsSettlement: true,
 	},
@@ -37,7 +37,7 @@ const BuildingTypes: Record<string, BuildingInfo> = {
 			Ore: 3,
 		},
 		BuildTime: 10,
-		Size: Vector3.new(15, 12, 15),
+		Size: new Vector3(15, 12, 15),
 		ClaimRadius: 40,
 		IsSettlement: true,
 		RequiresSettlement: true, // Must be built on existing settlement
@@ -50,7 +50,7 @@ const BuildingTypes: Record<string, BuildingInfo> = {
 			Brick: 1,
 		},
 		BuildTime: 0,
-		Size: Vector3.new(4, 0.5, 8),
+		Size: new Vector3(4, 0.5, 8),
 		IsRoad: true,
 	},
 	House: {
@@ -63,7 +63,7 @@ const BuildingTypes: Record<string, BuildingInfo> = {
 		},
 		BuildTime: 10,
 		Capacity: 5,
-		Size: Vector3.new(8, 6, 8),
+		Size: new Vector3(8, 6, 8),
 	},
 	Storage: {
 		Name: "Storage",
@@ -74,7 +74,7 @@ const BuildingTypes: Record<string, BuildingInfo> = {
 		},
 		BuildTime: 5,
 		StorageCapacity: 50,
-		Size: Vector3.new(6, 5, 6),
+		Size: new Vector3(6, 5, 6),
 	},
 };
 

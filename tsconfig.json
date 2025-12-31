@@ -2,18 +2,33 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "CommonJS",
+    "moduleResolution": "Node",
+    "moduleDetection": "force",
+    "noLib": true,
+    "allowSyntheticDefaultImports": true,
     "outDir": "out",
     "rootDir": "src",
     "strict": true,
-    "types": ["@rbxts/types", "@rbxts/reflect"],
+    "typeRoots": [
+      "node_modules/@rbxts",
+      "node_modules/@flamework"
+    ],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "baseUrl": "src",
     "paths": {
-      "shared/*": ["shared/*"],
-      "client/*": ["client/*"],
-      "server/*": ["server/*"]
+      "shared/*": [
+        "shared/*"
+      ],
+      "client/*": [
+        "client/*"
+      ],
+      "server/*": [
+        "server/*"
+      ]
     }
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }
