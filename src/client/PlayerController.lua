@@ -246,31 +246,39 @@ local function findNearbyFoundation()
 	if not character or not character.PrimaryPart then return nil end
 	
 	local playerPos = character.PrimaryPart.Position
-	local folders = {workspace:FindFirstChild("Buildings"), workspace:FindFirstChild("Settlements")}
-	
 	local closest = nil
 	local closestDist = 15 -- Max interaction distance
+	local foundCount = 0
 	
-	for _, folder in ipairs(folders) do
-		if not folder then continue end
+	-- Search all of workspace to be more robust than just checking specific folders
+	for _, object in ipairs(workspace:GetChildren()) do
+		-- Also check inside folders if they exist
+		local searchArea = {object}
+		if object:IsA("Folder") and (object.Name == "Buildings" or object.Name == "Settlements") then
+			searchArea = object:GetChildren()
+		end
 		
-		for _, model in ipairs(folder:GetChildren()) do
+		for _, model in ipairs(searchArea) do
 			if model:IsA("Model") then
 				local basePart = model:FindFirstChild("FoundationBase")
 				if basePart then
 					local foundationId = basePart:GetAttribute("FoundationId")
 					local ownerId = basePart:GetAttribute("OwnerId")
 					
-					-- Only interact with own foundations that aren't complete
-					if foundationId and ownerId == player.UserId then
+					if foundationId then
+						foundCount = foundCount + 1
 						local dist = (basePart.Position - playerPos).Magnitude
-						if dist < closestDist then
-							closestDist = dist
-							closest = {
-								Id = foundationId,
-								Model = model,
-								Part = basePart
-							}
+						
+						-- Only interact with own foundations
+						if ownerId == player.UserId then
+							if dist < closestDist then
+								closestDist = dist
+								closest = {
+									Id = foundationId,
+									Model = model,
+									Part = basePart
+								}
+							end
 						end
 					end
 				end
@@ -278,6 +286,8 @@ local function findNearbyFoundation()
 		end
 	end
 	
+	-- Store for debug logging
+	_G.FoundFoundations = foundCount
 	return closest
 end
 
@@ -369,16 +379,11 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 				Network:FireServer("DepositResource", nearbyFoundation.Id, resourceType)
 			end
 		else
-			-- Check if near ANY building to see if detection is the problem
-			local folders = {workspace:FindFirstChild("Buildings"), workspace:FindFirstChild("Settlements")}
-			local foundAny = false
-			for _, folder in ipairs(folders) do
-				if folder and #folder:GetChildren() > 0 then foundAny = true break end
-			end
-			if not foundAny then
-				Logger.Debug("PlayerController", "Pressing E, but no buildings/foundations exist in workspace")
+			local totalFound = _G.FoundFoundations or 0
+			if totalFound == 0 then
+				Logger.Debug("PlayerController", "Pressing E, but NO foundations with 'FoundationBase' were found in workspace at all.")
 			else
-				Logger.Debug("PlayerController", "Pressing E, but not close enough to a foundation (or wrong owner)")
+				Logger.Debug("PlayerController", "Pressing E, found " .. totalFound .. " foundations in workspace, but none close enough (15 studs) or owned by you.")
 			end
 		end
 	end
