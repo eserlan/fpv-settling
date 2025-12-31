@@ -120,6 +120,7 @@ function BuildingManager:PlaceFoundation(blueprintName, position, rotation)
 		Type = blueprintName,
 		Position = position,
 		Rotation = rotation or Vector3.new(0, 0, 0),
+		SnapKey = snapKey,
 		Blueprint = blueprint,
 		IsFoundation = true,
 		IsSettlement = blueprint.ClaimsTiles or blueprintName == "Settlement",
@@ -346,6 +347,7 @@ function BuildingManager:CreateFoundationModel(foundation)
 	-- Store reference to foundation ID on the model for interaction
 	part:SetAttribute("FoundationId", foundation.Id)
 	part:SetAttribute("OwnerId", foundation.OwnerId)
+	part:SetAttribute("Key", foundation.SnapKey)
 	
 	foundation.Model = model
 end
@@ -465,7 +467,7 @@ function BuildingManager:CreateBuildingModel(building)
 		part.Color = Color3.fromRGB(80, 80, 80) -- Stone grey
 		part.Material = Enum.Material.Slate
 	elseif building.Type == "Road" then
-		part.Size = Vector3.new(12, 1, 3)
+		part.Size = Vector3.new(37, 1, 3)
 		part.CFrame = baseCFrame * CFrame.new(0, 0.1, 0)
 		part.Color = Color3.fromRGB(100, 80, 60) -- Dirt road
 		part.Material = Enum.Material.Ground
@@ -485,6 +487,8 @@ function BuildingManager:CreateBuildingModel(building)
 	model.PrimaryPart = part
 	
 	building.Model = model
+	part:SetAttribute("Key", building.SnapKey)
+	part:SetAttribute("OwnerId", building.OwnerId)
 	
 	return model
 end

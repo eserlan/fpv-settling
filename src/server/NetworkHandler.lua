@@ -18,8 +18,8 @@ function NetworkHandler.Init(gameManager)
 			
 		elseif actionType == "PlaceFoundation" then
 			-- New blueprint building system
-			local blueprintName, position, rotation = ...
-			playerData.BuildingManager:PlaceFoundation(blueprintName, position, rotation)
+			local blueprintName, position, rotation, snapKey = ...
+			playerData.BuildingManager:PlaceFoundation(blueprintName, position, rotation, snapKey)
 			
 		elseif actionType == "DepositResource" then
 			-- Deposit resource into foundation

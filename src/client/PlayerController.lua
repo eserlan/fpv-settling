@@ -125,14 +125,78 @@ local function isSnapPointValidForBlueprint(marker, blueprintName)
 	local blueprint = Blueprints.Buildings[blueprintName]
 	if not blueprint then return false end
 	
-	-- For now, basic validation: 
-	-- Vertices need 3-way (except edge of world 2-way)
-	-- Edges just need to exist
+	-- Helper to find owner of a building at a position/key
+	local function getOwnerAt(key, folderName)
+		local folder = workspace:FindFirstChild(folderName)
+		if not folder then return nil end
+		for _, model in ipairs(folder:GetChildren()) do
+			local base = model:FindFirstChild("FoundationBase") or model.PrimaryPart
+			if base and base:GetAttribute("Key") == key then
+				return base:GetAttribute("OwnerId")
+			end
+		end
+		return nil
+	end
+	
+	-- Adjacency rules
 	if blueprint.PlacementType == "3-way" then
-		local adjCount = marker:GetAttribute("AdjacentTileCount") or 0
-		return adjCount >= 2 -- Allow 2-way for starting edge settlements
+		-- First settlement can be placed anywhere valid (no connection needed)
+		-- We can check attributes or a local flag for this
+		local hasAnyBuildings = false
+		for _, model in ipairs(workspace:GetChildren()) do
+			if model:IsA("Model") then
+				local base = model:FindFirstChild("FoundationBase") or model.PrimaryPart
+				if base and base:GetAttribute("OwnerId") == player.UserId then
+					hasAnyBuildings = true
+					break
+				end
+			end
+		end
+		
+		if not hasAnyBuildings then return true end -- First one is free
+		
+		-- Subsequent settlements must be connected via road (standard Catan)
+		-- For now, let's keep it simple: allow if not too close to another (not implemented yet)
+		return true 
 	elseif blueprint.PlacementType == "edge" then
-		return true -- Valid if it's an edge marker
+		-- Roads MUST connect to a settlement or road you own
+		local v1 = marker:GetAttribute("Vertex1")
+		local v2 = marker:GetAttribute("Vertex2")
+		
+		-- Check for owned settlement at either vertex
+		local folders = {"Settlements", "Buildings"}
+		for _, folder in ipairs(folders) do
+			local f = workspace:FindFirstChild(folder)
+			if f then
+				for _, model in ipairs(f:GetChildren()) do
+					local base = model:FindFirstChild("FoundationBase") or model.PrimaryPart
+					if base and base:GetAttribute("OwnerId") == player.UserId then
+						local pos = base.Position
+						-- Vertices are spheres, check distance
+						if (pos - marker.Position).Magnitude < 25 then
+							return true
+						end
+					end
+				end
+			end
+		end
+		
+		-- Check for owned road at either vertex
+		-- A road at vertex V1 means its key has V1 in it
+		local f = workspace:FindFirstChild("Buildings")
+		if f then
+			for _, model in ipairs(f:GetChildren()) do
+				local base = model:FindFirstChild("FoundationBase") or model.PrimaryPart
+				if base and base:GetAttribute("OwnerId") == player.UserId then
+					local key = base:GetAttribute("Key")
+					if key and (string.find(key, v1) or string.find(key, v2)) then
+						return true
+					end
+				end
+			end
+		end
+		
+		return false
 	end
 	
 	return false
@@ -175,7 +239,7 @@ local function updatePlacementPreview()
 	
 	-- Update preview size and rotation
 	if blueprint.PlacementType == "edge" then
-		buildingPreview.Size = Vector3.new(12, 0.5, 4)
+		buildingPreview.Size = Vector3.new(37, 0.5, 4)
 		buildingPreview.CFrame = snapPoint.CFrame * CFrame.new(0, 0.25, 0)
 	else
 		buildingPreview.Size = Vector3.new(8, 0.5, 8)
@@ -378,7 +442,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if placementMode and input.UserInputType == Enum.UserInputType.MouseButton1 then
 		if currentVertex and isValidPlacement and selectedBlueprint then
 			local rotation = currentVertex.Rotation
-			Network:FireServer("PlaceFoundation", selectedBlueprint, currentVertex.Position, rotation)
+			local snapKey = currentVertex:GetAttribute("Key")
+			Network:FireServer("PlaceFoundation", selectedBlueprint, currentVertex.Position, rotation, snapKey)
 			Logger.Info("PlayerController", "Placed foundation for " .. selectedBlueprint)
 			exitPlacementMode()
 		else

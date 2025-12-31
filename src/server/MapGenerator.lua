@@ -471,7 +471,7 @@ function MapGenerator.CreateVerticesAndEdges(mapFolder)
 		local adjCount = #data.AdjacentTiles
 		local marker = Instance.new("Part")
 		marker.Name = "Edge_" .. edgeId
-		marker.Size = Vector3.new(12, 1, 3) -- Length is approx dist between vertices
+		marker.Size = Vector3.new(37, 1, 3) -- ~80% of vertex-to-vertex distance (~46 studs)
 		marker.Position = data.Center
 		marker.Anchored = true
 		marker.CanCollide = false
@@ -483,6 +483,10 @@ function MapGenerator.CreateVerticesAndEdges(mapFolder)
 		marker.Parent = edgeFolder
 		marker:SetAttribute("EdgeId", edgeId)
 		marker:SetAttribute("Key", key)
+		-- Store vertex keys for connection logic
+		local vKeys = string.split(key, ":")
+		marker:SetAttribute("Vertex1", vKeys[1])
+		marker:SetAttribute("Vertex2", vKeys[2])
 		marker:SetAttribute("AdjacentTileCount", adjCount)
 		edgeId = edgeId + 1
 	end
