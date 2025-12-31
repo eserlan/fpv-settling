@@ -428,3 +428,130 @@
 [02:01:13] [WARN ] [SERVER] [BuildingManager] eserlan09 doesn't have enough resources for Settlement
 [02:01:13] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -35.126399993896484, 6.998026371002197, -111.4352035522461
 [02:01:17] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[02:15:35] [INFO ] [SERVER] [Server] ===========================================
+[02:15:35] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[02:15:35] [INFO ] [SERVER] [Server] ===========================================
+[02:15:35] [INFO ] [SERVER] [CollectionManager] Initialized
+[02:15:35] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[02:15:35] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[02:15:35] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[02:15:35] [INFO ] [SERVER] [Server] ===========================================
+[02:15:35] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[02:15:35] [INFO ] [SERVER] [Server] ===========================================
+[02:15:35] [INFO ] [SERVER] [NetworkHandler] Initialized
+[02:15:35] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[02:15:35] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09
+[02:15:37] [INFO ] [SERVER] [Client] ===========================================
+[02:15:37] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[02:15:37] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[02:15:37] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[02:15:37] [INFO ] [SERVER] [Client] ===========================================
+[02:15:38] [INFO ] [SERVER] [Client] Waiting for character...
+[02:15:40] [INFO ] [SERVER] [Client] Character loaded!
+[02:15:40] [INFO ] [SERVER] [PlayerController] Initialized
+[02:15:40] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[02:15:40] [INFO ] [SERVER] [UIManager] Initialized
+[02:15:40] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[02:15:40] [INFO ] [SERVER] [PulseUI] Initialized
+[02:15:40] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[02:15:40] [INFO ] [SERVER] [InventoryUI] Initialized
+[02:15:40] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[02:15:40] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[02:15:40] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[02:15:40] [INFO ] [SERVER] [Client] ===========================================
+[02:15:40] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[02:15:40] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[02:15:40] [INFO ] [SERVER] [Client] ===========================================
+[02:15:52] [DEBUG] [SERVER] [PlayerController] Entered first-person mode
+[02:15:52] [DEBUG] [SERVER] [PlayerController] Entered third-person mode (mouse unlocked)
+[02:15:56] [DEBUG] [SERVER] [PlayerController] Build mode: true
+[02:15:59] [DEBUG] [SERVER] [PlayerController] Entered first-person mode
+[02:16:02] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_36 (dist: 1)
+[02:16:02] [INFO ] [SERVER] [BuildingManager] Settlement claimed 0 tiles
+[02:16:02] [INFO ] [SERVER] [PulseManager] All players ready! Starting pulse timer...
+[02:16:02] [INFO ] [SERVER] [BuildingManager] eserlan09 placing FREE first settlement!
+[02:16:02] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[02:16:02] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 0 tiles with settlement
+[02:16:02] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -18.414945602416992, 6.998023986816406, 34.893714904785156
+[02:16:05] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_40 (dist: 20)
+[02:16:05] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[02:16:05] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 0 tiles with settlement
+[02:16:05] [INFO ] [SERVER] [BuildingManager] Settlement claimed 0 tiles
+[02:16:05] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -42.28144073486328, 6.998023509979248, 24.02002716064453
+[02:16:07] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_65 (dist: 0)
+[02:16:07] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[02:16:08] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 0 tiles with settlement
+[02:16:08] [INFO ] [SERVER] [BuildingManager] Settlement claimed 0 tiles
+[02:16:08] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -40.35567855834961, 6.998022556304932, 0.8650226593017578
+[02:16:09] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_65 (dist: 17)
+[02:16:09] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[02:16:09] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 0 tiles with settlement
+[02:16:09] [INFO ] [SERVER] [BuildingManager] Settlement claimed 0 tiles
+[02:16:10] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -37.54527282714844, 6.998025417327881, -17.575761795043945
+[02:16:11] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_60 (dist: 22)
+[02:16:11] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[02:16:11] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 0 tiles with settlement
+[02:16:11] [INFO ] [SERVER] [BuildingManager] Settlement claimed 0 tiles
+[02:16:11] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -40.263145446777344, 6.9980244636535645, -23.148292541503906
+[02:16:12] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_39 (dist: 1)
+[02:16:12] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[02:16:12] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 0 tiles with settlement
+[02:16:12] [INFO ] [SERVER] [BuildingManager] Settlement claimed 0 tiles
+[02:16:13] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -21.137828826904297, 6.998022556304932, -33.129066467285156
+[02:16:14] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_69 (dist: 19)
+[02:16:14] [WARN ] [SERVER] [BuildingManager] eserlan09 doesn't have enough resources for Settlement
+[02:16:15] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_69 (dist: 12)
+[02:16:15] [WARN ] [SERVER] [BuildingManager] eserlan09 doesn't have enough resources for Settlement
+[02:16:15] [DEBUG] [SERVER] [PlayerController] Requested building placement at: 0.5641269683837891, 6.998023986816406, -30.9603328704834
+[02:16:15] [DEBUG] [SERVER] [PlayerController] Requested building placement at: 7.281188011169434, 6.9980244636535645, -35.663673400878906
+[02:16:15] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_69 (dist: 3)
+[02:16:15] [WARN ] [SERVER] [BuildingManager] eserlan09 doesn't have enough resources for Settlement
+[02:16:16] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_69 (dist: 3)
+[02:16:16] [WARN ] [SERVER] [BuildingManager] eserlan09 doesn't have enough resources for Settlement
+[02:16:16] [DEBUG] [SERVER] [PlayerController] Requested building placement at: 18.630395889282227, 6.9980244636535645, -38.031150817871094
+[02:16:16] [DEBUG] [SERVER] [PlayerController] Requested building placement at: 21.28519058227539, 6.998023986816406, -37.371803283691406
+[02:16:16] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_69 (dist: 2)
+[02:16:16] [WARN ] [SERVER] [BuildingManager] eserlan09 doesn't have enough resources for Settlement
+[02:16:17] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_69 (dist: 3)
+[02:16:17] [WARN ] [SERVER] [BuildingManager] eserlan09 doesn't have enough resources for Settlement
+[02:16:17] [DEBUG] [SERVER] [PlayerController] Requested building placement at: 21.62468910217285, 6.9980244636535645, -36.81232452392578
+[02:16:17] [DEBUG] [SERVER] [PlayerController] Requested building placement at: 22.99535369873047, 6.998023986816406, -34.38780975341797
+[02:16:23] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[02:16:36] [INFO ] [SERVER] [Server] ===========================================
+[02:16:36] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[02:16:36] [INFO ] [SERVER] [Server] ===========================================
+[02:16:36] [INFO ] [SERVER] [CollectionManager] Initialized
+[02:16:36] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[02:16:36] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[02:16:36] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[02:16:36] [INFO ] [SERVER] [Server] ===========================================
+[02:16:36] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[02:16:36] [INFO ] [SERVER] [Server] ===========================================
+[02:16:36] [INFO ] [SERVER] [NetworkHandler] Initialized
+[02:16:36] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[02:16:36] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09
+[02:16:38] [INFO ] [SERVER] [Client] ===========================================
+[02:16:38] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[02:16:38] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[02:16:38] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[02:16:38] [INFO ] [SERVER] [Client] ===========================================
+[02:16:38] [INFO ] [SERVER] [Client] Waiting for character...
+[02:16:38] [INFO ] [SERVER] [Client] Character loaded!
+[02:16:38] [INFO ] [SERVER] [PlayerController] Initialized
+[02:16:39] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[02:16:39] [INFO ] [SERVER] [UIManager] Initialized
+[02:16:39] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[02:16:39] [INFO ] [SERVER] [PulseUI] Initialized
+[02:16:39] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[02:16:39] [INFO ] [SERVER] [InventoryUI] Initialized
+[02:16:39] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[02:16:39] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[02:16:39] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[02:16:39] [INFO ] [SERVER] [Client] ===========================================
+[02:16:39] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[02:16:39] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[02:16:39] [INFO ] [SERVER] [Client] ===========================================
+[02:16:40] [DEBUG] [SERVER] [PlayerController] Entered first-person mode
+[02:16:40] [DEBUG] [SERVER] [PlayerController] Entered third-person mode (mouse unlocked)
+[02:16:40] [DEBUG] [SERVER] [PlayerController] Entered first-person mode
+[02:16:40] [DEBUG] [SERVER] [PlayerController] Entered third-person mode (mouse unlocked)

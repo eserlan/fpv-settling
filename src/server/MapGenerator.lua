@@ -383,9 +383,11 @@ function MapGenerator.CreateVertices(mapFolder)
 				local vx = center.X + HEX_SIZE * math.cos(angle)
 				local vz = center.Z + HEX_SIZE * math.sin(angle)
 				
-				-- Round to nearest integer for deduplication
-				local keyX = math.floor(vx + 0.5)
-				local keyZ = math.floor(vz + 0.5)
+				-- Round to grid cells of 5 studs for deduplication
+				-- This ensures shared vertices from adjacent hexes are merged
+				local gridSize = 5
+				local keyX = math.floor(vx / gridSize + 0.5)
+				local keyZ = math.floor(vz / gridSize + 0.5)
 				local key = keyX .. "_" .. keyZ
 				
 				if not vertices[key] then
