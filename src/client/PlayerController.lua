@@ -87,42 +87,52 @@ local function updateMouseMode()
 	end
 end
 
--- Find vertex at mouse position
-local function findVertexAtMouse()
+-- Find snapping point (vertex or edge) at mouse position
+local function findSnapPointAtMouse()
 	local mouse = player:GetMouse()
 	if not mouse.Target then return nil end
 	
 	local mousePos = mouse.Hit.Position
-	local vertexFolder = workspace:FindFirstChild("Vertices")
-	if not vertexFolder then return nil end
+	local blueprint = selectedBlueprint and Blueprints.Buildings[selectedBlueprint]
+	if not blueprint then return nil end
+	
+	local folderName = "Vertices"
+	if blueprint.PlacementType == "edge" then
+		folderName = "Edges"
+	end
+	
+	local folder = workspace:FindFirstChild(folderName)
+	if not folder then return nil end
 	
 	local closest = nil
 	local closestDist = 20 -- Max snap distance
 	
-	for _, vertex in ipairs(vertexFolder:GetChildren()) do
-		local dist = (vertex.Position - mousePos).Magnitude
+	for _, marker in ipairs(folder:GetChildren()) do
+		local dist = (marker.Position - mousePos).Magnitude
 		if dist < closestDist then
 			closestDist = dist
-			closest = vertex
+			closest = marker
 		end
 	end
 	
 	return closest
 end
 
--- Check if vertex is valid for selected blueprint
-local function isVertexValidForBlueprint(vertex, blueprintName)
-	if not vertex or not blueprintName then return false end
+-- Check if snap point is valid for selected blueprint
+local function isSnapPointValidForBlueprint(marker, blueprintName)
+	if not marker or not blueprintName then return false end
 	
 	local blueprint = Blueprints.Buildings[blueprintName]
 	if not blueprint then return false end
 	
-	local adjCount = vertex:GetAttribute("AdjacentTileCount") or 0
-	
+	-- For now, basic validation: 
+	-- Vertices need 3-way (except edge of world 2-way)
+	-- Edges just need to exist
 	if blueprint.PlacementType == "3-way" then
-		return adjCount >= 3
-	elseif blueprint.PlacementType == "2-way" then
-		return adjCount == 2
+		local adjCount = marker:GetAttribute("AdjacentTileCount") or 0
+		return adjCount >= 2 -- Allow 2-way for starting edge settlements
+	elseif blueprint.PlacementType == "edge" then
+		return true -- Valid if it's an edge marker
 	end
 	
 	return false
@@ -138,10 +148,10 @@ local function updatePlacementPreview()
 		return
 	end
 	
-	local vertex = findVertexAtMouse()
-	currentVertex = vertex
+	local snapPoint = findSnapPointAtMouse()
+	currentVertex = snapPoint
 	
-	if not vertex then
+	if not snapPoint then
 		if buildingPreview then
 			buildingPreview.Transparency = 0.9
 		end
@@ -150,7 +160,7 @@ local function updatePlacementPreview()
 	end
 	
 	local blueprint = Blueprints.Buildings[selectedBlueprint]
-	isValidPlacement = isVertexValidForBlueprint(vertex, selectedBlueprint)
+	isValidPlacement = isSnapPointValidForBlueprint(snapPoint, selectedBlueprint)
 	
 	-- Create preview if it doesn't exist
 	if not buildingPreview then
@@ -159,14 +169,18 @@ local function updatePlacementPreview()
 		buildingPreview.Anchored = true
 		buildingPreview.CanCollide = false
 		buildingPreview.Transparency = 0.3 -- More visible
-		-- Flat indicator on ground
-		buildingPreview.Size = Vector3.new(8, 0.5, 8)
 		buildingPreview.Material = Enum.Material.Neon
 		buildingPreview.Parent = workspace
 	end
 	
-	-- Position flat on vertex (slightly above ground)
-	buildingPreview.Position = vertex.Position + Vector3.new(0, 0.5, 0)
+	-- Update preview size and rotation
+	if blueprint.PlacementType == "edge" then
+		buildingPreview.Size = Vector3.new(12, 0.5, 4)
+		buildingPreview.CFrame = snapPoint.CFrame * CFrame.new(0, 0.25, 0)
+	else
+		buildingPreview.Size = Vector3.new(8, 0.5, 8)
+		buildingPreview.CFrame = CFrame.new(snapPoint.Position + Vector3.new(0, 0.25, 0))
+	end
 	
 	-- Color based on validity
 	if isValidPlacement then
@@ -174,6 +188,8 @@ local function updatePlacementPreview()
 	else
 		buildingPreview.Color = Color3.fromRGB(255, 100, 100) -- Red = invalid
 	end
+	
+	buildingPreview.Transparency = 0.3
 end
 
 -- Exit placement mode
@@ -361,8 +377,9 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	-- Place foundation with left mouse button
 	if placementMode and input.UserInputType == Enum.UserInputType.MouseButton1 then
 		if currentVertex and isValidPlacement and selectedBlueprint then
-			Network:FireServer("PlaceFoundation", selectedBlueprint, currentVertex.Position)
-			Logger.Info("PlayerController", "Placed foundation for " .. selectedBlueprint .. " at vertex " .. currentVertex.Name)
+			local rotation = currentVertex.Rotation
+			Network:FireServer("PlaceFoundation", selectedBlueprint, currentVertex.Position, rotation)
+			Logger.Info("PlayerController", "Placed foundation for " .. selectedBlueprint)
 			exitPlacementMode()
 		else
 			Logger.Warn("PlayerController", "Invalid placement location")

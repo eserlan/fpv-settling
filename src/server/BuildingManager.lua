@@ -103,7 +103,7 @@ function BuildingManager:StartBuilding(buildingType, position)
 end
 
 -- New Blueprint Building System: Place a foundation
-function BuildingManager:PlaceFoundation(blueprintName, position)
+function BuildingManager:PlaceFoundation(blueprintName, position, rotation)
 	local Blueprints = require(ReplicatedStorage.Shared.Blueprints)
 	local blueprint = Blueprints.Buildings[blueprintName]
 	
@@ -119,6 +119,7 @@ function BuildingManager:PlaceFoundation(blueprintName, position)
 		Id = foundationId,
 		Type = blueprintName,
 		Position = position,
+		Rotation = rotation or Vector3.new(0, 0, 0),
 		Blueprint = blueprint,
 		IsFoundation = true,
 		IsSettlement = blueprint.ClaimsTiles or blueprintName == "Settlement",
@@ -275,7 +276,7 @@ function BuildingManager:CreateFoundationModel(foundation)
 	local part = Instance.new("Part")
 	part.Name = "FoundationBase"
 	part.Size = size
-	part.Position = foundation.Position + Vector3.new(0, size.Y / 2, 0)
+	part.CFrame = CFrame.new(foundation.Position + Vector3.new(0, size.Y / 2, 0)) * CFrame.Angles(math.rad(foundation.Rotation.X), math.rad(foundation.Rotation.Y), math.rad(foundation.Rotation.Z))
 	part.Anchored = true
 	part.CanCollide = false
 	part.Transparency = 0.7 -- Start very transparent
@@ -399,9 +400,15 @@ function BuildingManager:CreateBuildingModel(building)
 	local buildingData = building.Blueprint or building.Data or {}
 	local size = buildingData.Size or Vector3.new(5, 4, 5)
 	
+	-- Base CFrame for entire building
+	local baseCFrame = CFrame.new(building.Position)
+	if building.Rotation then
+		baseCFrame = baseCFrame * CFrame.Angles(math.rad(building.Rotation.X), math.rad(building.Rotation.Y), math.rad(building.Rotation.Z))
+	end
+	
 	local part = Instance.new("Part")
 	part.Size = size
-	part.Position = building.Position
+	part.CFrame = baseCFrame * CFrame.new(0, size.Y / 2, 0)
 	part.Anchored = true
 	part.Parent = model
 	
@@ -410,20 +417,18 @@ function BuildingManager:CreateBuildingModel(building)
 		-- Create a proper house shape!
 		-- Base/walls
 		part.Size = Vector3.new(5, 4, 5)
-		part.Position = building.Position + Vector3.new(0, 2, 0)
+		part.CFrame = baseCFrame * CFrame.new(0, 2, 0)
 		part.Color = Color3.fromRGB(220, 200, 160) -- Cream walls
 		part.Material = Enum.Material.SmoothPlastic
 		
 		-- Roof - using 2 wedges to form A-frame
-		-- WedgePart: the slanted face points in -Z direction by default
 		local roofHeight = 2.5
 		local roofOverhang = 0.5
 		
 		-- Left side of roof
 		local roof1 = Instance.new("WedgePart")
 		roof1.Size = Vector3.new(5 + roofOverhang * 2, roofHeight, 3)
-		roof1.CFrame = CFrame.new(building.Position + Vector3.new(0, 4 + roofHeight/2, -1.5)) 
-			* CFrame.Angles(0, 0, 0)
+		roof1.CFrame = baseCFrame * CFrame.new(0, 4 + roofHeight/2, -1.5)
 		roof1.Anchored = true
 		roof1.Color = Color3.fromRGB(139, 69, 19) -- Brown roof
 		roof1.Material = Enum.Material.Wood
@@ -432,8 +437,7 @@ function BuildingManager:CreateBuildingModel(building)
 		-- Right side of roof (rotated 180 degrees around Y)
 		local roof2 = Instance.new("WedgePart")
 		roof2.Size = Vector3.new(5 + roofOverhang * 2, roofHeight, 3)
-		roof2.CFrame = CFrame.new(building.Position + Vector3.new(0, 4 + roofHeight/2, 1.5)) 
-			* CFrame.Angles(0, math.pi, 0)
+		roof2.CFrame = baseCFrame * CFrame.new(0, 4 + roofHeight/2, 1.5) * CFrame.Angles(0, math.pi, 0)
 		roof2.Anchored = true
 		roof2.Color = Color3.fromRGB(139, 69, 19) -- Brown roof
 		roof2.Material = Enum.Material.Wood
@@ -442,7 +446,7 @@ function BuildingManager:CreateBuildingModel(building)
 		-- Door
 		local door = Instance.new("Part")
 		door.Size = Vector3.new(1.2, 2.5, 0.3)
-		door.Position = building.Position + Vector3.new(0, 1.25, 2.6)
+		door.CFrame = baseCFrame * CFrame.new(0, 1.25, 2.6)
 		door.Anchored = true
 		door.Color = Color3.fromRGB(101, 67, 33) -- Dark wood door
 		door.Material = Enum.Material.Wood
@@ -451,7 +455,7 @@ function BuildingManager:CreateBuildingModel(building)
 		-- Window
 		local window = Instance.new("Part")
 		window.Size = Vector3.new(1, 1, 0.2)
-		window.Position = building.Position + Vector3.new(1.5, 2.5, 2.6)
+		window.CFrame = baseCFrame * CFrame.new(1.5, 2.5, 2.6)
 		window.Anchored = true
 		window.Color = Color3.fromRGB(135, 206, 235) -- Light blue glass
 		window.Material = Enum.Material.Glass
@@ -461,6 +465,8 @@ function BuildingManager:CreateBuildingModel(building)
 		part.Color = Color3.fromRGB(80, 80, 80) -- Stone grey
 		part.Material = Enum.Material.Slate
 	elseif building.Type == "Road" then
+		part.Size = Vector3.new(12, 1, 3)
+		part.CFrame = baseCFrame * CFrame.new(0, 0.1, 0)
 		part.Color = Color3.fromRGB(100, 80, 60) -- Dirt road
 		part.Material = Enum.Material.Ground
 	elseif building.Type == "House" then

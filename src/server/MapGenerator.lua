@@ -374,41 +374,44 @@ function MapGenerator.Generate(rings)
 		end
 	end
 	
-	-- Create hex vertices (corners where 3 hexes meet)
-	-- These are the valid positions for settlements
-	MapGenerator.CreateVertices(mapFolder)
+	-- Create hex vertices and edges
+	MapGenerator.CreateVerticesAndEdges(mapFolder)
 end
 
--- Calculate and create vertex markers at hex corners
-function MapGenerator.CreateVertices(mapFolder)
+-- Calculate and create markers for vertices (corners) and edges (lines)
+function MapGenerator.CreateVerticesAndEdges(mapFolder)
 	local vertices = {}
 	local vertexFolder = workspace:FindFirstChild("Vertices") or Instance.new("Folder", workspace)
 	vertexFolder.Name = "Vertices"
 	vertexFolder:ClearAllChildren()
 	
-	-- For each hex, calculate its 6 corner positions
+	local edgeFolder = workspace:FindFirstChild("Edges") or Instance.new("Folder", workspace)
+	edgeFolder.Name = "Edges"
+	edgeFolder:ClearAllChildren()
+	
+	local edges = {}
+	
+	-- For each hex, calculate its 6 corner positions and edges
 	for _, tile in ipairs(mapFolder:GetChildren()) do
 		if tile:IsA("Model") and tile.PrimaryPart then
 			local center = tile.PrimaryPart.Position
 			local q = tile.PrimaryPart:GetAttribute("Q")
 			local r = tile.PrimaryPart:GetAttribute("R")
-			
-			-- 6 vertices for the hex
-			-- The hex is made from rotated rectangles, so corners are at 30° offsets
-			-- and the effective radius is slightly larger
 			local cornerRadius = HEX_SIZE * 1.15 -- Adjusted for the visual hex shape
+			
+			local tileVertexKeys = {}
+			
+			-- Generate 6 vertices for this hex
 			for i = 0, 5 do
-				-- Add 30° (π/6) offset for pointy-top hex corners
 				local angle = (math.pi / 3) * i + (math.pi / 6)
 				local vx = center.X + cornerRadius * math.cos(angle)
 				local vz = center.Z + cornerRadius * math.sin(angle)
 				
-				-- Round to grid cells of 8 studs for deduplication
-				-- This ensures shared vertices from adjacent hexes are merged
 				local gridSize = 8
 				local keyX = math.floor(vx / gridSize + 0.5)
 				local keyZ = math.floor(vz / gridSize + 0.5)
 				local key = keyX .. "_" .. keyZ
+				tileVertexKeys[i] = key
 				
 				if not vertices[key] then
 					vertices[key] = {
@@ -416,58 +419,75 @@ function MapGenerator.CreateVertices(mapFolder)
 						AdjacentTiles = {}
 					}
 				end
-				
-				-- Track which tiles this vertex touches
 				table.insert(vertices[key].AdjacentTiles, {Q = q, R = r})
+			end
+			
+			-- Generate 6 edges for this hex
+			for i = 0, 5 do
+				local key1 = tileVertexKeys[i]
+				local key2 = tileVertexKeys[(i + 1) % 6]
+				
+				-- Create a unique key for the edge by sorting vertex keys
+				local eKey = key1 < key2 and (key1 .. ":" .. key2) or (key2 .. ":" .. key1)
+				
+				if not edges[eKey] then
+					local v1 = vertices[key1].Position
+					local v2 = vertices[key2].Position
+					edges[eKey] = {
+						V1 = v1,
+						V2 = v2,
+						Center = (v1 + v2) / 2,
+						AdjacentTiles = {}
+					}
+				end
+				table.insert(edges[eKey].AdjacentTiles, {Q = q, R = r})
 			end
 		end
 	end
 	
-	-- Count vertices by adjacency for debugging
-	local countByAdj = {}
-	for key, data in pairs(vertices) do
-		local count = #data.AdjacentTiles
-		countByAdj[count] = (countByAdj[count] or 0) + 1
-	end
-	for adj, count in pairs(countByAdj) do
-		print("[MapGenerator] Vertices with " .. adj .. " adjacent tiles: " .. count)
-	end
-	
-	-- Create visible vertex markers - color based on adjacency
+	-- Create vertex markers
 	local vertexId = 1
 	for key, data in pairs(vertices) do
 		local adjCount = #data.AdjacentTiles
-		
 		local marker = Instance.new("Part")
 		marker.Name = "Vertex_" .. vertexId
 		marker.Shape = Enum.PartType.Ball
-		marker.Size = Vector3.new(3, 3, 3) -- Small sphere
+		marker.Size = Vector3.new(3, 3, 3)
 		marker.Position = data.Position
 		marker.Anchored = true
 		marker.CanCollide = false
-		marker.Material = Enum.Material.SmoothPlastic
-		marker.Transparency = 1 -- Fully invisible
-		marker.Color = Color3.fromRGB(255, 255, 255)
-		
+		marker.Transparency = 1
 		marker.Parent = vertexFolder
 		
-		-- Store vertex data as attributes
 		marker:SetAttribute("VertexId", vertexId)
 		marker:SetAttribute("Key", key)
 		marker:SetAttribute("AdjacentTileCount", adjCount)
-		
-		-- Store adjacent tile info
-		for i, tileInfo in ipairs(data.AdjacentTiles) do
-			if i <= 3 then
-				marker:SetAttribute("Tile" .. i .. "Q", tileInfo.Q)
-				marker:SetAttribute("Tile" .. i .. "R", tileInfo.R)
-			end
-		end
-		
 		vertexId = vertexId + 1
 	end
 	
-	print("[MapGenerator] Created " .. (vertexId - 1) .. " total vertices")
+	-- Create edge markers
+	local edgeId = 1
+	for key, data in pairs(edges) do
+		local adjCount = #data.AdjacentTiles
+		local marker = Instance.new("Part")
+		marker.Name = "Edge_" .. edgeId
+		marker.Size = Vector3.new(12, 1, 3) -- Length is approx dist between vertices
+		marker.Position = data.Center
+		marker.Anchored = true
+		marker.CanCollide = false
+		marker.Transparency = 1 
+		
+		-- Align with the line between v1 and v2
+		marker.CFrame = CFrame.lookAt(data.Center, data.V1) * CFrame.Angles(0, math.rad(90), 0)
+		
+		marker.Parent = edgeFolder
+		marker:SetAttribute("EdgeId", edgeId)
+		marker:SetAttribute("Key", key)
+		marker:SetAttribute("AdjacentTileCount", adjCount)
+		edgeId = edgeId + 1
+	end
+	
+	print("[MapGenerator] Created " .. (vertexId-1) .. " vertices and " .. (edgeId-1) .. " edges")
 end
 
 -- Get all vertices (for building placement)
