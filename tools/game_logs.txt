@@ -712,3 +712,16 @@
 [12:07:36] [WARN ] [SERVER] [BuildingManager] eserlan09 doesn't have enough resources for Settlement
 [12:07:36] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -42.558990478515625, 6.998025417327881, -24.06900405883789
 [12:07:41] [DEBUG] [SERVER] [PlayerController] Build mode: false
+[12:08:30] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 3 + 3 = 6
+[12:08:33] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[12:08:34] [DEBUG] [SERVER] [PulseManager] Spawned Wool at tile
+[12:08:34] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[12:08:57] [DEBUG] [SERVER] [CollectionManager] eserlan09 collected 1 Wheat
+[12:09:07] [DEBUG] [SERVER] [CollectionManager] eserlan09 collected 1 Wool
+[12:09:33] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 4 + 3 = 7
+[12:09:36] [WARN ] [SERVER] [PulseManager] ROBBER! No resources this pulse.
+[12:10:36] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 2 + 3 = 5
+[12:10:39] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[12:10:40] [DEBUG] [SERVER] [PulseManager] Spawned Ore at tile
+[12:10:40] [DEBUG] [SERVER] [PulseManager] Spawned Wool at tile
+[12:11:11] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09

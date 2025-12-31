@@ -27,8 +27,8 @@ function TileOwnershipManager.PlayerOwnsTile(player, tileQ, tileR)
 		return ownership.playerUserId == player.UserId
 	end
 	
-	-- No owner = anyone can collect (for now)
-	return true
+	-- No owner = can't collect (must have a settlement on adjacent vertex)
+	return false
 end
 
 -- Claim a tile for a player (called when placing a settlement)
@@ -70,32 +70,50 @@ function TileOwnershipManager.GetPlayerTiles(player)
 	return tiles
 end
 
--- Claim tiles near a settlement position
+-- Claim tiles near a settlement position (using vertex data)
 function TileOwnershipManager.ClaimTilesNearSettlement(player, settlementPosition, settlementId)
-	local mapFolder = workspace:FindFirstChild("Map")
-	if not mapFolder then return {} end
-	
 	local claimedTiles = {}
 	
-	for _, tile in ipairs(mapFolder:GetChildren()) do
-		if tile:IsA("Model") and tile.PrimaryPart then
-			local tilePos = tile.PrimaryPart.Position
-			local distance = (Vector3.new(tilePos.X, 0, tilePos.Z) - Vector3.new(settlementPosition.X, 0, settlementPosition.Z)).Magnitude
-			
-			if distance <= SETTLEMENT_CLAIM_RADIUS then
-				local q = tile.PrimaryPart:GetAttribute("Q")
-				local r = tile.PrimaryPart:GetAttribute("R")
-				
-				if q and r then
-					if TileOwnershipManager.ClaimTile(player, q, r, settlementId) then
-						table.insert(claimedTiles, {Q = q, R = r})
-					end
-				end
+	-- Find the vertex marker at this position
+	local vertexFolder = workspace:FindFirstChild("Vertices")
+	if not vertexFolder then 
+		Logger.Warn("TileOwnership", "No vertices folder found")
+		return claimedTiles 
+	end
+	
+	-- Find the closest vertex to the settlement position
+	local closestVertex = nil
+	local closestDist = math.huge
+	
+	for _, vertex in ipairs(vertexFolder:GetChildren()) do
+		local dist = (vertex.Position - settlementPosition).Magnitude
+		if dist < closestDist then
+			closestDist = dist
+			closestVertex = vertex
+		end
+	end
+	
+	if not closestVertex or closestDist > 10 then
+		Logger.Warn("TileOwnership", "No vertex found near settlement position")
+		return claimedTiles
+	end
+	
+	-- Get adjacent tiles from vertex attributes
+	local adjCount = closestVertex:GetAttribute("AdjacentTileCount") or 0
+	Logger.Debug("TileOwnership", "Vertex " .. closestVertex.Name .. " has " .. adjCount .. " adjacent tiles")
+	
+	for i = 1, adjCount do
+		local q = closestVertex:GetAttribute("Tile" .. i .. "Q")
+		local r = closestVertex:GetAttribute("Tile" .. i .. "R")
+		
+		if q and r then
+			if TileOwnershipManager.ClaimTile(player, q, r, settlementId) then
+				table.insert(claimedTiles, {Q = q, R = r})
 			end
 		end
 	end
 	
-	Logger.Info("TileOwnership", player.Name .. " claimed " .. #claimedTiles .. " tiles with settlement")
+	Logger.Info("TileOwnership", player.Name .. " claimed " .. #claimedTiles .. " tiles with settlement at vertex " .. closestVertex.Name)
 	return claimedTiles
 end
 
