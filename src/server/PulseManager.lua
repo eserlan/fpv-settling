@@ -22,6 +22,8 @@ local NUMBER_DISTRIBUTION = {2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 
 local pulseTimer = PULSE_INTERVAL
 local isRolling = false
 local tileNumbers = {} -- Maps tile coordinates to numbers
+local gameStarted = false -- Pulse doesn't start until all players place settlements
+local GameManagerRef = nil -- Set on init
 
 -- Events
 local Events = ReplicatedStorage:FindFirstChild("Events") or Instance.new("Folder", ReplicatedStorage)
@@ -187,9 +189,42 @@ function PulseManager.SpawnResource(tile, resourceKey, resourceData)
 	Logger.Debug("PulseManager", "Spawned " .. resourceKey .. " at tile")
 end
 
+-- Check if all players have placed their first settlement
+local function allPlayersReady()
+	if not GameManagerRef then return false end
+	
+	local players = Players:GetPlayers()
+	if #players == 0 then return false end
+	
+	for _, player in ipairs(players) do
+		local playerData = GameManagerRef.PlayerData[player.UserId]
+		if not playerData then return false end
+		if not playerData.BuildingManager then return false end
+		if not playerData.BuildingManager.HasPlacedFirstSettlement then
+			return false
+		end
+	end
+	
+	return true
+end
+
 -- Update loop (called from GameManager)
 function PulseManager.Update(deltaTime)
 	if isRolling then return end
+	
+	-- Check if game has started (all players placed settlements)
+	if not gameStarted then
+		if allPlayersReady() then
+			gameStarted = true
+			pulseTimer = PULSE_INTERVAL
+			Logger.Info("PulseManager", "All players ready! Starting pulse timer...")
+			TimerEvent:FireAllClients(math.floor(pulseTimer))
+		else
+			-- Show "waiting for players" status
+			TimerEvent:FireAllClients(-1) -- -1 means waiting
+			return
+		end
+	end
 	
 	pulseTimer = pulseTimer - deltaTime
 	
@@ -203,9 +238,14 @@ function PulseManager.Update(deltaTime)
 	end
 end
 
+-- Set reference to GameManager (called from GameManager)
+function PulseManager.SetGameManager(gm)
+	GameManagerRef = gm
+end
+
 -- Initialize
 function PulseManager.Initialize()
-	Logger.Info("PulseManager", "Initialized - Pulse every " .. PULSE_INTERVAL .. " seconds")
+	Logger.Info("PulseManager", "Initialized - Waiting for players to place settlements...")
 	
 	-- Assign numbers after a short delay to ensure map is generated
 	task.delay(1, function()

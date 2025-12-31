@@ -24,8 +24,7 @@ MapGenerator.Generate()
 
 -- Initialize the Pulse system
 PulseManager.Initialize()
-
--- Initialize player data when they join
+PulseManager.SetGameManager(GameManager)
 local function onPlayerAdded(player)
 	Logger.Info("GameManager", "Player joined: " .. player.Name)
 	

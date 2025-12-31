@@ -126,3 +126,43 @@
 [19:27:56] [DEBUG] [SERVER] [PulseManager] Spawned Ore at tile
 [19:27:56] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
 [19:28:34] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[01:31:59] [INFO ] [SERVER] [Server] ===========================================
+[01:31:59] [INFO ] [SERVER] [CollectionManager] Initialized
+[01:31:59] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[01:31:59] [INFO ] [SERVER] [Server] ===========================================
+[01:31:59] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[01:31:59] [INFO ] [SERVER] [PulseManager] Initialized - Pulse every 60 seconds
+[01:31:59] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[01:31:59] [INFO ] [SERVER] [Server] ===========================================
+[01:31:59] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[01:31:59] [INFO ] [SERVER] [Server] ===========================================
+[01:31:59] [INFO ] [SERVER] [NetworkHandler] Initialized
+[01:32:00] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[01:32:00] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09
+[01:32:02] [INFO ] [SERVER] [Client] ===========================================
+[01:32:02] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[01:32:02] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[01:32:02] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[01:32:02] [INFO ] [SERVER] [Client] ===========================================
+[01:32:02] [INFO ] [SERVER] [Client] Waiting for character...
+[01:32:04] [INFO ] [SERVER] [Client] Character loaded!
+[01:32:04] [INFO ] [SERVER] [PlayerController] Initialized
+[01:32:04] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[01:32:04] [INFO ] [SERVER] [UIManager] Initialized
+[01:32:04] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[01:32:04] [INFO ] [SERVER] [PulseUI] Initialized
+[01:32:04] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[01:32:04] [INFO ] [SERVER] [InventoryUI] Initialized
+[01:32:04] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[01:32:04] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[01:32:04] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[01:32:04] [INFO ] [SERVER] [Client] ===========================================
+[01:32:04] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[01:32:04] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[01:32:04] [INFO ] [SERVER] [Client] ===========================================
+[01:32:08] [DEBUG] [SERVER] [PlayerController] Build mode: true
+[01:32:10] [DEBUG] [SERVER] [PlayerController] Build mode: false
+[01:32:10] [DEBUG] [SERVER] [PlayerController] Build mode: true
+[01:32:11] [DEBUG] [SERVER] [PlayerController] Build mode: false
+[01:32:15] [DEBUG] [SERVER] [PlayerController] Build mode: true
+[01:32:34] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09

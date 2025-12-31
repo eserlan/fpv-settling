@@ -107,13 +107,21 @@ resultLabel.Parent = diceFrame
 
 -- Handle timer updates
 TimerEvent.OnClientEvent:Connect(function(seconds)
-	countdownLabel.Text = tostring(seconds)
-	
-	-- Flash when low
-	if seconds <= 5 then
-		countdownLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+	if seconds == -1 then
+		-- Waiting for all players to place settlements
+		countdownLabel.Text = "Place Settlement!"
+		countdownLabel.TextColor3 = Color3.fromRGB(255, 255, 100)
+		timerTitle.Text = "🏠 Build First"
 	else
-		countdownLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+		timerTitle.Text = "⏱️ Next Pulse"
+		countdownLabel.Text = tostring(seconds)
+		
+		-- Flash when low
+		if seconds <= 5 then
+			countdownLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+		else
+			countdownLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+		end
 	end
 end)
 

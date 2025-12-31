@@ -138,17 +138,39 @@ function BuildingManager:CreateBuildingModel(building)
 	
 	-- Color based on building type
 	if building.Type == "Settlement" then
-		part.Color = Color3.fromRGB(139, 90, 43) -- Brown wood
-		part.Material = Enum.Material.Wood
+		-- Create a house shape!
+		-- Base/walls
+		part.Size = Vector3.new(6, 5, 6)
+		part.Position = building.Position + Vector3.new(0, 2.5, 0)
+		part.Color = Color3.fromRGB(200, 180, 140) -- Cream walls
+		part.Material = Enum.Material.SmoothPlastic
 		
-		-- Add roof
-		local roof = Instance.new("Part")
-		roof.Size = Vector3.new(building.Data.Size.X + 2, 1, building.Data.Size.Z + 2)
-		roof.Position = building.Position + Vector3.new(0, building.Data.Size.Y / 2 + 0.5, 0)
+		-- Roof (wedge shape for triangle)
+		local roof = Instance.new("WedgePart")
+		roof.Size = Vector3.new(8, 4, 4)
+		roof.CFrame = CFrame.new(building.Position + Vector3.new(0, 7, -2)) * CFrame.Angles(0, math.pi, 0)
 		roof.Anchored = true
-		roof.Color = Color3.fromRGB(178, 102, 59) -- Terracotta
-		roof.Material = Enum.Material.Brick
+		roof.Color = Color3.fromRGB(139, 69, 19) -- Brown roof
+		roof.Material = Enum.Material.Wood
 		roof.Parent = model
+		
+		-- Second half of roof
+		local roof2 = Instance.new("WedgePart")
+		roof2.Size = Vector3.new(8, 4, 4)
+		roof2.CFrame = CFrame.new(building.Position + Vector3.new(0, 7, 2))
+		roof2.Anchored = true
+		roof2.Color = Color3.fromRGB(139, 69, 19) -- Brown roof
+		roof2.Material = Enum.Material.Wood
+		roof2.Parent = model
+		
+		-- Door
+		local door = Instance.new("Part")
+		door.Size = Vector3.new(1.5, 3, 0.5)
+		door.Position = building.Position + Vector3.new(0, 1.5, 3.2)
+		door.Anchored = true
+		door.Color = Color3.fromRGB(101, 67, 33) -- Dark wood door
+		door.Material = Enum.Material.Wood
+		door.Parent = model
 	elseif building.Type == "City" then
 		part.Color = Color3.fromRGB(80, 80, 80) -- Stone grey
 		part.Material = Enum.Material.Slate
