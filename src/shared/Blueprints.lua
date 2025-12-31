@@ -5,10 +5,10 @@ local Blueprints = {}
 
 -- Resource icons for display
 Blueprints.ResourceIcons = {
-	Wood = "🪵",
+	Wood = "🌲",
 	Brick = "🧱",
 	Wheat = "🌾",
-	Ore = "⛏️",
+	Ore = "⛏",
 	Wool = "🧶"
 }
 
@@ -46,7 +46,7 @@ Blueprints.Buildings = {
 	
 	Road = {
 		Name = "Road",
-		Icon = "🛤️",
+		Icon = "🛣️",
 		Description = "Connect your settlements",
 		PlacementType = "2-way", -- Place on 2-way vertices (edges)
 		Cost = {

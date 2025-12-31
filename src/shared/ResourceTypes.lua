@@ -12,7 +12,7 @@ local ResourceTypes = {
 	},
 	Wood = {
 		Name = "Wood",
-		Icon = "🪵",
+		Icon = "🌲",
 		Description = "Lumber for construction",
 		Color = Color3.fromRGB(139, 90, 43),
 		Material = Enum.Material.Wood,
@@ -32,7 +32,7 @@ local ResourceTypes = {
 	},
 	Ore = {
 		Name = "Ore",
-		Icon = "⛏️",
+		Icon = "⛏",
 		Description = "Iron ore for advanced construction",
 		Color = Color3.fromRGB(105, 105, 105),
 		Material = Enum.Material.Slate,

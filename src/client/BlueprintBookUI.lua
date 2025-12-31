@@ -28,8 +28,8 @@ screenGui.Parent = playerGui
 -- Main frame
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 500, 0, 350)
-mainFrame.Position = UDim2.new(0.5, -250, 0.5, -175)
+mainFrame.Size = UDim2.new(0, 500, 0, 400) -- Taller to fit cards
+mainFrame.Position = UDim2.new(0.5, -250, 0.5, -200)
 mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
@@ -107,7 +107,7 @@ containerLayout.Parent = container
 local function createBlueprintCard(blueprintName, blueprintData)
 	local card = Instance.new("Frame")
 	card.Name = blueprintName .. "Card"
-	card.Size = UDim2.new(0, 130, 0, 200)
+	card.Size = UDim2.new(0, 130, 0, 240) -- Taller card
 	card.BackgroundColor3 = Color3.fromRGB(55, 55, 70)
 	card.BorderSizePixel = 0
 	
@@ -137,10 +137,10 @@ local function createBlueprintCard(blueprintName, blueprintData)
 	name.TextSize = 16
 	name.Parent = card
 	
-	-- Cost display
+	-- Cost display - taller to fit 4 resources
 	local costFrame = Instance.new("Frame")
 	costFrame.Name = "CostFrame"
-	costFrame.Size = UDim2.new(1, -10, 0, 70)
+	costFrame.Size = UDim2.new(1, -10, 0, 95) -- Taller
 	costFrame.Position = UDim2.new(0, 5, 0, 100)
 	costFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 	costFrame.BorderSizePixel = 0
