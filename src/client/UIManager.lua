@@ -14,44 +14,7 @@ screenGui.Name = "GameUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
--- Resource Display
-local resourceFrame = Instance.new("Frame")
-resourceFrame.Name = "ResourceDisplay"
-resourceFrame.Size = UDim2.new(0, 300, 0, 150)
-resourceFrame.Position = UDim2.new(0, 10, 0, 10)
-resourceFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-resourceFrame.BackgroundTransparency = 0.3
-resourceFrame.BorderSizePixel = 2
-resourceFrame.BorderColor3 = Color3.fromRGB(200, 200, 200)
-resourceFrame.Parent = screenGui
-
--- Title
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Name = "Title"
-titleLabel.Size = UDim2.new(1, 0, 0, 30)
-titleLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-titleLabel.BorderSizePixel = 0
-titleLabel.Text = "Resources"
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.Font = Enum.Font.SourceSansBold
-titleLabel.TextSize = 20
-titleLabel.Parent = resourceFrame
-
--- Resource labels
-local resources = {"Wood", "Brick", "Wheat", "Ore", "Wool"}
-for i, resourceName in ipairs(resources) do
-	local label = Instance.new("TextLabel")
-	label.Name = resourceName .. "Label"
-	label.Size = UDim2.new(1, -20, 0, 25)
-	label.Position = UDim2.new(0, 10, 0, 30 + (i - 1) * 30)
-	label.BackgroundTransparency = 1
-	label.Text = resourceName .. ": 0"
-	label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	label.Font = Enum.Font.SourceSans
-	label.TextSize = 18
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.Parent = resourceFrame
-end
+-- Note: Resource display removed - using InventoryUI at bottom center instead
 
 -- Building Menu
 local buildingFrame = Instance.new("Frame")
@@ -109,19 +72,6 @@ helpText.TextSize = 16
 helpText.TextXAlignment = Enum.TextXAlignment.Left
 helpText.TextYAlignment = Enum.TextYAlignment.Top
 helpText.Parent = helpFrame
-
--- Function to update resource display (would be called from server via RemoteEvents)
-local function updateResourceDisplay(resources)
-	for resourceName, amount in pairs(resources) do
-		local label = resourceFrame:FindFirstChild(resourceName .. "Label")
-		if label then
-			label.Text = resourceName .. ": " .. tostring(amount)
-		end
-	end
-end
-
--- Listen for resource updates from server
-Network:OnEvent("ResourceUpdate", updateResourceDisplay)
 
 -- System message handler (for chat log)
 local StarterGui = game:GetService("StarterGui")
