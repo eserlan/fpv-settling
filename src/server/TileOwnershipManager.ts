@@ -4,6 +4,7 @@
 
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
 import * as Logger from "shared/Logger";
+import * as TileKey from "shared/TileKey";
 
 type TileOwnershipRecord = {
 	playerUserId: number;
@@ -18,13 +19,10 @@ let tileOwnership: Record<string, TileOwnershipRecord | undefined> = {};
 // Settlement radius - how close a settlement must be to claim a tile
 const SETTLEMENT_CLAIM_RADIUS = 30; // studs
 
-// Get tile key from Q, R coordinates
-const getTileKey = (q: number, r: number) => `${q}_${r}`;
-
 const TileOwnershipManager = {
 	// Check if a player owns a specific tile
 	PlayerOwnsTile(player: Player, tileQ: number, tileR: number) {
-		const key = getTileKey(tileQ, tileR);
+		const key = TileKey.makeTileKey(tileQ, tileR);
 		const ownership = tileOwnership[key];
 
 		if (ownership) {
@@ -37,7 +35,7 @@ const TileOwnershipManager = {
 
 	// Claim a tile for a player (called when placing a settlement)
 	ClaimTile(player: Player, tileQ: number, tileR: number, settlementId: string) {
-		const key = getTileKey(tileQ, tileR);
+		const key = TileKey.makeTileKey(tileQ, tileR);
 
 		// Check if already owned by someone else
 		if (tileOwnership[key] && tileOwnership[key]!.playerUserId !== player.UserId) {
@@ -58,7 +56,7 @@ const TileOwnershipManager = {
 
 	// Release a tile (when settlement is destroyed)
 	ReleaseTile(tileQ: number, tileR: number) {
-		const key = getTileKey(tileQ, tileR);
+		const key = TileKey.makeTileKey(tileQ, tileR);
 		tileOwnership[key] = undefined;
 		Logger.Info("TileOwnership", `Tile ${key} released`);
 	},
@@ -128,7 +126,7 @@ const TileOwnershipManager = {
 
 	// Get owner of a tile
 	GetTileOwner(tileQ: number, tileR: number) {
-		const key = getTileKey(tileQ, tileR);
+		const key = TileKey.makeTileKey(tileQ, tileR);
 		return tileOwnership[key];
 	},
 
