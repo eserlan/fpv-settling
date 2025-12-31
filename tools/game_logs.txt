@@ -666,3 +666,49 @@
 [05:35:42] [WARN ] [SERVER] [BuildingManager] eserlan09 doesn't have enough resources for Settlement
 [05:35:43] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -76.60846710205078, 6.998023509979248, -92.23188018798828
 [05:36:02] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[12:06:27] [INFO ] [SERVER] [Server] ===========================================
+[12:06:27] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[12:06:27] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[12:06:27] [INFO ] [SERVER] [Server] ===========================================
+[12:06:27] [INFO ] [SERVER] [CollectionManager] Initialized
+[12:06:28] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[12:06:28] [INFO ] [SERVER] [Server] ===========================================
+[12:06:28] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[12:06:28] [INFO ] [SERVER] [Server] ===========================================
+[12:06:28] [INFO ] [SERVER] [NetworkHandler] Initialized
+[12:06:28] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[12:06:28] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[12:06:28] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09
+[12:06:31] [INFO ] [SERVER] [Client] ===========================================
+[12:06:31] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[12:06:31] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[12:06:31] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[12:06:31] [INFO ] [SERVER] [Client] ===========================================
+[12:06:31] [INFO ] [SERVER] [Client] Waiting for character...
+[12:06:33] [INFO ] [SERVER] [Client] Character loaded!
+[12:06:33] [INFO ] [SERVER] [PlayerController] Initialized
+[12:06:33] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[12:06:33] [INFO ] [SERVER] [UIManager] Initialized
+[12:06:33] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[12:06:33] [INFO ] [SERVER] [PulseUI] Initialized
+[12:06:33] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[12:06:33] [INFO ] [SERVER] [InventoryUI] Initialized
+[12:06:33] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[12:06:33] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[12:06:33] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[12:06:33] [INFO ] [SERVER] [Client] ===========================================
+[12:06:33] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[12:06:34] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[12:06:34] [INFO ] [SERVER] [Client] ===========================================
+[12:07:25] [DEBUG] [SERVER] [PlayerController] Build mode: true
+[12:07:31] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_40 (dist: 2)
+[12:07:31] [INFO ] [SERVER] [BuildingManager] eserlan09 placing FREE first settlement!
+[12:07:31] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[12:07:31] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 0 tiles with settlement
+[12:07:31] [INFO ] [SERVER] [BuildingManager] Settlement claimed 0 tiles
+[12:07:31] [INFO ] [SERVER] [PulseManager] All players ready! Starting pulse timer...
+[12:07:31] [DEBUG] [SERVER] [PlayerController] Requested building placement at: 1.8204936981201172, 6.998026371002197, -47.025474548339844
+[12:07:36] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_8 (dist: 2)
+[12:07:36] [WARN ] [SERVER] [BuildingManager] eserlan09 doesn't have enough resources for Settlement
+[12:07:36] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -42.558990478515625, 6.998025417327881, -24.06900405883789
+[12:07:41] [DEBUG] [SERVER] [PlayerController] Build mode: false

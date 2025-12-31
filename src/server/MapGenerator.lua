@@ -271,7 +271,7 @@ function MapGenerator.Generate(rings)
 					if attempts < maxAttempts then
 						table.insert(placedPositions, pos)
 						
-						local sheep = placeAsset("Animals/Sheep", pos)
+						local sheep = placeAsset("Animals/Sheep", pos, 0.8) -- 20% smaller
 						if sheep then
 							-- Apply random Y rotation using PivotTo
 							local randomAngle = math.rad(math.random(0, 360))
