@@ -1204,3 +1204,13 @@
 [14:59:51] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
 [14:59:51] [INFO ] [SERVER] [System] 🎲 Rolled 5! Spawned: 1x Wood, 1x Brick
 [15:00:51] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 5 + 4 = 9
+[15:00:54] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[15:00:54] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[15:00:54] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[15:00:54] [INFO ] [SERVER] [System] 🎲 Rolled 9! Spawned: 1x Wood, 1x Wheat
+[15:01:54] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 6 + 2 = 8
+[15:01:57] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[15:01:57] [DEBUG] [SERVER] [PulseManager] Spawned Ore at tile
+[15:01:57] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[15:01:57] [INFO ] [SERVER] [System] 🎲 Rolled 8! Spawned: 1x Brick, 1x Ore
+[15:02:31] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09

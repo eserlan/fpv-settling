@@ -2,6 +2,7 @@
 local ResourceTypes = {
 	Brick = {
 		Name = "Brick",
+		Icon = "🧱",
 		Description = "Clay bricks for building foundations",
 		Color = Color3.fromRGB(178, 102, 59),
 		Material = Enum.Material.Brick,
@@ -11,6 +12,7 @@ local ResourceTypes = {
 	},
 	Wood = {
 		Name = "Wood",
+		Icon = "🪵",
 		Description = "Lumber for construction",
 		Color = Color3.fromRGB(139, 90, 43),
 		Material = Enum.Material.Wood,
@@ -20,6 +22,7 @@ local ResourceTypes = {
 	},
 	Wheat = {
 		Name = "Wheat",
+		Icon = "🌾",
 		Description = "Grain for settlements and cities",
 		Color = Color3.fromRGB(218, 165, 32),
 		Material = Enum.Material.Grass,
@@ -29,6 +32,7 @@ local ResourceTypes = {
 	},
 	Ore = {
 		Name = "Ore",
+		Icon = "⛏️",
 		Description = "Iron ore for advanced construction",
 		Color = Color3.fromRGB(105, 105, 105),
 		Material = Enum.Material.Slate,
@@ -38,6 +42,7 @@ local ResourceTypes = {
 	},
 	Wool = {
 		Name = "Wool",
+		Icon = "🧶",
 		Description = "Wool from sheep for settlements",
 		Color = Color3.fromRGB(245, 245, 245),
 		Material = Enum.Material.SmoothPlastic,

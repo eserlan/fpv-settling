@@ -14,13 +14,13 @@ local InventoryUI = {}
 local Events = ReplicatedStorage:WaitForChild("Events")
 local CollectEvent = Events:WaitForChild("CollectEvent")
 
--- Resource display data
+-- Resource display data (icons must match Blueprints.ResourceIcons)
 local RESOURCES = {
 	{ Key = "Wood", Icon = "🪵", Color = Color3.fromRGB(139, 90, 43) },
 	{ Key = "Brick", Icon = "🧱", Color = Color3.fromRGB(178, 102, 59) },
 	{ Key = "Wheat", Icon = "🌾", Color = Color3.fromRGB(218, 165, 32) },
-	{ Key = "Ore", Icon = "�ite", Color = Color3.fromRGB(105, 105, 105) },
-	{ Key = "Wool", Icon = "🐑", Color = Color3.fromRGB(245, 245, 245) },
+	{ Key = "Ore", Icon = "⛏️", Color = Color3.fromRGB(105, 105, 105) },
+	{ Key = "Wool", Icon = "🧶", Color = Color3.fromRGB(245, 245, 245) },
 }
 
 -- Create UI elements
