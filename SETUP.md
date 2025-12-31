@@ -7,6 +7,8 @@ This guide will help you set up the development environment and start working on
 Before you begin, ensure you have:
 - **Roblox Studio** installed (via **Vinegar** on Linux)
 - **Rojo** for syncing files between your file system and Roblox Studio
+- **Node.js** (for the roblox-ts compiler)
+- **roblox-ts** (TypeScript-to-Luau build tool)
 - **Aftman** (Highly recommended for Linux/Nobara)
 
 ## Step 1: Install Rojo
@@ -107,7 +109,18 @@ Roblox Studio is not officially supported on Linux, but **Vinegar** is the recom
    - Look for a **Rojo** button in the **Plugins** tab of the ribbon toolbar.
    - If you see it, the plugin is installed correctly!
 
-## Step 4: Start Rojo Server
+## Step 4: Install roblox-ts Dependencies
+
+Install npm dependencies and start the TypeScript compiler in watch mode:
+
+```bash
+npm install
+npm run watch
+```
+
+Keep the watch process running while you work. It will output compiled Luau to `out/`.
+
+## Step 5: Start Rojo Server
 
 In your terminal, navigate to the project directory and start the Rojo server:
 
@@ -154,22 +167,22 @@ fpv-settling/
 ├── default.project.json          # Rojo configuration
 ├── src/
 │   ├── client/                   # Client-side code
-│   │   ├── init.client.lua       # Client entry point
-│   │   ├── PlayerController.lua  # First-person controls
-│   │   └── UIManager.lua         # User interface
+│   │   ├── init.client.ts        # Client entry point
+│   │   ├── PlayerController.ts   # First-person controls
+│   │   └── UIManager.ts          # User interface
 │   ├── server/                   # Server-side code
-│   │   ├── init.server.lua       # Server entry point
-│   │   ├── GameManager.lua       # Main game loop
-│   │   ├── ResourceManager.lua   # Resource system
-│   │   ├── BuildingManager.lua   # Building system
-│   │   ├── NPCManager.lua        # NPC/Worker system
-│   │   └── ResearchManager.lua   # Technology research
+│   │   ├── init.server.ts        # Server entry point
+│   │   ├── GameManager.ts        # Main game loop
+│   │   ├── ResourceManager.ts    # Resource system
+│   │   ├── BuildingManager.ts    # Building system
+│   │   ├── NPCManager.ts         # NPC/Worker system
+│   │   └── ResearchManager.ts    # Technology research
 │   └── shared/                   # Shared code
-│       ├── ResourceTypes.lua     # Resource definitions
-│       ├── BuildingTypes.lua     # Building definitions
-│       ├── NPCTypes.lua          # NPC definitions
-│       ├── TechTree.lua          # Tech tree data
-│       └── TileTypes.lua         # Terrain/Resource definitions
+│       ├── ResourceTypes.ts      # Resource definitions
+│       ├── BuildingTypes.ts      # Building definitions
+│       ├── NPCTypes.ts           # NPC definitions
+│       ├── TechTree.ts           # Tech tree data
+│       └── TileTypes.ts          # Terrain/Resource definitions
 └── README.md
 
 ## Procedural World Generation
@@ -292,16 +305,16 @@ The project includes a VS Code build task in `.vscode/tasks.json`.
 Now that you have the development environment set up:
 
 1. Explore the codebase to understand how systems work
-2. Try modifying resource values in `ResourceTypes.lua`
-3. Add a new building type in `BuildingTypes.lua`
-4. Create a new technology in `TechTree.lua`
-5. Enhance the UI in `UIManager.lua`
+2. Try modifying resource values in `ResourceTypes.ts`
+3. Add a new building type in `BuildingTypes.ts`
+4. Create a new technology in `TechTree.ts`
+5. Enhance the UI in `UIManager.ts`
 
 ## Resources
 
 - [Rojo Documentation](https://rojo.space/docs)
 - [Roblox Developer Hub](https://create.roblox.com/docs)
-- [Lua Learning Resources](https://www.lua.org/manual/5.1/)
+- [roblox-ts Documentation](https://roblox-ts.com/docs)
 - [Roblox API Reference](https://create.roblox.com/docs/reference/engine)
 
 ## Getting Help

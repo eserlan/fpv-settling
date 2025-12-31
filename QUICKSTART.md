@@ -87,7 +87,8 @@ Press **F5** to start the game. You should see:
 - Check port 34872 isn't blocked
 
 **"Can't see my code changes"**
-- Save your .lua files
+- Save your .ts files
+- Ensure `npm run watch` (roblox-ts) is running
 - Click "Sync In" in Rojo plugin
 - Check Output window for errors
 

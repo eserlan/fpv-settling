@@ -16,6 +16,11 @@ Thumbs.db
 *.swo
 *~
 
+# Node/roblox-ts artifacts
+node_modules/
+package-lock.json
+out/
+
 # Logs
 *.log
 
