@@ -6,6 +6,13 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
 local Logger = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Logger"))
+local Blueprints = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Blueprints"))
+
+-- Wait for BlueprintBookUI to be available
+local BlueprintBookUI = nil
+task.spawn(function()
+	BlueprintBookUI = require(script.Parent:WaitForChild("BlueprintBookUI"))
+end)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -19,6 +26,13 @@ local ZOOM_THRESHOLD = 5 -- studs
 -- Track current mode
 local isFirstPerson = false
 
+-- Building placement state
+local placementMode = false
+local selectedBlueprint = nil
+local buildingPreview = nil
+local currentVertex = nil
+local isValidPlacement = false
+
 -- Function to update mouse lock based on camera distance
 local function updateMouseMode()
 	local character = player.Character
@@ -26,6 +40,13 @@ local function updateMouseMode()
 	
 	local head = character:FindFirstChild("Head")
 	if not head then return end
+	
+	-- Don't lock mouse if blueprint book or placement mode is active
+	if (BlueprintBookUI and BlueprintBookUI.IsOpen()) or placementMode then
+		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+		UserInputService.MouseIconEnabled = true
+		return
+	end
 	
 	-- Calculate distance from camera to character head
 	local distance = (camera.CFrame.Position - head.Position).Magnitude
@@ -50,30 +71,148 @@ local function updateMouseMode()
 	end
 end
 
+-- Find vertex at mouse position
+local function findVertexAtMouse()
+	local mouse = player:GetMouse()
+	if not mouse.Target then return nil end
+	
+	local mousePos = mouse.Hit.Position
+	local vertexFolder = workspace:FindFirstChild("Vertices")
+	if not vertexFolder then return nil end
+	
+	local closest = nil
+	local closestDist = 20 -- Max snap distance
+	
+	for _, vertex in ipairs(vertexFolder:GetChildren()) do
+		local dist = (vertex.Position - mousePos).Magnitude
+		if dist < closestDist then
+			closestDist = dist
+			closest = vertex
+		end
+	end
+	
+	return closest
+end
+
+-- Check if vertex is valid for selected blueprint
+local function isVertexValidForBlueprint(vertex, blueprintName)
+	if not vertex or not blueprintName then return false end
+	
+	local blueprint = Blueprints.Buildings[blueprintName]
+	if not blueprint then return false end
+	
+	local adjCount = vertex:GetAttribute("AdjacentTileCount") or 0
+	
+	if blueprint.PlacementType == "3-way" then
+		return adjCount >= 3
+	elseif blueprint.PlacementType == "2-way" then
+		return adjCount == 2
+	end
+	
+	return false
+end
+
+-- Create or update building preview
+local function updatePlacementPreview()
+	if not placementMode or not selectedBlueprint then
+		if buildingPreview then
+			buildingPreview:Destroy()
+			buildingPreview = nil
+		end
+		return
+	end
+	
+	local vertex = findVertexAtMouse()
+	currentVertex = vertex
+	
+	if not vertex then
+		if buildingPreview then
+			buildingPreview.Transparency = 0.9
+		end
+		isValidPlacement = false
+		return
+	end
+	
+	local blueprint = Blueprints.Buildings[selectedBlueprint]
+	isValidPlacement = isVertexValidForBlueprint(vertex, selectedBlueprint)
+	
+	-- Create preview if it doesn't exist
+	if not buildingPreview then
+		buildingPreview = Instance.new("Part")
+		buildingPreview.Name = "BuildingPreview"
+		buildingPreview.Anchored = true
+		buildingPreview.CanCollide = false
+		buildingPreview.Transparency = 0.5
+		buildingPreview.Size = blueprint.Size or Vector3.new(5, 4, 5)
+		buildingPreview.Parent = workspace
+	end
+	
+	-- Position at vertex
+	buildingPreview.Position = vertex.Position + Vector3.new(0, (buildingPreview.Size.Y / 2), 0)
+	
+	-- Color based on validity
+	if isValidPlacement then
+		buildingPreview.Color = Color3.fromRGB(100, 255, 100) -- Green = valid
+	else
+		buildingPreview.Color = Color3.fromRGB(255, 100, 100) -- Red = invalid
+	end
+end
+
+-- Exit placement mode
+local function exitPlacementMode()
+	placementMode = false
+	selectedBlueprint = nil
+	if buildingPreview then
+		buildingPreview:Destroy()
+		buildingPreview = nil
+	end
+	Logger.Debug("PlayerController", "Exited placement mode")
+end
+
+-- Handle blueprint selection callback
+task.spawn(function()
+	task.wait(1) -- Wait for BlueprintBookUI to initialize
+	if BlueprintBookUI then
+		BlueprintBookUI.OnBlueprintSelected(function(blueprintName, blueprintData)
+			selectedBlueprint = blueprintName
+			placementMode = true
+			Logger.Info("PlayerController", "Entering placement mode for: " .. blueprintName)
+		end)
+	end
+end)
+
 -- Update every frame
 RunService.RenderStepped:Connect(function()
 	updateMouseMode()
+	updatePlacementPreview()
 end)
 
--- Building placement system
-local buildMode = false
-local currentBuildingType = nil
-local buildingPreview = nil
-
--- Toggle build mode with 'B' key
+-- Handle input
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
 	
+	-- Toggle Blueprint Book with 'B' key
 	if input.KeyCode == Enum.KeyCode.B then
-		buildMode = not buildMode
-		Logger.Debug("PlayerController", "Build mode: " .. tostring(buildMode))
+		if placementMode then
+			exitPlacementMode()
+		elseif BlueprintBookUI then
+			BlueprintBookUI.Toggle()
+		end
 	end
 	
-	-- Place building with left mouse button
-	if buildMode and input.UserInputType == Enum.UserInputType.MouseButton1 then
-		if buildingPreview and currentBuildingType then
-			Network:FireServer("PlaceBuilding", currentBuildingType, buildingPreview.Position)
-			Logger.Debug("PlayerController", "Requested building placement at: " .. tostring(buildingPreview.Position))
+	-- Cancel placement with Escape
+	if input.KeyCode == Enum.KeyCode.Escape and placementMode then
+		exitPlacementMode()
+	end
+	
+	-- Place foundation with left mouse button
+	if placementMode and input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if currentVertex and isValidPlacement and selectedBlueprint then
+			Network:FireServer("PlaceFoundation", selectedBlueprint, currentVertex.Position)
+			Logger.Info("PlayerController", "Placed foundation for " .. selectedBlueprint .. " at vertex " .. currentVertex.Name)
+			exitPlacementMode()
+		else
+			Logger.Warn("PlayerController", "Invalid placement location")
 		end
 	end
 	
@@ -81,8 +220,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if input.KeyCode == Enum.KeyCode.H then
 		local character = player.Character
 		if character and character.PrimaryPart then
-			Network:FireServer("HireNPC", "Worker", character.PrimaryPart.Position + character.PrimaryPart.CFrame.LookVector * 5)
-			Logger.Debug("PlayerController", "Requested worker hire")
+			Network:FireServer("HireNPC", "Worker", character.PrimaryPart.Position)
+			Logger.Debug("PlayerController", "Requested Worker hire")
 		end
 	end
 	
@@ -90,50 +229,15 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if input.KeyCode == Enum.KeyCode.G then
 		local character = player.Character
 		if character and character.PrimaryPart then
-			Network:FireServer("HireNPC", "Guard", character.PrimaryPart.Position + character.PrimaryPart.CFrame.LookVector * 5)
-			Logger.Debug("PlayerController", "Requested guard hire")
+			Network:FireServer("HireNPC", "Guard", character.PrimaryPart.Position)
+			Logger.Debug("PlayerController", "Requested Guard hire")
 		end
 	end
 	
-	-- Open Research with 'R' key (placeholder for now, just starts first tech)
+	-- Open Research with 'R' key
 	if input.KeyCode == Enum.KeyCode.R then
 		Network:FireServer("StartResearch", "ImprovedTools")
 		Logger.Debug("PlayerController", "Requested research: ImprovedTools")
-	end
-end)
-
--- Update building preview
-RunService.RenderStepped:Connect(function()
-	if buildMode then
-		-- Set default building type if none selected
-		if not currentBuildingType then
-			currentBuildingType = "Settlement" -- Default to Settlement for new players
-		end
-		
-		-- Create preview part if it doesn't exist
-		if not buildingPreview then
-			buildingPreview = Instance.new("Part")
-			buildingPreview.Name = "BuildingPreview"
-			buildingPreview.Anchored = true
-			buildingPreview.CanCollide = false
-			buildingPreview.Transparency = 0.5
-			buildingPreview.BrickColor = BrickColor.new("Electric blue")
-			buildingPreview.Size = Vector3.new(10, 8, 10)
-			buildingPreview.Parent = workspace
-		end
-		
-		-- Position preview 10 units in front of player
-		local character = player.Character
-		if character and character.PrimaryPart then
-			local lookVector = character.PrimaryPart.CFrame.LookVector
-			buildingPreview.Position = character.PrimaryPart.Position + lookVector * 15
-		end
-	else
-		-- Remove preview if it exists
-		if buildingPreview then
-			buildingPreview:Destroy()
-			buildingPreview = nil
-		end
 	end
 end)
 

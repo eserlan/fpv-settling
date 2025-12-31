@@ -16,6 +16,11 @@ function NetworkHandler.Init(gameManager)
 			local buildingType, position = ...
 			playerData.BuildingManager:StartBuilding(buildingType, position)
 			
+		elseif actionType == "PlaceFoundation" then
+			-- New blueprint building system
+			local blueprintName, position = ...
+			playerData.BuildingManager:PlaceFoundation(blueprintName, position)
+			
 		elseif actionType == "HireNPC" then
 			local npcType, position = ...
 			playerData.NPCManager:HireNPC(npcType, position)

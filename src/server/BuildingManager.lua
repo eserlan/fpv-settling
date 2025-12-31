@@ -102,7 +102,92 @@ function BuildingManager:StartBuilding(buildingType, position)
 	return true, buildingId
 end
 
--- Update building construction progress
+-- New Blueprint Building System: Place a foundation
+function BuildingManager:PlaceFoundation(blueprintName, position)
+	local Blueprints = require(ReplicatedStorage.Shared.Blueprints)
+	local blueprint = Blueprints.Buildings[blueprintName]
+	
+	if not blueprint then
+		Logger.Warn("BuildingManager", "Invalid blueprint: " .. tostring(blueprintName))
+		return false, "Invalid blueprint"
+	end
+	
+	-- First settlement is free
+	local isFreeFirst = blueprintName == "Settlement" and not self.HasPlacedFirstSettlement
+	
+	-- Check resources (unless free first settlement)
+	if not isFreeFirst then
+		for resource, required in pairs(blueprint.Cost) do
+			local has = self.ResourceManager:GetResource(resource) or 0
+			if has < required then
+				Logger.Warn("BuildingManager", self.Player.Name .. " can't afford " .. blueprintName)
+				Network:FireClient(self.Player, "BuildingError", "Not enough resources")
+				return false, "Not enough resources"
+			end
+		end
+		
+		-- Deduct resources
+		for resource, required in pairs(blueprint.Cost) do
+			self.ResourceManager:RemoveResource(resource, required)
+		end
+	else
+		Logger.Info("BuildingManager", self.Player.Name .. " placing FREE first settlement!")
+	end
+	
+	-- Create the foundation/ghost building
+	local foundationId = #self.Buildings + 1
+	local foundation = {
+		Id = foundationId,
+		Type = blueprintName,
+		Position = position,
+		Blueprint = blueprint,
+		IsFoundation = true,
+		ResourcesDeposited = {}, -- Track deposited resources
+		Completed = false
+	}
+	
+	-- Create physical foundation model
+	self:CreateFoundationModel(foundation)
+	
+	table.insert(self.Buildings, foundation)
+	
+	-- Mark first settlement as placed
+	if blueprintName == "Settlement" and not self.HasPlacedFirstSettlement then
+		self.HasPlacedFirstSettlement = true
+	end
+	
+	-- For now, complete immediately (TODO: require resource deposits)
+	foundation.Completed = true
+	self:OnBuildingComplete(foundation)
+	
+	Logger.Info("BuildingManager", self.Player.Name .. " placed foundation for " .. blueprintName)
+	return true, foundationId
+end
+
+-- Create foundation/ghost model
+function BuildingManager:CreateFoundationModel(foundation)
+	local model = Instance.new("Model")
+	model.Name = self.Player.Name .. "_Foundation_" .. foundation.Type .. "_" .. foundation.Id
+	
+	local size = foundation.Blueprint.Size or Vector3.new(5, 4, 5)
+	
+	local part = Instance.new("Part")
+	part.Name = "FoundationBase"
+	part.Size = size
+	part.Position = foundation.Position + Vector3.new(0, size.Y / 2, 0)
+	part.Anchored = true
+	part.CanCollide = false
+	part.Transparency = 0.6
+	part.Color = Color3.fromRGB(100, 200, 255) -- Light blue ghost
+	part.Material = Enum.Material.SmoothPlastic
+	part.Parent = model
+	
+	model.PrimaryPart = part
+	model.Parent = workspace:FindFirstChild("Buildings") or workspace
+	
+	foundation.Model = model
+end
+
 function BuildingManager:UpdateBuildings(deltaTime)
 	for i = #self.BuildingInProgress, 1, -1 do
 		local building = self.BuildingInProgress[i]

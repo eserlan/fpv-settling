@@ -34,9 +34,12 @@ local PlayerController = safeRequire("PlayerController", script.PlayerController
 local UIManager = safeRequire("UIManager", script.UIManager)
 local PulseUI = safeRequire("PulseUI", script.PulseUI)
 local InventoryUI = safeRequire("InventoryUI", script.InventoryUI)
+local BlueprintBookUI = safeRequire("BlueprintBookUI", script.BlueprintBookUI)
 local DevPanel = safeRequire("DevPanel", script.DevPanel)
 
 Logger.Info("Client", "===========================================")
 Logger.Info("Client", "Welcome to FPV Settling!")
+Logger.Info("Client", "Press B to open Blueprint Book")
 Logger.Info("Client", "Press Alt+C to open dev panel")
 Logger.Info("Client", "===========================================")
+

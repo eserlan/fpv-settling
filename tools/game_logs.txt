@@ -1016,3 +1016,59 @@
 [14:30:57] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
 [14:30:57] [INFO ] [SERVER] [Client] ===========================================
 [14:31:11] [DEBUG] [SERVER] [PlayerController] Build mode: true
+[14:31:49] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_18 (dist: 7)
+[14:31:49] [INFO ] [SERVER] [BuildingManager] eserlan09 placing FREE first settlement!
+[14:31:49] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[14:31:49] [DEBUG] [SERVER] [TileOwnership] Vertex Vertex_18 has 3 adjacent tiles
+[14:31:49] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile -2_0
+[14:31:49] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile -1_-1
+[14:31:49] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile -1_0
+[14:31:49] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 3 tiles with settlement at vertex Vertex_18
+[14:31:49] [INFO ] [SERVER] [BuildingManager] Settlement claimed 3 tiles
+[14:31:49] [INFO ] [SERVER] [PulseManager] All players ready! Starting pulse timer...
+[14:31:50] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -127.00615692138672, 6.998024940490723, -20.841426849365234
+[14:31:59] [DEBUG] [SERVER] [PlayerController] Build mode: false
+[14:32:49] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 5 + 6 = 11
+[14:32:52] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[14:32:52] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[14:32:52] [DEBUG] [SERVER] [PulseManager] Spawned Ore at tile
+[14:32:53] [INFO ] [SERVER] [System] 🎲 Rolled 11! Spawned: 1x Brick, 1x Ore
+[14:33:52] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 2 + 6 = 8
+[14:33:55] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[14:33:55] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[14:33:55] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[14:33:55] [INFO ] [SERVER] [System] 🎲 Rolled 8! Spawned: 1x Wheat, 1x Brick
+[14:34:55] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 1 + 3 = 4
+[14:34:58] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[14:34:58] [DEBUG] [SERVER] [PulseManager] Spawned Wool at tile
+[14:34:58] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[14:34:59] [INFO ] [SERVER] [System] 🎲 Rolled 4! Spawned: 1x Wool, 1x Brick
+[14:35:58] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 2 + 6 = 8
+[14:36:01] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[14:36:01] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[14:36:01] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[14:36:01] [INFO ] [SERVER] [System] 🎲 Rolled 8! Spawned: 1x Wheat, 1x Brick
+[14:37:01] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 5 + 3 = 8
+[14:37:04] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[14:37:04] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[14:37:04] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[14:37:04] [INFO ] [SERVER] [System] 🎲 Rolled 8! Spawned: 1x Wheat, 1x Brick
+[14:38:04] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 3 + 5 = 8
+[14:38:07] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[14:38:07] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[14:38:07] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[14:38:08] [INFO ] [SERVER] [System] 🎲 Rolled 8! Spawned: 1x Wheat, 1x Brick
+[14:39:07] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 6 + 6 = 12
+[14:39:10] [INFO ] [SERVER] [PulseManager] 1 tiles match!
+[14:39:10] [DEBUG] [SERVER] [PulseManager] Spawned Wool at tile
+[14:39:10] [INFO ] [SERVER] [System] 🎲 Rolled 12! Spawned: 1x Wool
+[14:40:10] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 2 + 3 = 5
+[14:40:13] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[14:40:13] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[14:40:13] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[14:40:14] [INFO ] [SERVER] [System] 🎲 Rolled 5! Spawned: 1x Wheat, 1x Wood
+[14:41:13] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 1 + 4 = 5
+[14:41:16] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[14:41:16] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[14:41:16] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[14:41:17] [INFO ] [SERVER] [System] 🎲 Rolled 5! Spawned: 1x Wheat, 1x Wood
