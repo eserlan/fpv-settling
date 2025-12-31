@@ -78,6 +78,19 @@ function PulseManager.AssignTileNumbers()
 				tileNumbers[key] = number
 				tile.PrimaryPart:SetAttribute("DiceNumber", number)
 				
+				-- Update the visible dice label
+				local labelGui = tile.PrimaryPart:FindFirstChild("TileLabel")
+				if labelGui then
+					local diceLabel = labelGui:FindFirstChild("DiceNumber")
+					if diceLabel then
+						diceLabel.Text = "🎲 " .. number
+						-- Highlight 6 and 8 (most common rolls) in red
+						if number == 6 or number == 8 then
+							diceLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+						end
+					end
+				end
+				
 				numberIndex = (numberIndex % #numbers) + 1
 			end
 		end

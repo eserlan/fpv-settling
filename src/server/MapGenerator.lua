@@ -34,24 +34,40 @@ local function createHexagon(name, position, color, material)
 	return model
 end
 
--- Add a label above the hex
+-- Add a label above the hex (includes dice number if available)
 local function addLabel(hex, text)
 	local billboard = Instance.new("BillboardGui")
-	billboard.Size = UDim2.new(0, 100, 0, 40)
+	billboard.Name = "TileLabel"
+	billboard.Size = UDim2.new(0, 120, 0, 50)
 	billboard.StudsOffset = Vector3.new(0, 10, 0)
 	billboard.AlwaysOnTop = true
 	billboard.Adornee = hex.PrimaryPart
 	billboard.Parent = hex.PrimaryPart
 	
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1, 0, 1, 0)
-	label.BackgroundTransparency = 0.3
-	label.BackgroundColor3 = Color3.new(0, 0, 0)
-	label.TextColor3 = Color3.new(1, 1, 1)
-	label.TextScaled = true
-	label.Font = Enum.Font.GothamBold
-	label.Text = text
-	label.Parent = billboard
+	-- Terrain name
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Name = "TerrainName"
+	nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
+	nameLabel.BackgroundTransparency = 0.3
+	nameLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+	nameLabel.TextColor3 = Color3.new(1, 1, 1)
+	nameLabel.TextScaled = true
+	nameLabel.Font = Enum.Font.GothamBold
+	nameLabel.Text = text
+	nameLabel.Parent = billboard
+	
+	-- Dice number (will be updated after assignment)
+	local diceLabel = Instance.new("TextLabel")
+	diceLabel.Name = "DiceNumber"
+	diceLabel.Size = UDim2.new(1, 0, 0.5, 0)
+	diceLabel.Position = UDim2.new(0, 0, 0.5, 0)
+	diceLabel.BackgroundTransparency = 0.3
+	diceLabel.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+	diceLabel.TextColor3 = Color3.fromRGB(255, 200, 100) -- Gold/yellow for dice number
+	diceLabel.TextScaled = true
+	diceLabel.Font = Enum.Font.GothamBold
+	diceLabel.Text = ""
+	diceLabel.Parent = billboard
 end
 
 -- Convert axial coordinates (q, r) to world position

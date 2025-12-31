@@ -936,3 +936,46 @@
 [12:29:21] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
 [12:29:22] [INFO ] [SERVER] [System] 🎲 Rolled 8! Spawned: 1x Wood, 1x Brick
 [12:29:30] [DEBUG] [SERVER] [CollectionManager] eserlan09 collected 1 Wood
+[12:30:02] [INFO ] [SERVER] [PulseManager] Force pulse triggered by eserlan09
+[12:30:02] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 6 + 6 = 12
+[12:30:05] [INFO ] [SERVER] [PulseManager] 1 tiles match!
+[12:30:05] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[12:30:05] [INFO ] [SERVER] [System] 🎲 Rolled 12! Spawned: 1x Wheat
+[12:30:45] [DEBUG] [SERVER] [PlayerController] Entered first-person mode
+[12:30:45] [DEBUG] [SERVER] [PlayerController] Entered third-person mode (mouse unlocked)
+[12:30:53] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[12:30:57] [INFO ] [SERVER] [Server] ===========================================
+[12:30:57] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[12:30:57] [INFO ] [SERVER] [Server] ===========================================
+[12:30:57] [INFO ] [SERVER] [CollectionManager] Initialized
+[12:30:57] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[12:30:57] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[12:30:57] [INFO ] [SERVER] [Server] ===========================================
+[12:30:57] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[12:30:57] [INFO ] [SERVER] [Server] ===========================================
+[12:30:57] [INFO ] [SERVER] [NetworkHandler] Initialized
+[12:30:57] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[12:30:57] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[12:30:58] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09
+[12:31:00] [INFO ] [SERVER] [Client] ===========================================
+[12:31:00] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[12:31:00] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[12:31:00] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[12:31:00] [INFO ] [SERVER] [Client] ===========================================
+[12:31:00] [INFO ] [SERVER] [Client] Waiting for character...
+[12:31:00] [INFO ] [SERVER] [Client] Character loaded!
+[12:31:00] [INFO ] [SERVER] [PlayerController] Initialized
+[12:31:00] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[12:31:00] [INFO ] [SERVER] [UIManager] Chat system ready
+[12:31:00] [INFO ] [SERVER] [UIManager] Initialized
+[12:31:00] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[12:31:00] [INFO ] [SERVER] [PulseUI] Initialized
+[12:31:00] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[12:31:00] [INFO ] [SERVER] [InventoryUI] Initialized
+[12:31:00] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[12:31:01] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[12:31:01] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[12:31:01] [INFO ] [SERVER] [Client] ===========================================
+[12:31:01] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[12:31:01] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[12:31:01] [INFO ] [SERVER] [Client] ===========================================
