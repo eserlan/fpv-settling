@@ -48,6 +48,8 @@ Unlock powerful upgrades through research:
 
 ### Prerequisites
 - [Rojo](https://rojo.space/) - Syncs project files with Roblox Studio
+- [Node.js](https://nodejs.org/) - Required for roblox-ts
+- [roblox-ts](https://roblox-ts.com/) - TypeScript to Luau compiler
 - Roblox Studio
 
 ### Installation
@@ -66,17 +68,23 @@ cargo install rojo
 # Or download from https://github.com/rojo-rbx/rojo/releases
 ```
 
-3. Start Rojo server:
+3. Install dependencies and start the roblox-ts compiler (in watch mode):
+```bash
+npm install
+npm run watch
+```
+
+4. Start Rojo server:
 ```bash
 rojo serve
 ```
 
-4. Open Roblox Studio and install the Rojo plugin from:
+5. Open Roblox Studio and install the Rojo plugin from:
    https://www.roblox.com/library/13916111004/Rojo-7
 
-5. In Roblox Studio, click the Rojo plugin button and connect to localhost:34872
+6. In Roblox Studio, click the Rojo plugin button and connect to localhost:34872
 
-6. Your project files will now sync automatically!
+7. Your project files will now sync automatically!
 
 ## 📁 Project Structure
 
@@ -85,19 +93,19 @@ fpv-settling/
 ├── default.project.json     # Rojo project configuration
 ├── src/
 │   ├── client/              # Client-side scripts
-│   │   ├── PlayerController.lua    # First-person camera & controls
-│   │   └── UIManager.lua           # User interface
+│   │   ├── PlayerController.ts     # First-person camera & controls
+│   │   └── UIManager.ts            # User interface
 │   ├── server/              # Server-side scripts
-│   │   ├── GameManager.lua         # Main game loop
-│   │   ├── ResourceManager.lua     # Resource management
-│   │   ├── BuildingManager.lua     # Building construction
-│   │   ├── NPCManager.lua          # NPC hiring & AI
-│   │   └── ResearchManager.lua     # Technology research
+│   │   ├── GameManager.ts          # Main game loop
+│   │   ├── ResourceManager.ts      # Resource management
+│   │   ├── BuildingManager.ts      # Building construction
+│   │   ├── NPCManager.ts           # NPC hiring & AI
+│   │   └── ResearchManager.ts      # Technology research
 │   └── shared/              # Shared modules
-│       ├── ResourceTypes.lua       # Resource definitions
-│       ├── BuildingTypes.lua       # Building definitions
-│       ├── NPCTypes.lua            # NPC definitions
-│       └── TechTree.lua            # Technology tree
+│       ├── ResourceTypes.ts        # Resource definitions
+│       ├── BuildingTypes.ts        # Building definitions
+│       ├── NPCTypes.ts             # NPC definitions
+│       └── TechTree.ts             # Technology tree
 └── README.md
 ```
 

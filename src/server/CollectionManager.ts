@@ -1,0 +1,277 @@
+// COLLECTION MANAGER - Handles physical resource collection
+// Players walk near resources to collect them
+
+const ReplicatedStorage = game.GetService("ReplicatedStorage");
+const Players = game.GetService("Players");
+
+const ResourceTypes = require(ReplicatedStorage.Shared.ResourceTypes) as typeof import("shared/ResourceTypes");
+const Logger = require(ReplicatedStorage.Shared.Logger) as typeof import("shared/Logger");
+
+// Configuration
+const COLLECTION_RANGE = 8; // Studs - how close player needs to be
+const COLLECTION_COOLDOWN = 0.5; // Seconds between collections
+
+// Player collection cooldowns
+const playerCooldowns = new Map<number, number>();
+
+// Events
+const events = (ReplicatedStorage.FindFirstChild("Events") as Folder) ?? new Instance("Folder", ReplicatedStorage);
+events.Name = "Events";
+
+const CollectEvent = (events.FindFirstChild("CollectEvent") as RemoteEvent) ?? new Instance("RemoteEvent", events);
+CollectEvent.Name = "CollectEvent";
+
+// Player inventories (simple table for now)
+const playerInventories = new Map<number, Record<string, number>>();
+
+const CollectionManager = {
+	// Initialize player inventory with starting resources
+	InitPlayer(player: Player) {
+		// Starting resources: enough for 1 settlement + 1 road
+		// Settlement: Wood 1, Brick 1, Wheat 1, Wool 1
+		// Road: Wood 1, Brick 1
+		playerInventories.set(player.UserId, {
+			Wood: 2,
+			Brick: 2,
+			Wheat: 1,
+			Wool: 1,
+			Ore: 0,
+		});
+		playerCooldowns.set(player.UserId, 0);
+
+		// Send initial inventory to client
+		task.delay(0.5, () => {
+			const inventory = playerInventories.get(player.UserId);
+			if (inventory) {
+				CollectEvent.FireClient(player, "InventoryUpdate", inventory);
+			}
+		});
+
+		Logger.Debug("CollectionManager", `Initialized inventory for ${player.Name} with starting resources`);
+	},
+
+	// Remove player inventory on leave
+	RemovePlayer(player: Player) {
+		playerInventories.delete(player.UserId);
+		playerCooldowns.delete(player.UserId);
+	},
+
+	// Get player inventory
+	GetInventory(player: Player) {
+		return playerInventories.get(player.UserId);
+	},
+
+	// Add resource to player inventory
+	AddResource(player: Player, resourceType: string, amount: number) {
+		const inventory = playerInventories.get(player.UserId);
+		if (!inventory) {
+			return false;
+		}
+
+		if (inventory[resourceType] !== undefined) {
+			inventory[resourceType] += amount;
+
+			// Notify client
+			CollectEvent.FireClient(player, "InventoryUpdate", inventory);
+
+			return true;
+		}
+
+		return false;
+	},
+
+	// Remove resource from player inventory
+	RemoveResource(player: Player, resourceType: string, amount: number) {
+		const inventory = playerInventories.get(player.UserId);
+		if (!inventory) {
+			return false;
+		}
+
+		if (inventory[resourceType] !== undefined && inventory[resourceType] >= amount) {
+			inventory[resourceType] -= amount;
+
+			// Notify client
+			CollectEvent.FireClient(player, "InventoryUpdate", inventory);
+
+			return true;
+		}
+
+		return false;
+	},
+
+	// Check if player has enough resources
+	HasResources(player: Player, requirements: Record<string, number>) {
+		const inventory = playerInventories.get(player.UserId);
+		if (!inventory) {
+			return false;
+		}
+
+		for (const [resourceType, amount] of pairs(requirements)) {
+			if (!inventory[resourceType] || inventory[resourceType] < amount) {
+				return false;
+			}
+		}
+
+		return true;
+	},
+
+	// Try to collect a specific resource
+	TryCollect(player: Player, resource: BasePart) {
+		if (!resource || !resource.Parent) {
+			return false;
+		}
+
+		const userId = player.UserId;
+
+		// Check cooldown
+		const cooldown = playerCooldowns.get(userId);
+		if (cooldown !== undefined && cooldown > 0) {
+			return false;
+		}
+
+		// Check if player has a character
+		const character = player.Character;
+		if (!character) {
+			return false;
+		}
+
+		const humanoidRootPart = character.FindFirstChild("HumanoidRootPart");
+		if (!humanoidRootPart || !humanoidRootPart.IsA("BasePart")) {
+			return false;
+		}
+
+		// Check distance
+		const distance = humanoidRootPart.Position.sub(resource.Position).Magnitude;
+		if (distance > COLLECTION_RANGE) {
+			return false;
+		}
+
+		// Get resource info
+		const resourceType = resource.GetAttribute("ResourceType") as string | undefined;
+		const amount = (resource.GetAttribute("Amount") as number | undefined) ?? 1;
+		const tileQ = resource.GetAttribute("TileQ") as number | undefined;
+		const tileR = resource.GetAttribute("TileR") as number | undefined;
+
+		if (!resourceType) {
+			return false;
+		}
+
+		// Check tile ownership (if TileOwnershipManager exists)
+		const tileOwnershipManager = script.Parent?.FindFirstChild("TileOwnershipManager");
+		if (tileOwnershipManager && tileQ !== undefined && tileR !== undefined) {
+			const ownershipModule = require(tileOwnershipManager) as typeof import("./TileOwnershipManager");
+			if (!ownershipModule.PlayerOwnsTile(player, tileQ, tileR)) {
+				// Player doesn't own this tile - can't collect
+				return false;
+			}
+		}
+
+		// Add to inventory
+		if (CollectionManager.AddResource(player, resourceType, amount)) {
+			// Set cooldown
+			playerCooldowns.set(userId, COLLECTION_COOLDOWN);
+
+			// Create collection effect
+			CollectionManager.CreateCollectionEffect(resource.Position, resourceType);
+
+			// Notify client
+			CollectEvent.FireClient(player, "Collected", resourceType, amount);
+
+			// Destroy the resource
+			resource.Destroy();
+
+			Logger.Debug("CollectionManager", `${player.Name} collected ${amount} ${resourceType}`);
+			return true;
+		}
+
+		return false;
+	},
+
+	// Create visual effect when collecting
+	CreateCollectionEffect(position: Vector3, resourceType: string) {
+		const data = ResourceTypes[resourceType];
+		if (!data) {
+			return;
+		}
+
+		// Create sparkle particles
+		const effect = new Instance("Part");
+		effect.Name = "CollectEffect";
+		effect.Size = Vector3.new(1, 1, 1);
+		effect.Position = position;
+		effect.Anchored = true;
+		effect.CanCollide = false;
+		effect.Transparency = 1;
+		effect.Parent = workspace;
+
+		const particles = new Instance("ParticleEmitter");
+		particles.Color = new ColorSequence(data.Color);
+		particles.Size = new NumberSequence(1, 0);
+		particles.Lifetime = new NumberRange(0.5, 1);
+		particles.Speed = new NumberRange(5, 10);
+		particles.SpreadAngle = new Vector2(180, 180);
+		particles.Rate = 50;
+		particles.Parent = effect;
+
+		// Destroy after short time
+		task.delay(0.5, () => {
+			particles.Enabled = false;
+			task.wait(1);
+			effect.Destroy();
+		});
+	},
+
+	// Update loop - check cooldowns and nearby resources
+	Update(deltaTime: number) {
+		// Update cooldowns
+		for (const [userId, cooldown] of playerCooldowns) {
+			if (cooldown > 0) {
+				playerCooldowns.set(userId, cooldown - deltaTime);
+			}
+		}
+
+		// Check each player for nearby resources
+		const resourcesFolder = workspace.FindFirstChild("Resources");
+		if (!resourcesFolder) {
+			return;
+		}
+
+		for (const player of Players.GetPlayers()) {
+			const character = player.Character;
+			if (!character) {
+				continue;
+			}
+
+			const humanoidRootPart = character.FindFirstChild("HumanoidRootPart");
+			if (!humanoidRootPart || !humanoidRootPart.IsA("BasePart")) {
+				continue;
+			}
+
+			const playerPos = humanoidRootPart.Position;
+
+			// Check all resources
+			for (const resource of resourcesFolder.GetChildren()) {
+				if (resource.IsA("BasePart")) {
+					const distance = playerPos.sub(resource.Position).Magnitude;
+					if (distance <= COLLECTION_RANGE) {
+						CollectionManager.TryCollect(player, resource);
+					}
+				}
+			}
+		}
+	},
+};
+
+// Handle client request for inventory
+CollectEvent.OnServerEvent.Connect((player, action) => {
+	if (action === "GetInventory") {
+		const inventory = CollectionManager.GetInventory(player);
+		if (inventory) {
+			CollectEvent.FireClient(player, "InventoryUpdate", inventory);
+		}
+	}
+});
+
+Logger.Info("CollectionManager", "Initialized");
+
+export = CollectionManager;

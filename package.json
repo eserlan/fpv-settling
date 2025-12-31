@@ -1,0 +1,13 @@
+{
+  "name": "fpv-settling",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "rbxtsc",
+    "watch": "rbxtsc -w"
+  },
+  "devDependencies": {
+    "@rbxts/types": "^1.0.0",
+    "roblox-ts": "^2.0.0"
+  }
+}

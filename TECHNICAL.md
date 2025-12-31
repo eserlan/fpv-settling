@@ -8,7 +8,7 @@ This document provides a technical overview of the FPV Settling game architectur
 
 ### 1. Resource Management System
 
-**Location**: `src/server/ResourceManager.lua`, `src/shared/ResourceTypes.lua`
+**Location**: `src/server/ResourceManager.ts`, `src/shared/ResourceTypes.ts`
 
 **Purpose**: Manages player resources (Wood, Stone, Food, Gold)
 
@@ -30,7 +30,7 @@ manager:GetResource(type) -- Get specific resource amount
 
 ### 2. Building System
 
-**Location**: `src/server/BuildingManager.lua`, `src/shared/BuildingTypes.lua`
+**Location**: `src/server/BuildingManager.ts`, `src/shared/BuildingTypes.ts`
 
 **Purpose**: Handles building construction and placement
 
@@ -60,7 +60,7 @@ manager:GetBuildings() -- Get completed buildings
 
 ### 3. NPC Management System
 
-**Location**: `src/server/NPCManager.lua`, `src/shared/NPCTypes.lua`
+**Location**: `src/server/NPCManager.ts`, `src/shared/NPCTypes.ts`
 
 **Purpose**: Manages worker and guard NPCs
 
@@ -94,7 +94,7 @@ manager:FireNPC(id) -- Remove NPC
 
 ### 4. Research System
 
-**Location**: `src/server/ResearchManager.lua`, `src/shared/TechTree.lua`
+**Location**: `src/server/ResearchManager.ts`, `src/shared/TechTree.ts`
 
 **Purpose**: Technology research and upgrades
 
@@ -125,7 +125,7 @@ manager:GetModifier(effectType) -- Get cumulative modifier
 
 ### 5. Game Manager
 
-**Location**: `src/server/GameManager.lua`
+**Location**: `src/server/GameManager.ts`
 
 **Purpose**: Coordinates all systems and main game loop
 
@@ -150,7 +150,7 @@ Every 60 seconds:
 ### 6. Client Systems
 
 #### Player Controller
-**Location**: `src/client/PlayerController.lua`
+**Location**: `src/client/PlayerController.ts`
 
 **Purpose**: First-person camera and controls
 
@@ -162,7 +162,7 @@ Every 60 seconds:
 - Camera pitch/yaw with mouse sensitivity
 
 #### UI Manager
-**Location**: `src/client/UIManager.lua`
+**Location**: `src/client/UIManager.ts`
 
 **Purpose**: User interface display
 
@@ -225,9 +225,9 @@ Deduct Resources → Progress Over Time → Complete → Apply Effects
 1. **Event System**: 
    ```lua
    Events/
-     BuildingCompleted.lua
-     ResourceChanged.lua
-     NPCHired.lua
+     BuildingCompleted.ts
+     ResourceChanged.ts
+     NPCHired.ts
    ```
 
 2. **Data Persistence**:
@@ -239,8 +239,8 @@ Deduct Resources → Progress Over Time → Complete → Apply Effects
    ```lua
    Shared/
      Network/
-       Events.lua
-       Requests.lua
+      Events.ts
+      Requests.ts
    ```
 
 ## Performance Considerations

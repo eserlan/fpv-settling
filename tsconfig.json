@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "CommonJS",
+    "outDir": "out",
+    "rootDir": "src",
+    "strict": true,
+    "types": ["@rbxts/types"],
+    "baseUrl": "src",
+    "paths": {
+      "shared/*": ["shared/*"],
+      "client/*": ["client/*"],
+      "server/*": ["server/*"]
+    }
+  },
+  "include": ["src"]
+}

@@ -5,7 +5,7 @@
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
       "Shared": {
-        "$path": "src/shared"
+        "$path": "out/shared"
       },
       "Events": {
         "$className": "Folder",
@@ -22,7 +22,7 @@
     "ServerScriptService": {
       "$className": "ServerScriptService",
       "Server": {
-        "$path": "src/server"
+        "$path": "out/server"
       },
       "$ignoreUnknownInstances": true
     },
@@ -31,7 +31,7 @@
       "StarterPlayerScripts": {
         "$className": "StarterPlayerScripts",
         "Client": {
-          "$path": "src/client"
+          "$path": "out/client"
         }
       },
       "$ignoreUnknownInstances": true
