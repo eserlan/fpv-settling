@@ -1872,3 +1872,18 @@
 [16:25:36] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
 [16:25:36] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
 [16:25:37] [INFO ] [SERVER] [System] 🎲 Rolled 9! Spawned: 1x Wood, 1x Wheat
+[16:26:36] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 6 + 2 = 8
+[16:26:39] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[16:26:39] [DEBUG] [SERVER] [PulseManager] Spawned Wool at tile
+[16:26:39] [DEBUG] [SERVER] [PulseManager] Spawned Wool at tile
+[16:26:40] [INFO ] [SERVER] [System] 🎲 Rolled 8! Spawned: 2x Wool
+[16:27:39] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 1 + 4 = 5
+[16:27:42] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[16:27:42] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[16:27:42] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[16:27:43] [INFO ] [SERVER] [System] 🎲 Rolled 5! Spawned: 1x Wood, 1x Wheat
+[16:28:42] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 2 + 2 = 4
+[16:28:45] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[16:28:46] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[16:28:46] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[16:28:46] [INFO ] [SERVER] [System] 🎲 Rolled 4! Spawned: 1x Wood, 1x Brick

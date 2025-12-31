@@ -138,10 +138,39 @@ local function isSnapPointValidForBlueprint(marker, blueprintName)
 		return nil
 	end
 	
+	-- Helper to check if a vertex key is occupied by ANY building
+	local function isVertexOccupied(key)
+		local folders = {"Settlements", "Buildings"}
+		for _, folderName in ipairs(folders) do
+			local folder = workspace:FindFirstChild(folderName)
+			if folder then
+				for _, model in ipairs(folder:GetChildren()) do
+					local base = model:FindFirstChild("FoundationBase") or model.PrimaryPart
+					if base and base:GetAttribute("Key") == key then
+						return true
+					end
+				end
+			end
+		end
+		return false
+	end
+	
 	-- Adjacency rules
 	if blueprint.PlacementType == "3-way" then
+		local myKey = marker:GetAttribute("Key")
+		
+		-- DISTANCE RULE: Is there a building here or at ANY neighbor?
+		if isVertexOccupied(myKey) then return false end
+		
+		-- Check all neighbors for settlements
+		for i = 1, 3 do -- Most hex vertices have up to 3 neighbors
+			local neighborKey = marker:GetAttribute("Neighbor_" .. i)
+			if neighborKey and isVertexOccupied(neighborKey) then
+				return false -- Too close to another settlement!
+			end
+		end
+		
 		-- First settlement can be placed anywhere valid (no connection needed)
-		-- We can check attributes or a local flag for this
 		local hasAnyBuildings = false
 		for _, model in ipairs(workspace:GetChildren()) do
 			if model:IsA("Model") then
@@ -153,11 +182,25 @@ local function isSnapPointValidForBlueprint(marker, blueprintName)
 			end
 		end
 		
-		if not hasAnyBuildings then return true end -- First one is free
+		if not hasAnyBuildings then return true end -- First one is free (Distance rule still applies above)
 		
 		-- Subsequent settlements must be connected via road (standard Catan)
-		-- For now, let's keep it simple: allow if not too close to another (not implemented yet)
-		return true 
+		-- Check if any owned road touches this vertex
+		local f = workspace:FindFirstChild("Buildings")
+		if f then
+			for _, model in ipairs(f:GetChildren()) do
+				local base = model:FindFirstChild("FoundationBase") or model.PrimaryPart
+				if base and base:GetAttribute("OwnerId") == player.UserId then
+					local key = base:GetAttribute("Key")
+					-- Edge key is "V1:V2", check if myKey is part of it
+					if key and string.find(key, myKey) then
+						return true
+					end
+				end
+			end
+		end
+		
+		return false -- Not connected
 	elseif blueprint.PlacementType == "edge" then
 		-- Roads MUST connect to a settlement or road you own
 		local v1 = marker:GetAttribute("Vertex1")

@@ -445,7 +445,30 @@ function MapGenerator.CreateVerticesAndEdges(mapFolder)
 		end
 	end
 	
-	-- Create vertex markers
+	-- Track vertex neighbors (for distance rule)
+	local vertexNeighbors = {}
+	for _, edge in pairs(edges) do
+		local v1 = edge.V1_Key or ""
+		local v2 = edge.V2_Key or "" -- Wait, I didn't store V1_Key in the edge table yet. Let me fix that.
+		-- Actually, V1 and V2 are the keys in the edges loop if I'm careful.
+	end
+	
+	-- Improved vertex and edge creation Loop logic
+	-- I'll rewrite the marker creation to include neighbor info
+	
+	-- First, build the neighbor map
+	for key, data in pairs(edges) do
+		local v1Key = string.split(key, ":")[1]
+		local v2Key = string.split(key, ":")[2]
+		
+		vertexNeighbors[v1Key] = vertexNeighbors[v1Key] or {}
+		table.insert(vertexNeighbors[v1Key], v2Key)
+		
+		vertexNeighbors[v2Key] = vertexNeighbors[v2Key] or {}
+		table.insert(vertexNeighbors[v2Key], v1Key)
+	end
+
+	-- Create vertex markers with neighbor info
 	local vertexId = 1
 	for key, data in pairs(vertices) do
 		local adjCount = #data.AdjacentTiles
@@ -462,6 +485,13 @@ function MapGenerator.CreateVerticesAndEdges(mapFolder)
 		marker:SetAttribute("VertexId", vertexId)
 		marker:SetAttribute("Key", key)
 		marker:SetAttribute("AdjacentTileCount", adjCount)
+		
+		-- Store neighbor keys for distance rule
+		local neighbors = vertexNeighbors[key] or {}
+		for i, nKey in ipairs(neighbors) do
+			marker:SetAttribute("Neighbor_" .. i, nKey)
+		end
+		
 		vertexId = vertexId + 1
 	end
 	

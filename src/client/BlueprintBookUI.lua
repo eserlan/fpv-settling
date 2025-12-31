@@ -17,6 +17,15 @@ local BlueprintBookUI = {}
 local isOpen = false
 local selectedBlueprint = nil
 local onBlueprintSelected = nil -- Callback when blueprint is selected
+local currentResources = {
+	Wood = 0,
+	Brick = 0,
+	Wheat = 0,
+	Wool = 0,
+	Ore = 0
+}
+
+local cards = {} -- Store card refs for updating
 
 -- Create the UI
 local screenGui = Instance.new("ScreenGui")
@@ -28,13 +37,12 @@ screenGui.Parent = playerGui
 -- Main frame
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 500, 0, 400) -- Taller to fit cards
-mainFrame.Position = UDim2.new(0.5, -250, 0.5, -200)
+mainFrame.Size = UDim2.new(0, 520, 0, 420)
+mainFrame.Position = UDim2.new(0.5, -260, 0.5, -210)
 mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
 
--- Rounded corners
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 16)
 corner.Parent = mainFrame
@@ -51,7 +59,6 @@ local titleCorner = Instance.new("UICorner")
 titleCorner.CornerRadius = UDim.new(0, 16)
 titleCorner.Parent = titleBar
 
--- Fix bottom corners of title bar
 local titleFix = Instance.new("Frame")
 titleFix.Size = UDim2.new(1, 0, 0, 16)
 titleFix.Position = UDim2.new(0, 0, 1, -16)
@@ -92,7 +99,7 @@ end)
 -- Blueprint container
 local container = Instance.new("Frame")
 container.Name = "Container"
-container.Size = UDim2.new(1, -40, 1, -80)
+container.Size = UDim2.new(1, -40, 1, -110)
 container.Position = UDim2.new(0, 20, 0, 60)
 container.BackgroundTransparency = 1
 container.Parent = mainFrame
@@ -103,11 +110,42 @@ containerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 containerLayout.Padding = UDim.new(0, 20)
 containerLayout.Parent = container
 
+-- Refresh affordability
+local function refreshAffordability()
+	for name, cardData in pairs(cards) do
+		local blueprint = Blueprints.Buildings[name]
+		local canAfford = Blueprints.CanAfford(currentResources, name)
+		
+		local selectBtn = cardData.SelectButton
+		if canAfford then
+			selectBtn.BackgroundColor3 = Color3.fromRGB(80, 160, 80)
+			selectBtn.AutoButtonColor = true
+			selectBtn.Text = "SELECT"
+			selectBtn.TextTransparency = 0
+		else
+			selectBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+			selectBtn.AutoButtonColor = false
+			selectBtn.Text = "INSUFFICIENT FUNDS"
+			selectBtn.TextTransparency = 0.5
+		end
+		
+		for resource, label in pairs(cardData.CostLabels) do
+			local required = blueprint.Cost[resource] or 0
+			local has = currentResources[resource] or 0
+			if has >= required then
+				label.TextColor3 = Color3.fromRGB(200, 200, 200)
+			else
+				label.TextColor3 = Color3.fromRGB(255, 100, 100)
+			end
+		end
+	end
+end
+
 -- Create a blueprint card
 local function createBlueprintCard(blueprintName, blueprintData)
 	local card = Instance.new("Frame")
 	card.Name = blueprintName .. "Card"
-	card.Size = UDim2.new(0, 130, 0, 240) -- Taller card
+	card.Size = UDim2.new(0, 140, 0, 260)
 	card.BackgroundColor3 = Color3.fromRGB(55, 55, 70)
 	card.BorderSizePixel = 0
 	
@@ -115,7 +153,6 @@ local function createBlueprintCard(blueprintName, blueprintData)
 	cardCorner.CornerRadius = UDim.new(0, 12)
 	cardCorner.Parent = card
 	
-	-- Icon
 	local icon = Instance.new("TextLabel")
 	icon.Name = "Icon"
 	icon.Size = UDim2.new(1, 0, 0, 60)
@@ -125,22 +162,20 @@ local function createBlueprintCard(blueprintName, blueprintData)
 	icon.TextSize = 48
 	icon.Parent = card
 	
-	-- Name
-	local name = Instance.new("TextLabel")
-	name.Name = "Name"
-	name.Size = UDim2.new(1, -10, 0, 25)
-	name.Position = UDim2.new(0, 5, 0, 70)
-	name.BackgroundTransparency = 1
-	name.Text = blueprintData.Name
-	name.TextColor3 = Color3.fromRGB(255, 255, 255)
-	name.Font = Enum.Font.GothamBold
-	name.TextSize = 16
-	name.Parent = card
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Name = "Name"
+	nameLabel.Size = UDim2.new(1, -10, 0, 25)
+	nameLabel.Position = UDim2.new(0, 5, 0, 70)
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Text = blueprintData.Name
+	nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	nameLabel.Font = Enum.Font.GothamBold
+	nameLabel.TextSize = 16
+	nameLabel.Parent = card
 	
-	-- Cost display - taller to fit 4 resources
 	local costFrame = Instance.new("Frame")
 	costFrame.Name = "CostFrame"
-	costFrame.Size = UDim2.new(1, -10, 0, 95) -- Taller
+	costFrame.Size = UDim2.new(1, -10, 0, 110)
 	costFrame.Position = UDim2.new(0, 5, 0, 100)
 	costFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 	costFrame.BorderSizePixel = 0
@@ -150,12 +185,12 @@ local function createBlueprintCard(blueprintName, blueprintData)
 	costCorner.CornerRadius = UDim.new(0, 6)
 	costCorner.Parent = costFrame
 	
-	-- Cost items
-	local y = 5
+	local costLabels = {}
+	local y = 8
 	for resource, amount in pairs(blueprintData.Cost) do
 		local costLabel = Instance.new("TextLabel")
 		costLabel.Size = UDim2.new(1, -10, 0, 18)
-		costLabel.Position = UDim2.new(0, 5, 0, y)
+		costLabel.Position = UDim2.new(0, 10, 0, y)
 		costLabel.BackgroundTransparency = 1
 		costLabel.Text = (Blueprints.ResourceIcons[resource] or "") .. " " .. resource .. ": " .. amount
 		costLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -163,44 +198,61 @@ local function createBlueprintCard(blueprintName, blueprintData)
 		costLabel.TextSize = 12
 		costLabel.TextXAlignment = Enum.TextXAlignment.Left
 		costLabel.Parent = costFrame
-		y = y + 16
+		costLabels[resource] = costLabel
+		y = y + 18
 	end
 	
-	-- Select button
 	local selectButton = Instance.new("TextButton")
 	selectButton.Name = "SelectButton"
-	selectButton.Size = UDim2.new(1, -10, 0, 30)
-	selectButton.Position = UDim2.new(0, 5, 1, -35)
+	selectButton.Size = UDim2.new(1, -10, 0, 35)
+	selectButton.Position = UDim2.new(0, 5, 1, -40)
 	selectButton.BackgroundColor3 = Color3.fromRGB(80, 160, 80)
 	selectButton.Text = "SELECT"
 	selectButton.TextColor3 = Color3.new(1, 1, 1)
 	selectButton.Font = Enum.Font.GothamBold
-	selectButton.TextSize = 14
+	selectButton.TextSize = 9
 	selectButton.Parent = card
 	
-	local selectCorner = Instance.new("UICorner")
-	selectCorner.CornerRadius = UDim.new(0, 6)
-	selectCorner.Parent = selectButton
+	local btnCorner = Instance.new("UICorner")
+	btnCorner.CornerRadius = UDim.new(0, 6)
+	btnCorner.Parent = selectButton
 	
 	selectButton.MouseButton1Click:Connect(function()
-		selectedBlueprint = blueprintName
-		BlueprintBookUI.Close()
-		
-		if onBlueprintSelected then
-			onBlueprintSelected(blueprintName, blueprintData)
+		if Blueprints.CanAfford(currentResources, blueprintName) then
+			selectedBlueprint = blueprintName
+			BlueprintBookUI.Close()
+			if onBlueprintSelected then
+				onBlueprintSelected(blueprintName, blueprintData)
+			end
 		end
-		
-		Logger.Info("BlueprintBook", "Selected: " .. blueprintName)
 	end)
+	
+	cards[blueprintName] = {
+		SelectButton = selectButton,
+		CostLabels = costLabels
+	}
 	
 	return card
 end
 
--- Initialize blueprint cards
-for name, data in pairs(Blueprints.Buildings) do
+-- Initialize
+local sortedNames = Blueprints.GetBlueprintNames()
+for _, name in ipairs(sortedNames) do
+	local data = Blueprints.Buildings[name]
 	local card = createBlueprintCard(name, data)
 	card.Parent = container
 end
+
+-- Listen for inventory updates
+local Events = ReplicatedStorage:WaitForChild("Events")
+local CollectEvent = Events:WaitForChild("InventoryUpdate")
+
+CollectEvent.OnClientEvent:Connect(function(action, data)
+	if action == "InventoryUpdate" then
+		currentResources = data
+		refreshAffordability()
+	end
+end)
 
 -- Help text
 local helpText = Instance.new("TextLabel")
@@ -214,51 +266,29 @@ helpText.Font = Enum.Font.Gotham
 helpText.TextSize = 12
 helpText.Parent = mainFrame
 
--- Public functions
+-- Public Functions
 function BlueprintBookUI.Open()
-	if isOpen then return end
 	isOpen = true
 	screenGui.Enabled = true
-	selectedBlueprint = nil
-	Logger.Info("BlueprintBook", "Opened")
+	refreshAffordability()
 end
 
 function BlueprintBookUI.Close()
-	if not isOpen then return end
 	isOpen = false
 	screenGui.Enabled = false
-	Logger.Info("BlueprintBook", "Closed")
 end
 
 function BlueprintBookUI.Toggle()
-	if isOpen then
-		BlueprintBookUI.Close()
-	else
-		BlueprintBookUI.Open()
-	end
+	if isOpen then BlueprintBookUI.Close() else BlueprintBookUI.Open() end
 end
 
-function BlueprintBookUI.IsOpen()
-	return isOpen
-end
+function BlueprintBookUI.IsOpen() return isOpen end
+function BlueprintBookUI.OnBlueprintSelected(cb) onBlueprintSelected = cb end
 
-function BlueprintBookUI.GetSelectedBlueprint()
-	return selectedBlueprint
-end
-
-function BlueprintBookUI.OnBlueprintSelected(callback)
-	onBlueprintSelected = callback
-end
-
--- Handle keyboard input
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	
-	if input.KeyCode == Enum.KeyCode.Escape and isOpen then
+UserInputService.InputBegan:Connect(function(input, processed)
+	if not processed and input.KeyCode == Enum.KeyCode.Escape and isOpen then
 		BlueprintBookUI.Close()
 	end
 end)
-
-Logger.Info("BlueprintBookUI", "Initialized")
 
 return BlueprintBookUI
