@@ -357,6 +357,110 @@ function MapGenerator.Generate(rings)
 			tileIndex = tileIndex + 1
 		end
 	end
+	
+	-- Create hex vertices (corners where 3 hexes meet)
+	-- These are the valid positions for settlements
+	MapGenerator.CreateVertices(mapFolder)
+end
+
+-- Calculate and create vertex markers at hex corners
+function MapGenerator.CreateVertices(mapFolder)
+	local vertices = {}
+	local vertexFolder = workspace:FindFirstChild("Vertices") or Instance.new("Folder", workspace)
+	vertexFolder.Name = "Vertices"
+	vertexFolder:ClearAllChildren()
+	
+	-- For each hex, calculate its 6 corner positions
+	for _, tile in ipairs(mapFolder:GetChildren()) do
+		if tile:IsA("Model") and tile.PrimaryPart then
+			local center = tile.PrimaryPart.Position
+			local q = tile.PrimaryPart:GetAttribute("Q")
+			local r = tile.PrimaryPart:GetAttribute("R")
+			
+			-- 6 vertices for a flat-top hexagon
+			for i = 0, 5 do
+				local angle = (math.pi / 3) * i
+				local vx = center.X + HEX_SIZE * math.cos(angle)
+				local vz = center.Z + HEX_SIZE * math.sin(angle)
+				
+				-- Round to avoid floating point duplicates (within 1 stud)
+				local key = math.floor(vx / 2 + 0.5) .. "_" .. math.floor(vz / 2 + 0.5)
+				
+				if not vertices[key] then
+					vertices[key] = {
+						Position = Vector3.new(vx, HEIGHT + 0.5, vz),
+						AdjacentTiles = {}
+					}
+				end
+				
+				-- Track which tiles this vertex touches
+				table.insert(vertices[key].AdjacentTiles, {Q = q, R = r})
+			end
+		end
+	end
+	
+	-- Create visible vertex markers
+	local vertexId = 1
+	for key, data in pairs(vertices) do
+		local marker = Instance.new("Part")
+		marker.Name = "Vertex_" .. vertexId
+		marker.Shape = Enum.PartType.Cylinder
+		marker.Size = Vector3.new(1, 3, 3) -- Small cylinder
+		marker.Position = data.Position
+		marker.Rotation = Vector3.new(0, 0, 90) -- Stand upright
+		marker.Anchored = true
+		marker.CanCollide = false
+		marker.Color = Color3.fromRGB(255, 255, 255) -- White markers
+		marker.Material = Enum.Material.Neon
+		marker.Transparency = 0.5
+		marker.Parent = vertexFolder
+		
+		-- Store vertex data as attributes
+		marker:SetAttribute("VertexId", vertexId)
+		marker:SetAttribute("Key", key)
+		
+		-- Store adjacent tile info (up to 3 tiles)
+		for i, tileInfo in ipairs(data.AdjacentTiles) do
+			if i <= 3 then
+				marker:SetAttribute("Tile" .. i .. "Q", tileInfo.Q)
+				marker:SetAttribute("Tile" .. i .. "R", tileInfo.R)
+			end
+		end
+		marker:SetAttribute("AdjacentTileCount", math.min(#data.AdjacentTiles, 3))
+		
+		vertexId = vertexId + 1
+	end
+	
+	print("[MapGenerator] Created " .. (vertexId - 1) .. " vertices")
+end
+
+-- Get all vertices (for building placement)
+function MapGenerator.GetVertices()
+	local vertices = {}
+	local vertexFolder = workspace:FindFirstChild("Vertices")
+	if vertexFolder then
+		for _, v in ipairs(vertexFolder:GetChildren()) do
+			table.insert(vertices, v)
+		end
+	end
+	return vertices
+end
+
+-- Find nearest vertex to a position
+function MapGenerator.FindNearestVertex(position)
+	local vertices = MapGenerator.GetVertices()
+	local nearest = nil
+	local nearestDist = math.huge
+	
+	for _, vertex in ipairs(vertices) do
+		local dist = (Vector3.new(position.X, 0, position.Z) - Vector3.new(vertex.Position.X, 0, vertex.Position.Z)).Magnitude
+		if dist < nearestDist then
+			nearestDist = dist
+			nearest = vertex
+		end
+	end
+	
+	return nearest, nearestDist
 end
 
 return MapGenerator

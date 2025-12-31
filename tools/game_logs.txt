@@ -247,3 +247,77 @@
 [01:48:55] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -33.9463996887207, 6.998025417327881, -40.075439453125
 [01:49:03] [DEBUG] [SERVER] [PlayerController] Build mode: false
 [01:49:33] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[01:53:24] [INFO ] [SERVER] [Server] ===========================================
+[01:53:24] [INFO ] [SERVER] [Server] ===========================================
+[01:53:24] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[01:53:24] [INFO ] [SERVER] [CollectionManager] Initialized
+[01:53:24] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[01:53:24] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[01:53:24] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[01:53:24] [INFO ] [SERVER] [Server] ===========================================
+[01:53:24] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[01:53:24] [INFO ] [SERVER] [Server] ===========================================
+[01:53:24] [INFO ] [SERVER] [NetworkHandler] Initialized
+[01:53:25] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[01:53:25] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09
+[01:53:27] [INFO ] [SERVER] [Client] ===========================================
+[01:53:27] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[01:53:27] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[01:53:27] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[01:53:28] [INFO ] [SERVER] [Client] ===========================================
+[01:53:28] [INFO ] [SERVER] [Client] Waiting for character...
+[01:53:29] [INFO ] [SERVER] [Client] Character loaded!
+[01:53:30] [INFO ] [SERVER] [PlayerController] Initialized
+[01:53:30] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[01:53:30] [INFO ] [SERVER] [UIManager] Initialized
+[01:53:30] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[01:53:30] [INFO ] [SERVER] [PulseUI] Initialized
+[01:53:30] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[01:53:30] [INFO ] [SERVER] [InventoryUI] Initialized
+[01:53:30] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[01:53:30] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[01:53:30] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[01:53:30] [INFO ] [SERVER] [Client] ===========================================
+[01:53:30] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[01:53:30] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[01:53:30] [INFO ] [SERVER] [Client] ===========================================
+[01:53:41] [DEBUG] [SERVER] [PlayerController] Build mode: true
+[01:53:57] [DEBUG] [SERVER] [PlayerController] Entered first-person mode
+[01:54:00] [DEBUG] [SERVER] [BuildingManager] Snapped settlement to vertex (dist: 27)
+[01:54:00] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[01:54:01] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile 1_-1
+[01:54:01] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 1 tiles with settlement
+[01:54:01] [INFO ] [SERVER] [BuildingManager] Settlement claimed 1 tiles
+[01:54:01] [INFO ] [SERVER] [PulseManager] All players ready! Starting pulse timer...
+[01:54:01] [INFO ] [SERVER] [BuildingManager] eserlan09 placing FREE first settlement!
+[01:54:01] [DEBUG] [SERVER] [PlayerController] Requested building placement at: 0.71146559715271, 6.998023986816406, -92.03874969482422
+[01:54:04] [DEBUG] [SERVER] [BuildingManager] Snapped settlement to vertex (dist: 27)
+[01:54:04] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile 1_-2
+[01:54:04] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 1 tiles with settlement
+[01:54:04] [INFO ] [SERVER] [BuildingManager] Settlement claimed 1 tiles
+[01:54:04] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[01:54:05] [DEBUG] [SERVER] [PlayerController] Requested building placement at: 0.031813740730285645, 6.998023986816406, -93.37954711914062
+[01:54:07] [DEBUG] [SERVER] [PlayerController] Entered third-person mode (mouse unlocked)
+[01:54:10] [DEBUG] [SERVER] [BuildingManager] Snapped settlement to vertex (dist: 24)
+[01:54:10] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile 1_-1
+[01:54:10] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 1 tiles with settlement
+[01:54:10] [INFO ] [SERVER] [BuildingManager] Settlement claimed 1 tiles
+[01:54:10] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[01:54:11] [DEBUG] [SERVER] [PlayerController] Requested building placement at: 1.892618179321289, 6.998026371002197, -87.60210418701172
+[01:54:23] [DEBUG] [SERVER] [BuildingManager] Snapped settlement to vertex (dist: 26)
+[01:54:23] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 1 tiles with settlement
+[01:54:23] [INFO ] [SERVER] [BuildingManager] Settlement claimed 1 tiles
+[01:54:23] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[01:54:23] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile 1_-2
+[01:54:23] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -2.760221481323242, 6.998023986816406, -94.02131652832031
+[01:54:25] [DEBUG] [SERVER] [BuildingManager] Snapped settlement to vertex (dist: 19)
+[01:54:25] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile 0_-1
+[01:54:25] [INFO ] [SERVER] [BuildingManager] Settlement claimed 1 tiles
+[01:54:25] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 1 tiles with settlement
+[01:54:25] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[01:54:26] [DEBUG] [SERVER] [PlayerController] Requested building placement at: -4.828943252563477, 6.998023986816406, -78.75503540039062
+[01:54:26] [DEBUG] [SERVER] [PlayerController] Entered first-person mode
+[01:54:26] [DEBUG] [SERVER] [PlayerController] Entered third-person mode (mouse unlocked)
+[01:54:26] [DEBUG] [SERVER] [PlayerController] Entered first-person mode
+[01:54:26] [DEBUG] [SERVER] [PlayerController] Entered third-person mode (mouse unlocked)
+[01:54:35] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09

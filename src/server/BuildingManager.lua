@@ -15,62 +15,8 @@ local function getTileOwnershipManager()
 	return TileOwnershipManager
 end
 
--- Hex geometry constants (must match MapGenerator)
-local HEX_SIZE = 30
-local HEX_HEIGHT = HEX_SIZE * math.sqrt(3)
-
--- Get all hex vertices (corners) from the map
-local function getHexVertices()
-	local vertices = {}
-	local mapFolder = workspace:FindFirstChild("Map")
-	if not mapFolder then return vertices end
-	
-	-- For each hex tile, calculate its 6 corner positions
-	for _, tile in ipairs(mapFolder:GetChildren()) do
-		if tile:IsA("Model") and tile.PrimaryPart then
-			local center = tile.PrimaryPart.Position
-			local y = center.Y + 1 -- Slightly above the tile
-			
-			-- 6 vertices for a pointy-top hexagon
-			for i = 0, 5 do
-				local angle = (math.pi / 3) * i + (math.pi / 6) -- 30 degree offset for pointy-top
-				local vx = center.X + HEX_SIZE * 0.6 * math.cos(angle)
-				local vz = center.Z + HEX_SIZE * 0.6 * math.sin(angle)
-				
-				-- Round to avoid floating point duplicates
-				local key = math.floor(vx + 0.5) .. "_" .. math.floor(vz + 0.5)
-				if not vertices[key] then
-					vertices[key] = Vector3.new(vx, y, vz)
-				end
-			end
-		end
-	end
-	
-	-- Convert to array
-	local vertexList = {}
-	for _, v in pairs(vertices) do
-		table.insert(vertexList, v)
-	end
-	
-	return vertexList
-end
-
--- Find nearest hex vertex to a given position
-local function findNearestVertex(position)
-	local vertices = getHexVertices()
-	local nearest = nil
-	local nearestDist = math.huge
-	
-	for _, vertex in ipairs(vertices) do
-		local dist = (Vector3.new(position.X, 0, position.Z) - Vector3.new(vertex.X, 0, vertex.Z)).Magnitude
-		if dist < nearestDist then
-			nearestDist = dist
-			nearest = vertex
-		end
-	end
-	
-	return nearest, nearestDist
-end
+-- MapGenerator provides vertex snapping
+local MapGenerator = require(script.Parent.MapGenerator)
 
 local BuildingManager = {}
 BuildingManager.__index = BuildingManager
@@ -98,12 +44,12 @@ function BuildingManager:StartBuilding(buildingType, position)
 	local buildingData = BuildingTypes[buildingType]
 	local finalPosition = position
 	
-	-- Snap settlements to hex vertices
+	-- Snap settlements to hex vertices (pre-calculated markers)
 	if buildingData.IsSettlement then
-		local nearestVertex, dist = findNearestVertex(position)
+		local nearestVertex, dist = MapGenerator.FindNearestVertex(position)
 		if nearestVertex then
-			finalPosition = nearestVertex
-			Logger.Debug("BuildingManager", "Snapped settlement to vertex (dist: " .. math.floor(dist) .. ")")
+			finalPosition = nearestVertex.Position
+			Logger.Debug("BuildingManager", "Snapped to vertex " .. nearestVertex.Name .. " (dist: " .. math.floor(dist) .. ")")
 		end
 	end
 	
