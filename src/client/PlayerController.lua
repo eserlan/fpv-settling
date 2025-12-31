@@ -23,8 +23,13 @@ camera.FieldOfView = 80
 -- Zoom threshold - below this distance, lock mouse (FPV mode)
 local ZOOM_THRESHOLD = 5 -- studs
 
+-- Speed settings
+local WALK_SPEED = 16
+local RUN_SPEED = 32
+
 -- Track current mode
 local isFirstPerson = false
+local isSprinting = false
 
 -- Building placement state
 local placementMode = false
@@ -32,6 +37,17 @@ local selectedBlueprint = nil
 local buildingPreview = nil
 local currentVertex = nil
 local isValidPlacement = false
+
+-- Update player speed based on sprint state
+local function updateSpeed()
+	local character = player.Character
+	if not character then return end
+	
+	local humanoid = character:FindFirstChild("Humanoid")
+	if humanoid then
+		humanoid.WalkSpeed = isSprinting and RUN_SPEED or WALK_SPEED
+	end
+end
 
 -- Function to update mouse lock based on camera distance
 local function updateMouseMode()
@@ -240,6 +256,21 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if input.KeyCode == Enum.KeyCode.R then
 		Network:FireServer("StartResearch", "ImprovedTools")
 		Logger.Debug("PlayerController", "Requested research: ImprovedTools")
+	end
+	
+	-- Sprint with Shift
+	if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.RightShift then
+		isSprinting = true
+		updateSpeed()
+	end
+end)
+
+-- Handle key release
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+	-- Stop sprinting when shift is released
+	if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.RightShift then
+		isSprinting = false
+		updateSpeed()
 	end
 end)
 
