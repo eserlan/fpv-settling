@@ -128,9 +128,31 @@ local StarterGui = game:GetService("StarterGui")
 local Events = ReplicatedStorage:WaitForChild("Events")
 local SystemMessageEvent = Events:WaitForChild("SystemMessageEvent")
 
-SystemMessageEvent.OnClientEvent:Connect(function(message)
-	-- Display in Roblox chat
-	pcall(function()
+-- Wait for chat to be ready
+local chatReady = false
+task.spawn(function()
+	local attempts = 0
+	while not chatReady and attempts < 30 do
+		local success = pcall(function()
+			StarterGui:SetCore("ChatMakeSystemMessage", {
+				Text = "",
+				Color = Color3.new(1, 1, 1)
+			})
+		end)
+		if success then
+			chatReady = true
+			Logger.Info("UIManager", "Chat system ready")
+		else
+			attempts = attempts + 1
+			task.wait(0.5)
+		end
+	end
+end)
+
+-- Function to send system message to chat
+local function sendSystemMessage(message)
+	-- Try to send to Roblox chat
+	local success = pcall(function()
 		StarterGui:SetCore("ChatMakeSystemMessage", {
 			Text = message,
 			Color = Color3.fromRGB(255, 215, 0), -- Gold color
@@ -141,8 +163,16 @@ SystemMessageEvent.OnClientEvent:Connect(function(message)
 	
 	-- Also log it
 	Logger.Info("System", message)
+	
+	return success
+end
+
+SystemMessageEvent.OnClientEvent:Connect(function(message)
+	sendSystemMessage(message)
 end)
 
 Logger.Info("UIManager", "Initialized")
 
-return {}
+return {
+	SendSystemMessage = sendSystemMessage
+}
