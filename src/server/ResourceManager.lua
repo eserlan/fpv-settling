@@ -18,12 +18,8 @@ function ResourceManager.new(player)
 		self.Resources[resourceName] = 0
 	end
 	
-	-- Give starting resources (Catan-style)
-	self.Resources.Wood = 5
-	self.Resources.Brick = 5
-	self.Resources.Wheat = 5
-	self.Resources.Ore = 5
-	self.Resources.Wool = 5
+	-- Catan rules: Players start with 0 resources
+	-- They earn resources when dice are rolled and their settlements match
 	
 	return self
 end

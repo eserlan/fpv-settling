@@ -429,18 +429,9 @@ function MapGenerator.CreateVertices(mapFolder)
 		marker.Position = data.Position
 		marker.Anchored = true
 		marker.CanCollide = false
-		marker.Material = Enum.Material.Neon
-		
-		-- Color based on how many hexes meet here
-		if adjCount >= 3 then
-			-- Valid settlement spot (3+ hexes meet)
-			marker.Color = Color3.fromRGB(255, 255, 255) -- White
-			marker.Transparency = 0.2
-		else
-			-- Edge or corner (only 1-2 hexes)
-			marker.Color = Color3.fromRGB(100, 100, 100) -- Grey
-			marker.Transparency = 0.7
-		end
+		marker.Material = Enum.Material.SmoothPlastic
+		marker.Transparency = 1 -- Fully invisible
+		marker.Color = Color3.fromRGB(255, 255, 255)
 		
 		marker.Parent = vertexFolder
 		
