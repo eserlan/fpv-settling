@@ -5,7 +5,9 @@
     "outDir": "out",
     "rootDir": "src",
     "strict": true,
-    "types": ["@rbxts/types"],
+    "types": ["@rbxts/types", "@rbxts/reflect"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "baseUrl": "src",
     "paths": {
       "shared/*": ["shared/*"],
