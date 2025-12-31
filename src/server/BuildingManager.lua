@@ -15,6 +15,63 @@ local function getTileOwnershipManager()
 	return TileOwnershipManager
 end
 
+-- Hex geometry constants (must match MapGenerator)
+local HEX_SIZE = 30
+local HEX_HEIGHT = HEX_SIZE * math.sqrt(3)
+
+-- Get all hex vertices (corners) from the map
+local function getHexVertices()
+	local vertices = {}
+	local mapFolder = workspace:FindFirstChild("Map")
+	if not mapFolder then return vertices end
+	
+	-- For each hex tile, calculate its 6 corner positions
+	for _, tile in ipairs(mapFolder:GetChildren()) do
+		if tile:IsA("Model") and tile.PrimaryPart then
+			local center = tile.PrimaryPart.Position
+			local y = center.Y + 1 -- Slightly above the tile
+			
+			-- 6 vertices for a pointy-top hexagon
+			for i = 0, 5 do
+				local angle = (math.pi / 3) * i + (math.pi / 6) -- 30 degree offset for pointy-top
+				local vx = center.X + HEX_SIZE * 0.6 * math.cos(angle)
+				local vz = center.Z + HEX_SIZE * 0.6 * math.sin(angle)
+				
+				-- Round to avoid floating point duplicates
+				local key = math.floor(vx + 0.5) .. "_" .. math.floor(vz + 0.5)
+				if not vertices[key] then
+					vertices[key] = Vector3.new(vx, y, vz)
+				end
+			end
+		end
+	end
+	
+	-- Convert to array
+	local vertexList = {}
+	for _, v in pairs(vertices) do
+		table.insert(vertexList, v)
+	end
+	
+	return vertexList
+end
+
+-- Find nearest hex vertex to a given position
+local function findNearestVertex(position)
+	local vertices = getHexVertices()
+	local nearest = nil
+	local nearestDist = math.huge
+	
+	for _, vertex in ipairs(vertices) do
+		local dist = (Vector3.new(position.X, 0, position.Z) - Vector3.new(vertex.X, 0, vertex.Z)).Magnitude
+		if dist < nearestDist then
+			nearestDist = dist
+			nearest = vertex
+		end
+	end
+	
+	return nearest, nearestDist
+end
+
 local BuildingManager = {}
 BuildingManager.__index = BuildingManager
 
@@ -39,6 +96,16 @@ function BuildingManager:StartBuilding(buildingType, position)
 	end
 	
 	local buildingData = BuildingTypes[buildingType]
+	local finalPosition = position
+	
+	-- Snap settlements to hex vertices
+	if buildingData.IsSettlement then
+		local nearestVertex, dist = findNearestVertex(position)
+		if nearestVertex then
+			finalPosition = nearestVertex
+			Logger.Debug("BuildingManager", "Snapped settlement to vertex (dist: " .. math.floor(dist) .. ")")
+		end
+	end
 	
 	-- First settlement is FREE
 	local isFreeFirstSettlement = buildingData.IsSettlement and not self.HasPlacedFirstSettlement
@@ -63,7 +130,7 @@ function BuildingManager:StartBuilding(buildingType, position)
 	local building = {
 		Id = buildingId,
 		Type = buildingType,
-		Position = position,
+		Position = finalPosition, -- Use snapped position for settlements
 		Progress = 0,
 		BuildTime = buildingData.BuildTime,
 		Completed = false,
@@ -78,7 +145,7 @@ function BuildingManager:StartBuilding(buildingType, position)
 		self:OnBuildingComplete(building)
 	else
 		table.insert(self.BuildingInProgress, building)
-		Network:FireClient(self.Player, "ConstructionStarted", buildingId, buildingType, position)
+		Network:FireClient(self.Player, "ConstructionStarted", buildingId, buildingType, finalPosition)
 	end
 	
 	-- Mark first settlement as placed
@@ -138,26 +205,33 @@ function BuildingManager:CreateBuildingModel(building)
 	
 	-- Color based on building type
 	if building.Type == "Settlement" then
-		-- Create a house shape!
+		-- Create a proper house shape!
 		-- Base/walls
-		part.Size = Vector3.new(6, 5, 6)
-		part.Position = building.Position + Vector3.new(0, 2.5, 0)
-		part.Color = Color3.fromRGB(200, 180, 140) -- Cream walls
+		part.Size = Vector3.new(5, 4, 5)
+		part.Position = building.Position + Vector3.new(0, 2, 0)
+		part.Color = Color3.fromRGB(220, 200, 160) -- Cream walls
 		part.Material = Enum.Material.SmoothPlastic
 		
-		-- Roof (wedge shape for triangle)
-		local roof = Instance.new("WedgePart")
-		roof.Size = Vector3.new(8, 4, 4)
-		roof.CFrame = CFrame.new(building.Position + Vector3.new(0, 7, -2)) * CFrame.Angles(0, math.pi, 0)
-		roof.Anchored = true
-		roof.Color = Color3.fromRGB(139, 69, 19) -- Brown roof
-		roof.Material = Enum.Material.Wood
-		roof.Parent = model
+		-- Roof - using 2 wedges to form A-frame
+		-- WedgePart: the slanted face points in -Z direction by default
+		local roofHeight = 2.5
+		local roofOverhang = 0.5
 		
-		-- Second half of roof
+		-- Left side of roof
+		local roof1 = Instance.new("WedgePart")
+		roof1.Size = Vector3.new(5 + roofOverhang * 2, roofHeight, 3)
+		roof1.CFrame = CFrame.new(building.Position + Vector3.new(0, 4 + roofHeight/2, -1.5)) 
+			* CFrame.Angles(0, 0, 0)
+		roof1.Anchored = true
+		roof1.Color = Color3.fromRGB(139, 69, 19) -- Brown roof
+		roof1.Material = Enum.Material.Wood
+		roof1.Parent = model
+		
+		-- Right side of roof (rotated 180 degrees around Y)
 		local roof2 = Instance.new("WedgePart")
-		roof2.Size = Vector3.new(8, 4, 4)
-		roof2.CFrame = CFrame.new(building.Position + Vector3.new(0, 7, 2))
+		roof2.Size = Vector3.new(5 + roofOverhang * 2, roofHeight, 3)
+		roof2.CFrame = CFrame.new(building.Position + Vector3.new(0, 4 + roofHeight/2, 1.5)) 
+			* CFrame.Angles(0, math.pi, 0)
 		roof2.Anchored = true
 		roof2.Color = Color3.fromRGB(139, 69, 19) -- Brown roof
 		roof2.Material = Enum.Material.Wood
@@ -165,12 +239,22 @@ function BuildingManager:CreateBuildingModel(building)
 		
 		-- Door
 		local door = Instance.new("Part")
-		door.Size = Vector3.new(1.5, 3, 0.5)
-		door.Position = building.Position + Vector3.new(0, 1.5, 3.2)
+		door.Size = Vector3.new(1.2, 2.5, 0.3)
+		door.Position = building.Position + Vector3.new(0, 1.25, 2.6)
 		door.Anchored = true
 		door.Color = Color3.fromRGB(101, 67, 33) -- Dark wood door
 		door.Material = Enum.Material.Wood
 		door.Parent = model
+		
+		-- Window
+		local window = Instance.new("Part")
+		window.Size = Vector3.new(1, 1, 0.2)
+		window.Position = building.Position + Vector3.new(1.5, 2.5, 2.6)
+		window.Anchored = true
+		window.Color = Color3.fromRGB(135, 206, 235) -- Light blue glass
+		window.Material = Enum.Material.Glass
+		window.Transparency = 0.3
+		window.Parent = model
 	elseif building.Type == "City" then
 		part.Color = Color3.fromRGB(80, 80, 80) -- Stone grey
 		part.Material = Enum.Material.Slate

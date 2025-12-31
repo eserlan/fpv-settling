@@ -111,9 +111,9 @@ TimerEvent.OnClientEvent:Connect(function(seconds)
 		-- Waiting for all players to place settlements
 		countdownLabel.Text = "Place Settlement!"
 		countdownLabel.TextColor3 = Color3.fromRGB(255, 255, 100)
-		timerTitle.Text = "🏠 Build First"
+		timerLabel.Text = "🏠 Build First"
 	else
-		timerTitle.Text = "⏱️ Next Pulse"
+		timerLabel.Text = "⏱️ Next Pulse"
 		countdownLabel.Text = tostring(seconds)
 		
 		-- Flash when low
