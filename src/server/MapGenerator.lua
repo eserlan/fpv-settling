@@ -399,36 +399,39 @@ function MapGenerator.CreateVertices(mapFolder)
 		end
 	end
 	
-	-- Create visible vertex markers
+	-- Create visible vertex markers - ONLY where 3 hexes meet
 	local vertexId = 1
 	for key, data in pairs(vertices) do
-		local marker = Instance.new("Part")
-		marker.Name = "Vertex_" .. vertexId
-		marker.Shape = Enum.PartType.Cylinder
-		marker.Size = Vector3.new(1, 3, 3) -- Small cylinder
-		marker.Position = data.Position
-		marker.Rotation = Vector3.new(0, 0, 90) -- Stand upright
-		marker.Anchored = true
-		marker.CanCollide = false
-		marker.Color = Color3.fromRGB(255, 255, 255) -- White markers
-		marker.Material = Enum.Material.Neon
-		marker.Transparency = 0.5
-		marker.Parent = vertexFolder
-		
-		-- Store vertex data as attributes
-		marker:SetAttribute("VertexId", vertexId)
-		marker:SetAttribute("Key", key)
-		
-		-- Store adjacent tile info (up to 3 tiles)
-		for i, tileInfo in ipairs(data.AdjacentTiles) do
-			if i <= 3 then
-				marker:SetAttribute("Tile" .. i .. "Q", tileInfo.Q)
-				marker:SetAttribute("Tile" .. i .. "R", tileInfo.R)
+		-- Only create markers where exactly 3 hexes meet (true intersections)
+		if #data.AdjacentTiles >= 3 then
+			local marker = Instance.new("Part")
+			marker.Name = "Vertex_" .. vertexId
+			marker.Shape = Enum.PartType.Cylinder
+			marker.Size = Vector3.new(1, 4, 4) -- Small cylinder
+			marker.Position = data.Position
+			marker.Rotation = Vector3.new(0, 0, 90) -- Stand upright
+			marker.Anchored = true
+			marker.CanCollide = false
+			marker.Color = Color3.fromRGB(255, 255, 255) -- White markers
+			marker.Material = Enum.Material.Neon
+			marker.Transparency = 0.3
+			marker.Parent = vertexFolder
+			
+			-- Store vertex data as attributes
+			marker:SetAttribute("VertexId", vertexId)
+			marker:SetAttribute("Key", key)
+			
+			-- Store adjacent tile info (exactly 3 tiles)
+			for i, tileInfo in ipairs(data.AdjacentTiles) do
+				if i <= 3 then
+					marker:SetAttribute("Tile" .. i .. "Q", tileInfo.Q)
+					marker:SetAttribute("Tile" .. i .. "R", tileInfo.R)
+				end
 			end
-		end
-		marker:SetAttribute("AdjacentTileCount", math.min(#data.AdjacentTiles, 3))
+			marker:SetAttribute("AdjacentTileCount", math.min(#data.AdjacentTiles, 3))
 		
-		vertexId = vertexId + 1
+			vertexId = vertexId + 1
+		end
 	end
 	
 	print("[MapGenerator] Created " .. (vertexId - 1) .. " vertices")
