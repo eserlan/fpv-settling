@@ -244,10 +244,8 @@ for _, name in ipairs(sortedNames) do
 end
 
 -- Listen for inventory updates
-local Events = ReplicatedStorage:WaitForChild("Events")
-local CollectEvent = Events:WaitForChild("InventoryUpdate")
-
-CollectEvent.OnClientEvent:Connect(function(action, data)
+local Network = require(ReplicatedStorage.Shared.Network)
+Network:OnEvent("CollectEvent", function(action, data)
 	if action == "InventoryUpdate" then
 		currentResources = data
 		refreshAffordability()

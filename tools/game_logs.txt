@@ -1887,3 +1887,38 @@
 [16:28:46] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
 [16:28:46] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
 [16:28:46] [INFO ] [SERVER] [System] 🎲 Rolled 4! Spawned: 1x Wood, 1x Brick
+[16:29:45] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 5 + 4 = 9
+[16:29:48] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[16:29:48] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[16:29:48] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[16:29:49] [INFO ] [SERVER] [System] 🎲 Rolled 9! Spawned: 1x Wood, 1x Wheat
+[16:30:18] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[16:30:25] [INFO ] [SERVER] [Server] ===========================================
+[16:30:25] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[16:30:25] [INFO ] [SERVER] [Server] ===========================================
+[16:30:25] [INFO ] [SERVER] [CollectionManager] Initialized
+[16:30:25] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[16:30:25] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[16:30:25] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[16:30:25] [INFO ] [SERVER] [Server] ===========================================
+[16:30:25] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[16:30:25] [INFO ] [SERVER] [Server] ===========================================
+[16:30:25] [INFO ] [SERVER] [NetworkHandler] Initialized
+[16:30:25] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[16:30:26] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09 with starting resources
+[16:30:28] [INFO ] [SERVER] [Client] ===========================================
+[16:30:28] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[16:30:28] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[16:30:28] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[16:30:28] [INFO ] [SERVER] [Client] ===========================================
+[16:30:28] [INFO ] [SERVER] [Client] Waiting for character...
+[16:30:30] [INFO ] [SERVER] [Client] Character loaded!
+[16:30:30] [INFO ] [SERVER] [PlayerController] Initialized
+[16:30:30] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[16:30:30] [INFO ] [SERVER] [UIManager] Chat system ready
+[16:30:30] [INFO ] [SERVER] [UIManager] Initialized
+[16:30:30] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[16:30:30] [INFO ] [SERVER] [PulseUI] Initialized
+[16:30:30] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[16:30:30] [INFO ] [SERVER] [InventoryUI] Initialized
+[16:30:30] [DEBUG] [SERVER] [Client] Loaded: InventoryUI

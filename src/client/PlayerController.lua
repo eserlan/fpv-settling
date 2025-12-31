@@ -11,7 +11,22 @@ local Blueprints = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild
 -- Wait for BlueprintBookUI to be available
 local BlueprintBookUI = nil
 task.spawn(function()
-	BlueprintBookUI = require(script.Parent:WaitForChild("BlueprintBookUI"))
+	local success, result = pcall(function()
+		return require(script.Parent:WaitForChild("BlueprintBookUI", 10))
+	end)
+	if success then
+		BlueprintBookUI = result
+		Logger.Info("PlayerController", "BlueprintBookUI loaded")
+		
+		-- Hook up selection callback immediately upon loading
+		BlueprintBookUI.OnBlueprintSelected(function(blueprintName, blueprintData)
+			selectedBlueprint = blueprintName
+			placementMode = true
+			Logger.Info("PlayerController", "Entering placement mode for: " .. blueprintName)
+		end)
+	else
+		Logger.Error("PlayerController", "Failed to load BlueprintBookUI: " .. tostring(result))
+	end
 end)
 
 local player = Players.LocalPlayer
@@ -311,16 +326,7 @@ local function exitPlacementMode()
 end
 
 -- Handle blueprint selection callback
-task.spawn(function()
-	task.wait(1) -- Wait for BlueprintBookUI to initialize
-	if BlueprintBookUI then
-		BlueprintBookUI.OnBlueprintSelected(function(blueprintName, blueprintData)
-			selectedBlueprint = blueprintName
-			placementMode = true
-			Logger.Info("PlayerController", "Entering placement mode for: " .. blueprintName)
-		end)
-	end
-end)
+-- (Handled in main initialization loop above)
 
 -- Foundation interaction state
 local nearbyFoundation = nil
