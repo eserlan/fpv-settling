@@ -555,3 +555,38 @@
 [02:16:40] [DEBUG] [SERVER] [PlayerController] Entered third-person mode (mouse unlocked)
 [02:16:40] [DEBUG] [SERVER] [PlayerController] Entered first-person mode
 [02:16:40] [DEBUG] [SERVER] [PlayerController] Entered third-person mode (mouse unlocked)
+[05:30:09] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[05:30:28] [INFO ] [SERVER] [Server] ===========================================
+[05:30:28] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[05:30:28] [INFO ] [SERVER] [Server] ===========================================
+[05:30:28] [INFO ] [SERVER] [CollectionManager] Initialized
+[05:30:28] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[05:30:28] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[05:30:28] [INFO ] [SERVER] [NetworkHandler] Initialized
+[05:30:28] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[05:30:28] [INFO ] [SERVER] [Server] ===========================================
+[05:30:28] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[05:30:28] [INFO ] [SERVER] [Server] ===========================================
+[05:30:29] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[05:30:29] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09
+[05:30:29] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[05:30:31] [INFO ] [SERVER] [Client] ===========================================
+[05:30:32] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[05:30:32] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[05:30:32] [INFO ] [SERVER] [Client] ===========================================
+[05:30:32] [INFO ] [SERVER] [Client] Waiting for character...
+[05:30:33] [INFO ] [SERVER] [Client] Character loaded!
+[05:30:33] [INFO ] [SERVER] [PlayerController] Initialized
+[05:30:33] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[05:30:34] [INFO ] [SERVER] [UIManager] Initialized
+[05:30:34] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[05:30:34] [INFO ] [SERVER] [PulseUI] Initialized
+[05:30:34] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[05:30:34] [INFO ] [SERVER] [InventoryUI] Initialized
+[05:30:34] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[05:30:34] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[05:30:34] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[05:30:34] [INFO ] [SERVER] [Client] ===========================================
+[05:30:34] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[05:30:34] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[05:30:34] [INFO ] [SERVER] [Client] ===========================================

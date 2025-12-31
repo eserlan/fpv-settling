@@ -377,15 +377,19 @@ function MapGenerator.CreateVertices(mapFolder)
 			local q = tile.PrimaryPart:GetAttribute("Q")
 			local r = tile.PrimaryPart:GetAttribute("R")
 			
-			-- 6 vertices for a flat-top hexagon
+			-- 6 vertices for the hex
+			-- The hex is made from rotated rectangles, so corners are at 30° offsets
+			-- and the effective radius is slightly larger
+			local cornerRadius = HEX_SIZE * 1.15 -- Adjusted for the visual hex shape
 			for i = 0, 5 do
-				local angle = (math.pi / 3) * i
-				local vx = center.X + HEX_SIZE * math.cos(angle)
-				local vz = center.Z + HEX_SIZE * math.sin(angle)
+				-- Add 30° (π/6) offset for pointy-top hex corners
+				local angle = (math.pi / 3) * i + (math.pi / 6)
+				local vx = center.X + cornerRadius * math.cos(angle)
+				local vz = center.Z + cornerRadius * math.sin(angle)
 				
-				-- Round to grid cells of 5 studs for deduplication
+				-- Round to grid cells of 8 studs for deduplication
 				-- This ensures shared vertices from adjacent hexes are merged
-				local gridSize = 5
+				local gridSize = 8
 				local keyX = math.floor(vx / gridSize + 0.5)
 				local keyZ = math.floor(vz / gridSize + 0.5)
 				local key = keyX .. "_" .. keyZ
