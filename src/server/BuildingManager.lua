@@ -142,48 +142,239 @@ function BuildingManager:PlaceFoundation(blueprintName, position)
 		Position = position,
 		Blueprint = blueprint,
 		IsFoundation = true,
-		ResourcesDeposited = {}, -- Track deposited resources
-		Completed = false
+		RequiredResources = {}, -- Copy of blueprint cost
+		DepositedResources = {}, -- Track what's been deposited
+		Progress = 0, -- 0 to 1
+		Completed = false,
+		OwnerId = self.Player.UserId
 	}
+	
+	-- Copy required resources from blueprint
+	for resource, amount in pairs(blueprint.Cost) do
+		foundation.RequiredResources[resource] = amount
+		foundation.DepositedResources[resource] = 0
+	end
+	
+	-- First settlement is free - auto-deposit all resources
+	if isFreeFirst then
+		for resource, amount in pairs(blueprint.Cost) do
+			foundation.DepositedResources[resource] = amount
+		end
+		foundation.Progress = 1
+		foundation.Completed = true
+	end
 	
 	-- Create physical foundation model
 	self:CreateFoundationModel(foundation)
 	
 	table.insert(self.Buildings, foundation)
 	
+	-- Store foundation by ID for easy lookup
+	self.FoundationsById = self.FoundationsById or {}
+	self.FoundationsById[foundationId] = foundation
+	
 	-- Mark first settlement as placed
 	if blueprintName == "Settlement" and not self.HasPlacedFirstSettlement then
 		self.HasPlacedFirstSettlement = true
 	end
 	
-	-- For now, complete immediately (TODO: require resource deposits)
-	foundation.Completed = true
-	self:OnBuildingComplete(foundation)
+	-- Complete immediately if free first settlement
+	if foundation.Completed then
+		self:OnBuildingComplete(foundation)
+	end
 	
-	Logger.Info("BuildingManager", self.Player.Name .. " placed foundation for " .. blueprintName)
+	-- Notify client about new foundation
+	Network:FireClient(self.Player, "FoundationPlaced", foundationId, blueprintName, position, foundation.RequiredResources)
+	
+	Logger.Info("BuildingManager", self.Player.Name .. " placed foundation for " .. blueprintName .. " (ID: " .. foundationId .. ")")
 	return true, foundationId
 end
 
--- Create foundation/ghost model
+-- Deposit a resource into a foundation
+function BuildingManager:DepositResource(foundationId, resourceType)
+	local foundation = self.FoundationsById and self.FoundationsById[foundationId]
+	if not foundation then
+		Logger.Warn("BuildingManager", "Foundation not found: " .. tostring(foundationId))
+		return false, "Foundation not found"
+	end
+	
+	if foundation.Completed then
+		return false, "Already completed"
+	end
+	
+	-- Check if this resource is needed
+	local required = foundation.RequiredResources[resourceType] or 0
+	local deposited = foundation.DepositedResources[resourceType] or 0
+	
+	if deposited >= required then
+		return false, "Resource not needed"
+	end
+	
+	-- Deposit the resource
+	foundation.DepositedResources[resourceType] = deposited + 1
+	
+	-- Calculate progress
+	local totalRequired = 0
+	local totalDeposited = 0
+	for res, req in pairs(foundation.RequiredResources) do
+		totalRequired = totalRequired + req
+		totalDeposited = totalDeposited + (foundation.DepositedResources[res] or 0)
+	end
+	foundation.Progress = totalDeposited / totalRequired
+	
+	-- Update the visual
+	self:UpdateFoundationVisual(foundation)
+	
+	-- Check if complete
+	if foundation.Progress >= 1 then
+		foundation.Completed = true
+		self:OnBuildingComplete(foundation)
+		Logger.Info("BuildingManager", "Foundation completed: " .. foundation.Type)
+	end
+	
+	-- Notify client
+	Network:FireClient(self.Player, "ResourceDeposited", foundationId, resourceType, foundation.Progress)
+	
+	Logger.Debug("BuildingManager", "Deposited " .. resourceType .. " into foundation " .. foundationId .. " (Progress: " .. math.floor(foundation.Progress * 100) .. "%)")
+	return true
+end
+
+-- Update foundation visual based on progress
+function BuildingManager:UpdateFoundationVisual(foundation)
+	if not foundation.Model then return end
+	
+	local basePart = foundation.Model:FindFirstChild("FoundationBase")
+	if not basePart then return end
+	
+	-- Reduce transparency as progress increases (0.7 at 0%, 0.2 at 100%)
+	basePart.Transparency = 0.7 - (foundation.Progress * 0.5)
+	
+	-- Change color as it completes
+	local greenAmount = math.floor(200 + foundation.Progress * 55)
+	basePart.Color = Color3.fromRGB(100, greenAmount, 100 + (1 - foundation.Progress) * 155)
+	
+	-- Update progress bar if exists
+	local progressBar = foundation.Model:FindFirstChild("ProgressBar")
+	if progressBar then
+		local fill = foundation.Model:FindFirstChild("Fill")
+		if fill then
+			local fillWidth = math.max(0.1, progressBar.Size.X * foundation.Progress)
+			fill.Size = Vector3.new(fillWidth, fill.Size.Y, fill.Size.Z)
+			-- Move fill to correct position
+			fill.Position = progressBar.Position - Vector3.new((progressBar.Size.X - fillWidth) / 2, 0, 0)
+		end
+	end
+	
+	-- Update resource display text
+	local resourceDisplay = basePart:FindFirstChild("ResourceDisplay")
+	if resourceDisplay then
+		local resourceLabel = resourceDisplay:FindFirstChild("Resources")
+		if resourceLabel then
+			local Blueprints = require(ReplicatedStorage.Shared.Blueprints)
+			local resourceText = "Needs:\n"
+			for resource, required in pairs(foundation.RequiredResources) do
+				local icon = Blueprints.ResourceIcons[resource] or ""
+				local deposited = foundation.DepositedResources[resource] or 0
+				local status = deposited >= required and "✓" or ""
+				resourceText = resourceText .. icon .. " " .. deposited .. "/" .. required .. " " .. status .. "\n"
+			end
+			resourceLabel.Text = resourceText
+		end
+	end
+end
+
+-- Get foundation at position (for client interaction)
+function BuildingManager:GetFoundationNear(position, maxDistance)
+	maxDistance = maxDistance or 15
+	
+	for _, building in ipairs(self.Buildings) do
+		if building.IsFoundation and not building.Completed then
+			local dist = (building.Position - position).Magnitude
+			if dist <= maxDistance then
+				return building
+			end
+		end
+	end
+	return nil
+end
+
+-- Create foundation/ghost model with progress indicators
 function BuildingManager:CreateFoundationModel(foundation)
 	local model = Instance.new("Model")
 	model.Name = self.Player.Name .. "_Foundation_" .. foundation.Type .. "_" .. foundation.Id
 	
 	local size = foundation.Blueprint.Size or Vector3.new(5, 4, 5)
 	
+	-- Main ghost building
 	local part = Instance.new("Part")
 	part.Name = "FoundationBase"
 	part.Size = size
 	part.Position = foundation.Position + Vector3.new(0, size.Y / 2, 0)
 	part.Anchored = true
 	part.CanCollide = false
-	part.Transparency = 0.6
+	part.Transparency = 0.7 -- Start very transparent
 	part.Color = Color3.fromRGB(100, 200, 255) -- Light blue ghost
-	part.Material = Enum.Material.SmoothPlastic
+	part.Material = Enum.Material.ForceField
 	part.Parent = model
+	
+	-- Progress bar background
+	local progressBg = Instance.new("Part")
+	progressBg.Name = "ProgressBar"
+	progressBg.Size = Vector3.new(6, 0.3, 0.3)
+	progressBg.Position = foundation.Position + Vector3.new(0, size.Y + 2, 0)
+	progressBg.Anchored = true
+	progressBg.CanCollide = false
+	progressBg.Color = Color3.fromRGB(50, 50, 50)
+	progressBg.Material = Enum.Material.SmoothPlastic
+	progressBg.Parent = model
+	
+	-- Progress bar fill
+	local progressFill = Instance.new("Part")
+	progressFill.Name = "Fill"
+	progressFill.Size = Vector3.new(0.1, 0.4, 0.4) -- Starts small
+	progressFill.Position = progressBg.Position - Vector3.new(progressBg.Size.X / 2 - 0.05, 0, 0)
+	progressFill.Anchored = true
+	progressFill.CanCollide = false
+	progressFill.Color = Color3.fromRGB(100, 255, 100) -- Green
+	progressFill.Material = Enum.Material.Neon
+	progressFill.Parent = model
+	
+	-- Billboard for resource requirements
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "ResourceDisplay"
+	billboard.Size = UDim2.new(0, 150, 0, 80)
+	billboard.StudsOffset = Vector3.new(0, size.Y + 4, 0)
+	billboard.AlwaysOnTop = true
+	billboard.Adornee = part
+	billboard.Parent = part
+	
+	local resourceLabel = Instance.new("TextLabel")
+	resourceLabel.Name = "Resources"
+	resourceLabel.Size = UDim2.new(1, 0, 1, 0)
+	resourceLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	resourceLabel.BackgroundTransparency = 0.3
+	resourceLabel.TextColor3 = Color3.new(1, 1, 1)
+	resourceLabel.Font = Enum.Font.GothamBold
+	resourceLabel.TextSize = 14
+	resourceLabel.TextWrapped = true
+	resourceLabel.Parent = billboard
+	
+	-- Build resource text
+	local Blueprints = require(ReplicatedStorage.Shared.Blueprints)
+	local resourceText = "Needs:\n"
+	for resource, amount in pairs(foundation.RequiredResources) do
+		local icon = Blueprints.ResourceIcons[resource] or ""
+		local deposited = foundation.DepositedResources[resource] or 0
+		resourceText = resourceText .. icon .. " " .. deposited .. "/" .. amount .. "\n"
+	end
+	resourceLabel.Text = resourceText
 	
 	model.PrimaryPart = part
 	model.Parent = workspace:FindFirstChild("Buildings") or workspace
+	
+	-- Store reference to foundation ID on the model for interaction
+	part:SetAttribute("FoundationId", foundation.Id)
+	part:SetAttribute("OwnerId", foundation.OwnerId)
 	
 	foundation.Model = model
 end

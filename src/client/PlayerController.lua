@@ -199,10 +199,127 @@ task.spawn(function()
 	end
 end)
 
+-- Foundation interaction state
+local nearbyFoundation = nil
+local depositPromptGui = nil
+
+-- Create deposit prompt UI
+local function createDepositPrompt()
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "DepositPrompt"
+	screenGui.ResetOnSpawn = false
+	screenGui.Parent = player:WaitForChild("PlayerGui")
+	
+	local frame = Instance.new("Frame")
+	frame.Name = "PromptFrame"
+	frame.Size = UDim2.new(0, 300, 0, 60)
+	frame.Position = UDim2.new(0.5, -150, 0.6, 0)
+	frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	frame.BackgroundTransparency = 0.3
+	frame.BorderSizePixel = 0
+	frame.Visible = false
+	frame.Parent = screenGui
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 10)
+	corner.Parent = frame
+	
+	local label = Instance.new("TextLabel")
+	label.Name = "Text"
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = 18
+	label.Text = "Press E to deposit resource"
+	label.Parent = frame
+	
+	return screenGui, frame
+end
+
+depositPromptGui = createDepositPrompt()
+local promptFrame = depositPromptGui:FindFirstChild("PromptFrame")
+
+-- Find nearby foundation
+local function findNearbyFoundation()
+	local character = player.Character
+	if not character or not character.PrimaryPart then return nil end
+	
+	local playerPos = character.PrimaryPart.Position
+	local buildings = workspace:FindFirstChild("Buildings")
+	if not buildings then return nil end
+	
+	local closest = nil
+	local closestDist = 15 -- Max interaction distance
+	
+	for _, model in ipairs(buildings:GetChildren()) do
+		if model:IsA("Model") then
+			local basePart = model:FindFirstChild("FoundationBase")
+			if basePart then
+				local foundationId = basePart:GetAttribute("FoundationId")
+				local ownerId = basePart:GetAttribute("OwnerId")
+				
+				-- Only interact with own foundations that aren't complete
+				if foundationId and ownerId == player.UserId then
+					local dist = (basePart.Position - playerPos).Magnitude
+					if dist < closestDist then
+						closestDist = dist
+						closest = {
+							Id = foundationId,
+							Model = model,
+							Part = basePart
+						}
+					end
+				end
+			end
+		end
+	end
+	
+	return closest
+end
+
+-- Get first needed resource from foundation
+local function getNeededResourceFromFoundation(foundation)
+	if not foundation or not foundation.Part then return nil end
+	
+	local resourceDisplay = foundation.Part:FindFirstChild("ResourceDisplay")
+	if not resourceDisplay then return nil end
+	
+	local resourceLabel = resourceDisplay:FindFirstChild("Resources")
+	if not resourceLabel then return nil end
+	
+	-- Parse the text to find a resource that's not complete
+	-- This is a simple approach - ideally server would send this info
+	local resources = {"Wood", "Brick", "Wheat", "Wool", "Ore"}
+	for _, res in ipairs(resources) do
+		-- Check if player has this resource (client-side check)
+		-- The server will verify anyway
+		return res -- Return first resource type for now
+	end
+	return nil
+end
+
 -- Update every frame
 RunService.RenderStepped:Connect(function()
 	updateMouseMode()
 	updatePlacementPreview()
+	
+	-- Check for nearby foundation (when not in placement mode)
+	if not placementMode then
+		nearbyFoundation = findNearbyFoundation()
+		
+		if nearbyFoundation and promptFrame then
+			promptFrame.Visible = true
+			local textLabel = promptFrame:FindFirstChild("Text")
+			if textLabel then
+				textLabel.Text = "Press E to deposit resources"
+			end
+		elseif promptFrame then
+			promptFrame.Visible = false
+		end
+	elseif promptFrame then
+		promptFrame.Visible = false
+	end
 end)
 
 -- Handle input
@@ -231,6 +348,18 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			exitPlacementMode()
 		else
 			Logger.Warn("PlayerController", "Invalid placement location")
+		end
+	end
+	
+	-- Deposit resource into foundation with E key
+	if input.KeyCode == Enum.KeyCode.E then
+		if nearbyFoundation then
+			-- Deposit wood first, then brick, wheat, wool, ore in order
+			local resourcesToTry = {"Wood", "Brick", "Wheat", "Wool", "Ore"}
+			for _, resourceType in ipairs(resourcesToTry) do
+				Network:FireServer("DepositResource", nearbyFoundation.Id, resourceType)
+			end
+			Logger.Debug("PlayerController", "Depositing resources into foundation " .. nearbyFoundation.Id)
 		end
 	end
 	

@@ -21,6 +21,25 @@ function NetworkHandler.Init(gameManager)
 			local blueprintName, position = ...
 			playerData.BuildingManager:PlaceFoundation(blueprintName, position)
 			
+		elseif actionType == "DepositResource" then
+			-- Deposit resource into foundation
+			local foundationId, resourceType = ...
+			
+			-- First check if player has the resource
+			local CollectionManager = require(script.Parent.CollectionManager)
+			local inventory = CollectionManager.GetInventory(player)
+			
+			if inventory and inventory[resourceType] and inventory[resourceType] > 0 then
+				-- Try to deposit
+				local success = playerData.BuildingManager:DepositResource(foundationId, resourceType)
+				if success then
+					-- Remove from player inventory
+					CollectionManager.RemoveResource(player, resourceType, 1)
+				end
+			else
+				Logger.Warn("NetworkHandler", player.Name .. " tried to deposit " .. resourceType .. " but doesn't have any")
+			end
+			
 		elseif actionType == "HireNPC" then
 			local npcType, position = ...
 			playerData.NPCManager:HireNPC(npcType, position)
