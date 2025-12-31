@@ -135,14 +135,6 @@ local function createSectionLabel(text)
 	return label
 end
 
--- ========== TOGGLE: Show Dice Numbers ==========
-createSectionLabel("Map Display")
-
-local _, getDiceNumbersState = createToggleButton("ShowDiceNumbers", "Show Dice Numbers", false, function(isOn)
-	showDiceNumbers = isOn
-	DevPanel.UpdateDiceNumberDisplay()
-end)
-
 -- ========== ACTION: Force Pulse ==========
 createSectionLabel("Pulse Controls")
 
@@ -150,50 +142,9 @@ createActionButton("ForcePulse", "⚡ Force Dice Roll", function()
 	DevEvent:FireServer("ForcePulse")
 end)
 
--- ========== TOGGLE: Show Terrain Labels ==========
-createSectionLabel("Labels")
 
-createToggleButton("ShowTerrainLabels", "Show Terrain Labels", true, function(isOn)
-	local mapFolder = workspace:FindFirstChild("Map")
-	if not mapFolder then return end
-	
-	for _, tile in ipairs(mapFolder:GetChildren()) do
-		if tile:IsA("Model") then
-			for _, child in ipairs(tile:GetDescendants()) do
-				if child:IsA("BillboardGui") then
-					child.Enabled = isOn
-				end
-			end
-		end
-	end
-end)
 
--- Function to update dice number display on labels
-function DevPanel.UpdateDiceNumberDisplay()
-	local mapFolder = workspace:FindFirstChild("Map")
-	if not mapFolder then return end
-	
-	for _, tile in ipairs(mapFolder:GetChildren()) do
-		if tile:IsA("Model") and tile.PrimaryPart then
-			local diceNumber = tile.PrimaryPart:GetAttribute("DiceNumber")
-			local tileType = tile.PrimaryPart:GetAttribute("TileType")
-			
-			-- Find the terrain label billboard
-			for _, child in ipairs(tile:GetDescendants()) do
-				if child:IsA("BillboardGui") then
-					local textLabel = child:FindFirstChild("TextLabel")
-					if textLabel then
-						if showDiceNumbers and diceNumber then
-							textLabel.Text = tileType .. "\n[" .. diceNumber .. "]"
-						else
-							textLabel.Text = tileType or ""
-						end
-					end
-				end
-			end
-		end
-	end
-end
+
 
 -- Toggle panel visibility
 local function togglePanel()
