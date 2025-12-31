@@ -78,8 +78,8 @@ buildingTitle.Parent = buildingFrame
 -- Help text
 local helpFrame = Instance.new("Frame")
 helpFrame.Name = "HelpDisplay"
-helpFrame.Size = UDim2.new(0, 400, 0, 120)
-helpFrame.Position = UDim2.new(0.5, -200, 1, -130)
+helpFrame.Size = UDim2.new(0, 300, 0, 120)
+helpFrame.Position = UDim2.new(0, 10, 1, -130) -- Lower left corner
 helpFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 helpFrame.BackgroundTransparency = 0.3
 helpFrame.BorderSizePixel = 2
@@ -122,6 +122,26 @@ end
 
 -- Listen for resource updates from server
 Network:OnEvent("ResourceUpdate", updateResourceDisplay)
+
+-- System message handler (for chat log)
+local StarterGui = game:GetService("StarterGui")
+local Events = ReplicatedStorage:WaitForChild("Events")
+local SystemMessageEvent = Events:WaitForChild("SystemMessageEvent")
+
+SystemMessageEvent.OnClientEvent:Connect(function(message)
+	-- Display in Roblox chat
+	pcall(function()
+		StarterGui:SetCore("ChatMakeSystemMessage", {
+			Text = message,
+			Color = Color3.fromRGB(255, 215, 0), -- Gold color
+			Font = Enum.Font.GothamBold,
+			TextSize = 16
+		})
+	end)
+	
+	-- Also log it
+	Logger.Info("System", message)
+end)
 
 Logger.Info("UIManager", "Initialized")
 

@@ -725,3 +725,79 @@
 [12:10:40] [DEBUG] [SERVER] [PulseManager] Spawned Ore at tile
 [12:10:40] [DEBUG] [SERVER] [PulseManager] Spawned Wool at tile
 [12:11:11] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[12:12:46] [INFO ] [SERVER] [Server] ===========================================
+[12:12:46] [INFO ] [SERVER] [Server] ===========================================
+[12:12:46] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[12:12:46] [INFO ] [SERVER] [CollectionManager] Initialized
+[12:12:46] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[12:12:46] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[12:12:46] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[12:12:46] [INFO ] [SERVER] [Server] ===========================================
+[12:12:46] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[12:12:46] [INFO ] [SERVER] [Server] ===========================================
+[12:12:46] [INFO ] [SERVER] [NetworkHandler] Initialized
+[12:12:47] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[12:12:47] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09
+[12:12:49] [INFO ] [SERVER] [Client] ===========================================
+[12:12:49] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[12:12:49] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[12:12:49] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[12:12:49] [INFO ] [SERVER] [Client] ===========================================
+[12:12:49] [INFO ] [SERVER] [Client] Waiting for character...
+[12:12:51] [INFO ] [SERVER] [Client] Character loaded!
+[12:12:51] [INFO ] [SERVER] [PlayerController] Initialized
+[12:12:51] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[12:12:51] [INFO ] [SERVER] [UIManager] Initialized
+[12:12:51] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[12:12:51] [INFO ] [SERVER] [PulseUI] Initialized
+[12:12:51] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[12:12:51] [INFO ] [SERVER] [InventoryUI] Initialized
+[12:12:51] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[12:12:51] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[12:12:51] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[12:12:51] [INFO ] [SERVER] [Client] ===========================================
+[12:12:51] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[12:12:51] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[12:12:51] [INFO ] [SERVER] [Client] ===========================================
+[12:17:46] [DEBUG] [SERVER] [PlayerController] Build mode: true
+[12:17:58] [DEBUG] [SERVER] [BuildingManager] Snapped to vertex Vertex_5 (dist: 3)
+[12:17:59] [DEBUG] [SERVER] [TileOwnership] Vertex Vertex_5 has 3 adjacent tiles
+[12:17:59] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile 0_-1
+[12:17:59] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile 1_-2
+[12:17:59] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed tile 1_-1
+[12:17:59] [INFO ] [SERVER] [TileOwnership] eserlan09 claimed 3 tiles with settlement at vertex Vertex_5
+[12:17:59] [INFO ] [SERVER] [BuildingManager] Settlement claimed 3 tiles
+[12:17:59] [INFO ] [SERVER] [BuildingManager] eserlan09 placing FREE first settlement!
+[12:17:59] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[12:17:59] [INFO ] [SERVER] [PulseManager] All players ready! Starting pulse timer...
+[12:17:59] [DEBUG] [SERVER] [PlayerController] Requested building placement at: 0.15049004554748535, 6.998023509979248, -95.50010681152344
+[12:18:01] [DEBUG] [SERVER] [PlayerController] Build mode: false
+[12:18:10] [INFO ] [SERVER] [PulseManager] Force pulse triggered by eserlan09
+[12:18:10] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 4 + 3 = 7
+[12:18:13] [WARN ] [SERVER] [PulseManager] ROBBER! No resources this pulse.
+[12:18:15] [INFO ] [SERVER] [PulseManager] Force pulse triggered by eserlan09
+[12:18:15] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 1 + 2 = 3
+[12:18:18] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[12:18:18] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[12:18:18] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[12:18:23] [DEBUG] [SERVER] [CollectionManager] eserlan09 collected 1 Brick
+[12:19:06] [DEBUG] [SERVER] [CollectionManager] eserlan09 collected 1 Wood
+[12:19:10] [INFO ] [SERVER] [PulseManager] Force pulse triggered by eserlan09
+[12:19:10] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 3 + 5 = 8
+[12:19:13] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[12:19:13] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[12:19:13] [DEBUG] [SERVER] [PulseManager] Spawned Wool at tile
+[12:20:13] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 1 + 3 = 4
+[12:20:16] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[12:20:16] [DEBUG] [SERVER] [PulseManager] Spawned Wool at tile
+[12:20:16] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[12:20:44] [INFO ] [SERVER] [PulseManager] Force pulse triggered by eserlan09
+[12:20:44] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 3 + 3 = 6
+[12:20:47] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[12:20:47] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
+[12:20:47] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[12:21:30] [INFO ] [SERVER] [PulseManager] Force pulse triggered by eserlan09
+[12:21:30] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 1 + 4 = 5
+[12:21:33] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[12:21:33] [DEBUG] [SERVER] [PulseManager] Spawned Ore at tile
+[12:21:33] [DEBUG] [SERVER] [PulseManager] Spawned Wool at tile

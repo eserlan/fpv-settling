@@ -35,6 +35,9 @@ PulseEvent.Name = "PulseEvent"
 local TimerEvent = Events:FindFirstChild("TimerEvent") or Instance.new("RemoteEvent", Events)
 TimerEvent.Name = "TimerEvent"
 
+local SystemMessageEvent = Events:FindFirstChild("SystemMessageEvent") or Instance.new("RemoteEvent", Events)
+SystemMessageEvent.Name = "SystemMessageEvent"
+
 -- Roll 2d6 dice
 local function rollDice()
 	local die1 = math.random(1, 6)
@@ -124,18 +127,33 @@ function PulseManager.ExecutePulse()
 		-- Robber! (TODO: Implement robber mechanics)
 		Logger.Warn("PulseManager", "ROBBER! No resources this pulse.")
 		PulseEvent:FireAllClients("Robber")
+		SystemMessageEvent:FireAllClients("🏴‍☠️ Robber! No resources this round.")
 	else
 		Logger.Info("PulseManager", #matchingTiles .. " tiles match!")
+		
+		-- Track spawned resources for the message
+		local spawnedResources = {}
 		
 		for _, tile in ipairs(matchingTiles) do
 			local tileType = tile.PrimaryPart:GetAttribute("TileType")
 			local resourceKey, resourceData = ResourceTypes.GetByTileType(tileType)
 			
 			if resourceKey then
-				-- TODO: Check if player has settlement/city on this tile
-				-- For now, just spawn resources on all matching tiles
 				PulseManager.SpawnResource(tile, resourceKey, resourceData)
+				spawnedResources[resourceKey] = (spawnedResources[resourceKey] or 0) + 1
 			end
+		end
+		
+		-- Send system message about spawned resources
+		if #matchingTiles > 0 then
+			local resourceList = {}
+			for resource, count in pairs(spawnedResources) do
+				table.insert(resourceList, count .. "x " .. resource)
+			end
+			local message = "🎲 Rolled " .. total .. "! Spawned: " .. table.concat(resourceList, ", ")
+			SystemMessageEvent:FireAllClients(message)
+		else
+			SystemMessageEvent:FireAllClients("🎲 Rolled " .. total .. " - No matching tiles")
 		end
 		
 		PulseEvent:FireAllClients("RollComplete", die1, die2, total, #matchingTiles)
