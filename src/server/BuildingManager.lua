@@ -142,6 +142,7 @@ function BuildingManager:PlaceFoundation(blueprintName, position)
 		Position = position,
 		Blueprint = blueprint,
 		IsFoundation = true,
+		IsSettlement = blueprint.ClaimsTiles or blueprintName == "Settlement",
 		RequiredResources = {}, -- Copy of blueprint cost
 		DepositedResources = {}, -- Track what's been deposited
 		Progress = 0, -- 0 to 1
@@ -398,6 +399,12 @@ end
 function BuildingManager:OnBuildingComplete(building)
 	Logger.Info("BuildingManager", "Building completed: " .. building.Type .. " for player: " .. self.Player.Name)
 	
+	-- Remove foundation model if it exists
+	if building.Model then
+		building.Model:Destroy()
+		building.Model = nil
+	end
+	
 	-- Create physical building in workspace
 	self:CreateBuildingModel(building)
 	
@@ -419,8 +426,12 @@ function BuildingManager:CreateBuildingModel(building)
 	local model = Instance.new("Model")
 	model.Name = self.Player.Name .. "_" .. building.Type .. "_" .. building.Id
 	
+	-- Get size from Blueprint (new system) or Data (old system)
+	local buildingData = building.Blueprint or building.Data or {}
+	local size = buildingData.Size or Vector3.new(5, 4, 5)
+	
 	local part = Instance.new("Part")
-	part.Size = building.Data.Size
+	part.Size = size
 	part.Position = building.Position
 	part.Anchored = true
 	part.Parent = model

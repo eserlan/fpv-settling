@@ -1369,3 +1369,58 @@
 [15:13:25] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
 [15:13:26] [INFO ] [SERVER] [System] 🎲 Rolled 8! Spawned: 1x Wood, 1x Wool
 [15:14:07] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[15:20:35] [INFO ] [SERVER] [Server] ===========================================
+[15:20:35] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[15:20:35] [INFO ] [SERVER] [Server] ===========================================
+[15:20:35] [INFO ] [SERVER] [CollectionManager] Initialized
+[15:20:35] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[15:20:35] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[15:20:35] [INFO ] [SERVER] [NetworkHandler] Initialized
+[15:20:35] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[15:20:35] [INFO ] [SERVER] [Server] ===========================================
+[15:20:35] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[15:20:35] [INFO ] [SERVER] [Server] ===========================================
+[15:20:35] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[15:20:35] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09 with starting resources
+[15:20:38] [INFO ] [SERVER] [Client] ===========================================
+[15:20:38] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[15:20:38] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[15:20:38] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[15:20:38] [INFO ] [SERVER] [Client] ===========================================
+[15:20:39] [INFO ] [SERVER] [Client] Waiting for character...
+[15:20:39] [INFO ] [SERVER] [Client] Character loaded!
+[15:20:39] [INFO ] [SERVER] [BlueprintBookUI] Initialized
+[15:20:39] [INFO ] [SERVER] [PlayerController] Initialized
+[15:20:39] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[15:20:39] [INFO ] [SERVER] [UIManager] Chat system ready
+[15:20:39] [INFO ] [SERVER] [UIManager] Initialized
+[15:20:39] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[15:20:39] [INFO ] [SERVER] [PulseUI] Initialized
+[15:20:39] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[15:20:39] [INFO ] [SERVER] [InventoryUI] Initialized
+[15:20:39] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[15:20:39] [DEBUG] [SERVER] [Client] Loaded: BlueprintBookUI
+[15:20:39] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[15:20:39] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[15:20:39] [INFO ] [SERVER] [Client] ===========================================
+[15:20:39] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[15:20:39] [INFO ] [SERVER] [Client] Press B to open Blueprint Book
+[15:20:39] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[15:20:39] [INFO ] [SERVER] [Client] ===========================================
+[15:23:29] [DEBUG] [SERVER] [PlayerController] Entered first-person mode
+[15:23:29] [DEBUG] [SERVER] [PlayerController] Entered third-person mode (mouse unlocked)
+[15:23:38] [INFO ] [SERVER] [BlueprintBook] Opened
+[15:23:40] [INFO ] [SERVER] [BlueprintBook] Closed
+[15:23:40] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[15:23:40] [INFO ] [SERVER] [BlueprintBook] Selected: Settlement
+[15:23:42] [INFO ] [SERVER] [BuildingManager] eserlan09 placing FREE first settlement!
+[15:23:42] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[15:23:42] [INFO ] [SERVER] [PulseManager] All players ready! Starting pulse timer...
+[15:23:42] [INFO ] [SERVER] [PlayerController] Placed foundation for Settlement at vertex Vertex_34
+[15:23:42] [DEBUG] [SERVER] [PlayerController] Exited placement mode
+[15:24:42] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 1 + 2 = 3
+[15:24:45] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[15:24:45] [DEBUG] [SERVER] [PulseManager] Spawned Wool at tile
+[15:24:45] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
+[15:24:45] [INFO ] [SERVER] [System] 🎲 Rolled 3! Spawned: 1x Wood, 1x Wool
+[15:24:54] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
