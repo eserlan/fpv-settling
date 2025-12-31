@@ -219,7 +219,7 @@ function MapGenerator.Generate(rings)
 					
 					-- Randomly pick one of 4 tree variants
 					local treeNum = math.random(1, 4)
-					local tree = placeAsset("Trees/Non Smooth pine tree/ModelOfANiceTree" .. treeNum, pos)
+					local tree = placeAsset("Trees/Tree" .. treeNum, pos)
 					if not tree then
 						-- Fallback: basic tree
 						local trunk = Instance.new("Part")

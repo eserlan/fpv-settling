@@ -246,29 +246,32 @@ local function findNearbyFoundation()
 	if not character or not character.PrimaryPart then return nil end
 	
 	local playerPos = character.PrimaryPart.Position
-	local buildings = workspace:FindFirstChild("Buildings")
-	if not buildings then return nil end
+	local folders = {workspace:FindFirstChild("Buildings"), workspace:FindFirstChild("Settlements")}
 	
 	local closest = nil
 	local closestDist = 15 -- Max interaction distance
 	
-	for _, model in ipairs(buildings:GetChildren()) do
-		if model:IsA("Model") then
-			local basePart = model:FindFirstChild("FoundationBase")
-			if basePart then
-				local foundationId = basePart:GetAttribute("FoundationId")
-				local ownerId = basePart:GetAttribute("OwnerId")
-				
-				-- Only interact with own foundations that aren't complete
-				if foundationId and ownerId == player.UserId then
-					local dist = (basePart.Position - playerPos).Magnitude
-					if dist < closestDist then
-						closestDist = dist
-						closest = {
-							Id = foundationId,
-							Model = model,
-							Part = basePart
-						}
+	for _, folder in ipairs(folders) do
+		if not folder then continue end
+		
+		for _, model in ipairs(folder:GetChildren()) do
+			if model:IsA("Model") then
+				local basePart = model:FindFirstChild("FoundationBase")
+				if basePart then
+					local foundationId = basePart:GetAttribute("FoundationId")
+					local ownerId = basePart:GetAttribute("OwnerId")
+					
+					-- Only interact with own foundations that aren't complete
+					if foundationId and ownerId == player.UserId then
+						local dist = (basePart.Position - playerPos).Magnitude
+						if dist < closestDist then
+							closestDist = dist
+							closest = {
+								Id = foundationId,
+								Model = model,
+								Part = basePart
+							}
+						end
 					end
 				end
 			end
@@ -306,7 +309,12 @@ RunService.RenderStepped:Connect(function()
 	
 	-- Check for nearby foundation (when not in placement mode)
 	if not placementMode then
+		local lastFoundation = nearbyFoundation
 		nearbyFoundation = findNearbyFoundation()
+		
+		if nearbyFoundation and not lastFoundation then
+			Logger.Info("PlayerController", "Now NEAR foundation: " .. tostring(nearbyFoundation.Id))
+		end
 		
 		if nearbyFoundation and promptFrame then
 			promptFrame.Visible = true
@@ -354,12 +362,24 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	-- Deposit resource into foundation with E key
 	if input.KeyCode == Enum.KeyCode.E then
 		if nearbyFoundation then
+			Logger.Debug("PlayerController", "Pressing E near foundation: " .. tostring(nearbyFoundation.Id))
 			-- Deposit wood first, then brick, wheat, wool, ore in order
 			local resourcesToTry = {"Wood", "Brick", "Wheat", "Wool", "Ore"}
 			for _, resourceType in ipairs(resourcesToTry) do
 				Network:FireServer("DepositResource", nearbyFoundation.Id, resourceType)
 			end
-			Logger.Debug("PlayerController", "Depositing resources into foundation " .. nearbyFoundation.Id)
+		else
+			-- Check if near ANY building to see if detection is the problem
+			local folders = {workspace:FindFirstChild("Buildings"), workspace:FindFirstChild("Settlements")}
+			local foundAny = false
+			for _, folder in ipairs(folders) do
+				if folder and #folder:GetChildren() > 0 then foundAny = true break end
+			end
+			if not foundAny then
+				Logger.Debug("PlayerController", "Pressing E, but no buildings/foundations exist in workspace")
+			else
+				Logger.Debug("PlayerController", "Pressing E, but not close enough to a foundation (or wrong owner)")
+			end
 		end
 	end
 	

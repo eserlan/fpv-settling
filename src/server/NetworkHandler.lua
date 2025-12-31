@@ -24,6 +24,7 @@ function NetworkHandler.Init(gameManager)
 		elseif actionType == "DepositResource" then
 			-- Deposit resource into foundation
 			local foundationId, resourceType = ...
+			Logger.Debug("NetworkHandler", player.Name .. " requesting deposit of " .. resourceType .. " into foundation " .. tostring(foundationId))
 			
 			-- First check if player has the resource
 			local CollectionManager = require(script.Parent.CollectionManager)

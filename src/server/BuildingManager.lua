@@ -335,8 +335,12 @@ function BuildingManager:CreateFoundationModel(foundation)
 	end
 	resourceLabel.Text = resourceText
 	
+	-- Put in appropriate folder
+	local folderName = foundation.IsSettlement and "Settlements" or "Buildings"
+	local folder = workspace:FindFirstChild(folderName) or Instance.new("Folder", workspace)
+	folder.Name = folderName
+	model.Parent = folder
 	model.PrimaryPart = part
-	model.Parent = workspace:FindFirstChild("Buildings") or workspace
 	
 	-- Store reference to foundation ID on the model for interaction
 	part:SetAttribute("FoundationId", foundation.Id)
