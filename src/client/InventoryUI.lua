@@ -115,11 +115,11 @@ end
 -- Show collection notification
 local function showCollectionNotification(resourceType, amount)
 	local icons = {
-		Wood = "🪵",
+		Wood = "🌲",
 		Brick = "🧱",
 		Wheat = "🌾",
-		Ore = "⛏️",
-		Wool = "🐑"
+		Ore = "⛏",
+		Wool = "🧶"
 	}
 	
 	local icon = icons[resourceType] or "📦"

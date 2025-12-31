@@ -1253,3 +1253,52 @@
 [15:04:36] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
 [15:04:37] [INFO ] [SERVER] [Client] ===========================================
 [15:05:06] [INFO ] [SERVER] [BlueprintBook] Opened
+[15:09:12] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[15:09:16] [INFO ] [SERVER] [Server] ===========================================
+[15:09:16] [INFO ] [SERVER] [Server] ===========================================
+[15:09:16] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[15:09:16] [INFO ] [SERVER] [CollectionManager] Initialized
+[15:09:16] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[15:09:16] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[15:09:16] [INFO ] [SERVER] [Server] ===========================================
+[15:09:16] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[15:09:16] [INFO ] [SERVER] [Server] ===========================================
+[15:09:16] [INFO ] [SERVER] [NetworkHandler] Initialized
+[15:09:16] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[15:09:16] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[15:09:16] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09
+[15:09:18] [INFO ] [SERVER] [Client] ===========================================
+[15:09:18] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[15:09:18] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[15:09:18] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[15:09:18] [INFO ] [SERVER] [Client] ===========================================
+[15:09:18] [INFO ] [SERVER] [Client] Waiting for character...
+[15:09:18] [INFO ] [SERVER] [Client] Character loaded!
+[15:09:19] [INFO ] [SERVER] [BlueprintBookUI] Initialized
+[15:09:19] [INFO ] [SERVER] [PlayerController] Initialized
+[15:09:19] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[15:09:19] [INFO ] [SERVER] [UIManager] Chat system ready
+[15:09:19] [INFO ] [SERVER] [UIManager] Initialized
+[15:09:19] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[15:09:19] [INFO ] [SERVER] [PulseUI] Initialized
+[15:09:19] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[15:09:19] [INFO ] [SERVER] [InventoryUI] Initialized
+[15:09:19] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[15:09:19] [DEBUG] [SERVER] [Client] Loaded: BlueprintBookUI
+[15:09:19] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[15:09:19] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[15:09:19] [INFO ] [SERVER] [Client] ===========================================
+[15:09:19] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[15:09:19] [INFO ] [SERVER] [Client] Press B to open Blueprint Book
+[15:09:19] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[15:09:19] [INFO ] [SERVER] [Client] ===========================================
+[15:10:08] [INFO ] [SERVER] [BlueprintBook] Opened
+[15:10:11] [INFO ] [SERVER] [BlueprintBook] Closed
+[15:10:11] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[15:10:11] [INFO ] [SERVER] [BlueprintBook] Selected: Settlement
+[15:10:22] [INFO ] [SERVER] [BuildingManager] eserlan09 placing FREE first settlement!
+[15:10:22] [INFO ] [SERVER] [BuildingManager] Building completed: Settlement for player: eserlan09
+[15:10:22] [INFO ] [SERVER] [PulseManager] All players ready! Starting pulse timer...
+[15:10:23] [INFO ] [SERVER] [PlayerController] Placed foundation for Settlement at vertex Vertex_4
+[15:10:23] [DEBUG] [SERVER] [PlayerController] Exited placement mode
+[15:11:22] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 5 + 5 = 10

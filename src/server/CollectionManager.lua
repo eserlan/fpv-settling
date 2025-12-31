@@ -26,18 +26,26 @@ CollectEvent.Name = "CollectEvent"
 -- Player inventories (simple table for now)
 local playerInventories = {}
 
--- Initialize player inventory
+-- Initialize player inventory with starting resources
 function CollectionManager.InitPlayer(player)
+	-- Starting resources: enough for 1 settlement + 1 road
+	-- Settlement: Wood 1, Brick 1, Wheat 1, Wool 1
+	-- Road: Wood 1, Brick 1
 	playerInventories[player.UserId] = {
-		Brick = 0,
-		Wood = 0,
-		Wheat = 0,
-		Ore = 0,
-		Wool = 0
+		Wood = 2,
+		Brick = 2,
+		Wheat = 1,
+		Wool = 1,
+		Ore = 0
 	}
 	playerCooldowns[player.UserId] = 0
 	
-	Logger.Debug("CollectionManager", "Initialized inventory for " .. player.Name)
+	-- Send initial inventory to client
+	task.delay(0.5, function()
+		CollectEvent:FireClient(player, "InventoryUpdate", playerInventories[player.UserId])
+	end)
+	
+	Logger.Debug("CollectionManager", "Initialized inventory for " .. player.Name .. " with starting resources")
 end
 
 -- Remove player inventory on leave
