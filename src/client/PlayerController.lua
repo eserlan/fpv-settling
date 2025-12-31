@@ -142,13 +142,15 @@ local function updatePlacementPreview()
 		buildingPreview.Name = "BuildingPreview"
 		buildingPreview.Anchored = true
 		buildingPreview.CanCollide = false
-		buildingPreview.Transparency = 0.5
-		buildingPreview.Size = blueprint.Size or Vector3.new(5, 4, 5)
+		buildingPreview.Transparency = 0.3 -- More visible
+		-- Flat indicator on ground
+		buildingPreview.Size = Vector3.new(8, 0.5, 8)
+		buildingPreview.Material = Enum.Material.Neon
 		buildingPreview.Parent = workspace
 	end
 	
-	-- Position at vertex
-	buildingPreview.Position = vertex.Position + Vector3.new(0, (buildingPreview.Size.Y / 2), 0)
+	-- Position flat on vertex (slightly above ground)
+	buildingPreview.Position = vertex.Position + Vector3.new(0, 0.5, 0)
 	
 	-- Color based on validity
 	if isValidPlacement then
