@@ -1,9 +1,20 @@
 -- Shared Network Module
 -- Centralizes access to RemoteEvents and provides a consistent API
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Events = ReplicatedStorage:WaitForChild("Events")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Logger = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Logger"))
+
+local Events = ReplicatedStorage:FindFirstChild("Events")
+if not Events then
+	if RunService:IsServer() then
+		Events = Instance.new("Folder")
+		Events.Name = "Events"
+		Events.Parent = ReplicatedStorage
+	else
+		Events = ReplicatedStorage:WaitForChild("Events")
+	end
+end
 
 local Network = {}
 
@@ -11,7 +22,19 @@ local Network = {}
 function Network.GetEvent(eventName)
 	local event = Events:FindFirstChild(eventName)
 	if not event then
-		error("RemoteEvent not found: " .. eventName)
+		if RunService:IsServer() then
+			-- Create it if it doesn't exist (Server side only)
+			event = Instance.new("RemoteEvent")
+			event.Name = eventName
+			event.Parent = Events
+			Logger.Debug("Network", "Created RemoteEvent: " .. eventName)
+		else
+			-- Client side: wait for it to exist
+			event = Events:WaitForChild(eventName, 5)
+			if not event then
+				error("RemoteEvent not found: " .. eventName)
+			end
+		end
 	end
 	return event
 end

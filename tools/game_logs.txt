@@ -1482,3 +1482,64 @@
 [15:28:07] [DEBUG] [SERVER] [PulseManager] Spawned Wood at tile
 [15:28:07] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
 [15:28:07] [INFO ] [SERVER] [System] 🎲 Rolled 5! Spawned: 1x Wood, 1x Wheat
+[15:29:07] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 4 + 4 = 8
+[15:29:10] [INFO ] [SERVER] [PulseManager] 2 tiles match!
+[15:29:10] [DEBUG] [SERVER] [PulseManager] Spawned Brick at tile
+[15:29:10] [DEBUG] [SERVER] [PulseManager] Spawned Ore at tile
+[15:29:11] [INFO ] [SERVER] [System] 🎲 Rolled 8! Spawned: 1x Ore, 1x Brick
+[15:29:14] [DEBUG] [SERVER] [PlayerController] Entered first-person mode
+[15:29:14] [DEBUG] [SERVER] [PlayerController] Entered third-person mode (mouse unlocked)
+[15:29:27] [DEBUG] [SERVER] [CollectionManager] eserlan09 collected 1 Wood
+[15:29:57] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[15:30:03] [INFO ] [SERVER] [Server] ===========================================
+[15:30:03] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[15:30:03] [INFO ] [SERVER] [Server] ===========================================
+[15:30:03] [INFO ] [SERVER] [CollectionManager] Initialized
+[15:30:03] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[15:30:03] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[15:30:03] [INFO ] [SERVER] [Server] ===========================================
+[15:30:03] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[15:30:03] [INFO ] [SERVER] [Server] ===========================================
+[15:30:03] [INFO ] [SERVER] [NetworkHandler] Initialized
+[15:30:03] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[15:30:04] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[15:30:04] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09 with starting resources
+[15:30:06] [INFO ] [SERVER] [Client] ===========================================
+[15:30:06] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[15:30:06] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[15:30:06] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[15:30:06] [INFO ] [SERVER] [Client] ===========================================
+[15:30:06] [INFO ] [SERVER] [Client] Waiting for character...
+[15:30:06] [INFO ] [SERVER] [Client] Character loaded!
+[15:30:06] [INFO ] [SERVER] [BlueprintBookUI] Initialized
+[15:30:06] [INFO ] [SERVER] [PlayerController] Initialized
+[15:30:06] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[15:30:06] [INFO ] [SERVER] [UIManager] Chat system ready
+[15:30:06] [INFO ] [SERVER] [UIManager] Initialized
+[15:30:06] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[15:30:06] [INFO ] [SERVER] [PulseUI] Initialized
+[15:30:06] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[15:30:06] [INFO ] [SERVER] [InventoryUI] Initialized
+[15:30:07] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[15:30:07] [DEBUG] [SERVER] [Client] Loaded: BlueprintBookUI
+[15:30:07] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[15:30:07] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[15:30:07] [INFO ] [SERVER] [Client] ===========================================
+[15:30:07] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[15:30:07] [INFO ] [SERVER] [Client] Press B to open Blueprint Book
+[15:30:07] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[15:30:07] [INFO ] [SERVER] [Client] ===========================================
+[15:30:45] [INFO ] [SERVER] [BlueprintBook] Opened
+[15:30:47] [INFO ] [SERVER] [BlueprintBook] Closed
+[15:30:47] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[15:30:47] [INFO ] [SERVER] [BlueprintBook] Selected: Settlement
+[15:30:50] [INFO ] [SERVER] [PulseManager] All players ready! Starting pulse timer...
+[15:30:50] [INFO ] [SERVER] [PlayerController] Placed foundation for Settlement at vertex Vertex_49
+[15:30:50] [DEBUG] [SERVER] [PlayerController] Exited placement mode
+[15:31:25] [INFO ] [SERVER] [BlueprintBook] Opened
+[15:31:27] [INFO ] [SERVER] [BlueprintBook] Closed
+[15:31:27] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[15:31:27] [INFO ] [SERVER] [BlueprintBook] Selected: Settlement
+[15:31:28] [INFO ] [SERVER] [PlayerController] Placed foundation for Settlement at vertex Vertex_49
+[15:31:28] [DEBUG] [SERVER] [PlayerController] Exited placement mode
+[15:31:38] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
