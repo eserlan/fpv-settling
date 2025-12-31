@@ -4,8 +4,9 @@
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
 const Players = game.GetService("Players");
 
-const ResourceTypes = require(ReplicatedStorage.Shared.ResourceTypes) as typeof import("shared/ResourceTypes");
-const Logger = require(ReplicatedStorage.Shared.Logger) as typeof import("shared/Logger");
+import ResourceTypes from "shared/ResourceTypes";
+import * as Logger from "shared/Logger";
+import ownershipModule = require("./TileOwnershipManager");
 
 // Configuration
 const COLLECTION_RANGE = 8; // Studs - how close player needs to be
@@ -157,9 +158,7 @@ const CollectionManager = {
 		}
 
 		// Check tile ownership (if TileOwnershipManager exists)
-		const tileOwnershipManager = script.Parent?.FindFirstChild("TileOwnershipManager");
-		if (tileOwnershipManager && tileQ !== undefined && tileR !== undefined) {
-			const ownershipModule = require(tileOwnershipManager) as typeof import("./TileOwnershipManager");
+		if (tileQ !== undefined && tileR !== undefined) {
 			if (!ownershipModule.PlayerOwnsTile(player, tileQ, tileR)) {
 				// Player doesn't own this tile - can't collect
 				return false;
@@ -197,12 +196,12 @@ const CollectionManager = {
 		// Create sparkle particles
 		const effect = new Instance("Part");
 		effect.Name = "CollectEffect";
-		effect.Size = Vector3.new(1, 1, 1);
+		effect.Size = new Vector3(1, 1, 1);
 		effect.Position = position;
 		effect.Anchored = true;
 		effect.CanCollide = false;
 		effect.Transparency = 1;
-		effect.Parent = workspace;
+		effect.Parent = game.Workspace;
 
 		const particles = new Instance("ParticleEmitter");
 		particles.Color = new ColorSequence(data.Color);
@@ -231,7 +230,7 @@ const CollectionManager = {
 		}
 
 		// Check each player for nearby resources
-		const resourcesFolder = workspace.FindFirstChild("Resources");
+		const resourcesFolder = game.Workspace.FindFirstChild("Resources");
 		if (!resourcesFolder) {
 			return;
 		}

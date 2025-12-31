@@ -1,8 +1,8 @@
 // Server-side Resource Manager
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
-const ResourceTypes = require(ReplicatedStorage.Shared.ResourceTypes) as typeof import("shared/ResourceTypes");
-const Network = require(ReplicatedStorage.Shared.Network) as typeof import("shared/Network");
-const Logger = require(ReplicatedStorage.Shared.Logger) as typeof import("shared/Logger");
+import ResourceTypes from "shared/ResourceTypes";
+import Network from "shared/Network";
+import * as Logger from "shared/Logger";
 
 class ResourceManager {
 	Player: Player;

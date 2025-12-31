@@ -15,7 +15,7 @@ type ResourceTypesMap = Record<string, ResourceInfo> & {
 	GetByTileType: (tileType: string) => LuaTuple<[string | undefined, ResourceInfo | undefined]>;
 };
 
-const ResourceTypes = {
+const BaseResources: Record<string, ResourceInfo> = {
 	Brick: {
 		Name: "Brick",
 		Icon: "🧱",
@@ -66,7 +66,9 @@ const ResourceTypes = {
 		MaxStack: 50,
 		BuildingCost: { Settlement: 1 },
 	},
-} as ResourceTypesMap;
+};
+
+const ResourceTypes = BaseResources as ResourceTypesMap;
 
 ResourceTypes.GetByTileType = (tileType: string) => {
 	for (const [key, data] of pairs(ResourceTypes)) {

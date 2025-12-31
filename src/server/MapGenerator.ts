@@ -1,6 +1,6 @@
 // HEXAGONAL MAP GENERATOR (Catan-Style with Exact Frequencies)
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
-const TileTypes = require(ReplicatedStorage.Shared.TileTypes) as typeof import("shared/TileTypes");
+import TileTypes from "shared/TileTypes";
 
 const HEX_SIZE = 40; // Radius: center to corner
 const HEIGHT = 4;
@@ -27,14 +27,14 @@ const createHexagon = (name: string, position: Vector3, color: Color3, material?
 	for (let i = 0; i <= 2; i += 1) {
 		const part = new Instance("Part");
 		part.Name = `Segment_${i}`;
-		part.Size = Vector3.new(rectWidth, HEIGHT, rectDepth);
+		part.Size = new Vector3(rectWidth, HEIGHT, rectDepth);
 		part.Anchored = true;
 		part.Color = color;
 		part.Material = material ?? Enum.Material.SmoothPlastic;
 		part.TopSurface = Enum.SurfaceType.Smooth;
 		part.BottomSurface = Enum.SurfaceType.Smooth;
 
-		part.CFrame = CFrame.new(position.add(Vector3.new(0, HEIGHT / 2, 0))).mul(CFrame.Angles(0, math.rad(i * 60), 0));
+		part.CFrame = new CFrame(position.add(new Vector3(0, HEIGHT / 2, 0))).mul(CFrame.Angles(0, math.rad(i * 60), 0));
 		part.Parent = model;
 
 		if (i === 0) {
@@ -49,8 +49,8 @@ const createHexagon = (name: string, position: Vector3, color: Color3, material?
 const addLabel = (hex: Model, text: string) => {
 	const billboard = new Instance("BillboardGui");
 	billboard.Name = "TileLabel";
-	billboard.Size = UDim2.new(0, 120, 0, 50);
-	billboard.StudsOffset = Vector3.new(0, 10, 0);
+	billboard.Size = new UDim2(0, 120, 0, 50);
+	billboard.StudsOffset = new Vector3(0, 10, 0);
 	billboard.AlwaysOnTop = true;
 	billboard.Adornee = hex.PrimaryPart;
 	billboard.Parent = hex.PrimaryPart;
@@ -58,10 +58,10 @@ const addLabel = (hex: Model, text: string) => {
 	// Terrain name
 	const nameLabel = new Instance("TextLabel");
 	nameLabel.Name = "TerrainName";
-	nameLabel.Size = UDim2.new(1, 0, 0.5, 0);
+	nameLabel.Size = new UDim2(1, 0, 0.5, 0);
 	nameLabel.BackgroundTransparency = 0.3;
-	nameLabel.BackgroundColor3 = Color3.new(0, 0, 0);
-	nameLabel.TextColor3 = Color3.new(1, 1, 1);
+	nameLabel.BackgroundColor3 = new Color3(0, 0, 0);
+	nameLabel.TextColor3 = new Color3(1, 1, 1);
 	nameLabel.TextScaled = true;
 	nameLabel.Font = Enum.Font.GothamBold;
 	nameLabel.Text = text;
@@ -70,10 +70,10 @@ const addLabel = (hex: Model, text: string) => {
 	// Dice number (will be updated after assignment)
 	const diceLabel = new Instance("TextLabel");
 	diceLabel.Name = "DiceNumber";
-	diceLabel.Size = UDim2.new(1, 0, 0.5, 0);
-	diceLabel.Position = UDim2.new(0, 0, 0.5, 0);
+	diceLabel.Size = new UDim2(1, 0, 0.5, 0);
+	diceLabel.Position = new UDim2(0, 0, 0.5, 0);
 	diceLabel.BackgroundTransparency = 0.3;
-	diceLabel.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2);
+	diceLabel.BackgroundColor3 = new Color3(0.2, 0.2, 0.2);
 	diceLabel.TextColor3 = Color3.fromRGB(255, 200, 100); // Gold/yellow for dice number
 	diceLabel.TextScaled = true;
 	diceLabel.Font = Enum.Font.GothamBold;
@@ -85,13 +85,14 @@ const addLabel = (hex: Model, text: string) => {
 const axialToWorld = (q: number, r: number) => {
 	const x = HEX_SIZE * 2 * (q + r / 2);
 	const z = HEX_SIZE * math.sqrt(3) * r;
-	return Vector3.new(x, 0, z);
+	return new Vector3(x, 0, z);
 };
 
 // Create an EXACT tile pool based on frequencies (no duplicates beyond frequency)
 const createExactTilePool = () => {
 	const pool = new Array<string>();
-	for (const [key, data] of pairs(TileTypes)) {
+	const tiles = TileTypes as unknown as Record<string, import("shared/TileTypes").TileInfo>;
+	for (const [key, data] of pairs(tiles)) {
 		for (let i = 1; i <= data.Frequency; i += 1) {
 			pool.push(key);
 		}
@@ -113,7 +114,7 @@ const createExactTilePool = () => {
 const MapGenerator = {
 	Generate(rings = 2) {
 		// Default: 2 rings = 19 hexes (standard Catan)
-		const mapFolder = (workspace.FindFirstChild("Map") as Folder) ?? new Instance("Folder", workspace);
+		const mapFolder = (game.Workspace.FindFirstChild("Map") as Folder) ?? new Instance("Folder", game.Workspace);
 		mapFolder.Name = "Map";
 		mapFolder.ClearAllChildren();
 
@@ -133,7 +134,7 @@ const MapGenerator = {
 				const typeKey = tilePool[tileIndex] ?? "Desert";
 				const tileData = TileTypes[typeKey];
 
-				let material = Enum.Material.Grass;
+				let material: Enum.Material = Enum.Material.Grass;
 				if (tileData.Name === "Mountains") {
 					material = Enum.Material.Slate;
 				} else if (tileData.Name === "Desert") {
@@ -182,7 +183,7 @@ const MapGenerator = {
 
 						// Calculate bounding box to find the bottom of the asset
 						let minY = math.huge;
-						let refPos = Vector3.new(0, 0, 0);
+						let refPos = new Vector3(0, 0, 0);
 
 						if (clone.IsA("Model")) {
 							// Find bounding box after scaling
@@ -202,7 +203,7 @@ const MapGenerator = {
 							// Move all parts by the offset
 							for (const part of clone.GetDescendants()) {
 								if (part.IsA("BasePart")) {
-									part.Position = Vector3.new(
+									part.Position = new Vector3(
 										part.Position.X - refPos.X + position.X,
 										part.Position.Y + yOffset,
 										part.Position.Z - refPos.Z + position.Z,
@@ -212,7 +213,7 @@ const MapGenerator = {
 						} else if (clone.IsA("BasePart")) {
 							// For single part, position so bottom sits on target
 							const yOffset = clone.Size.Y / 2;
-							clone.Position = position.add(Vector3.new(0, yOffset, 0));
+							clone.Position = position.add(new Vector3(0, yOffset, 0));
 						}
 
 						clone.Parent = hex;
@@ -228,7 +229,7 @@ const MapGenerator = {
 					for (let i = 1; i <= treeCount; i += 1) {
 						const angle = math.rad(math.random(0, 360));
 						const dist = math.random(8, 25);
-						const pos = worldPos.add(Vector3.new(math.cos(angle) * dist, baseY, math.sin(angle) * dist));
+						const pos = worldPos.add(new Vector3(math.cos(angle) * dist, baseY, math.sin(angle) * dist));
 
 						// Randomly pick one of 4 tree variants
 						const treeNum = math.random(1, 4);
@@ -236,8 +237,8 @@ const MapGenerator = {
 						if (!tree) {
 							// Fallback: basic tree
 							const trunk = new Instance("Part");
-							trunk.Size = Vector3.new(2, 12, 2);
-							trunk.Position = pos.add(Vector3.new(0, 6, 0));
+							trunk.Size = new Vector3(2, 12, 2);
+							trunk.Position = pos.add(new Vector3(0, 6, 0));
 							trunk.Color = Color3.fromRGB(101, 67, 33);
 							trunk.Material = Enum.Material.Wood;
 							trunk.Anchored = true;
@@ -250,16 +251,16 @@ const MapGenerator = {
 					for (let i = 1; i <= grassCount; i += 1) {
 						const angle = math.rad(math.random(0, 360));
 						const dist = math.random(5, 22);
-						const pos = worldPos.add(Vector3.new(math.cos(angle) * dist, baseY, math.sin(angle) * dist));
+						const pos = worldPos.add(new Vector3(math.cos(angle) * dist, baseY, math.sin(angle) * dist));
 
 						const grass = placeAsset("Grass/Grass", pos);
 						if (!grass) {
 							// Fallback: basic wheat
 							const stalk = new Instance("Part");
 							stalk.Shape = Enum.PartType.Cylinder;
-							stalk.Size = Vector3.new(6, 1, 1);
-							stalk.Position = pos.add(Vector3.new(0, 3, 0));
-							stalk.Orientation = Vector3.new(0, 0, 90);
+							stalk.Size = new Vector3(6, 1, 1);
+							stalk.Position = pos.add(new Vector3(0, 3, 0));
+							stalk.Orientation = new Vector3(0, 0, 90);
 							stalk.Color = Color3.fromRGB(218, 165, 32);
 							stalk.Material = Enum.Material.Grass;
 							stalk.Anchored = true;
@@ -278,10 +279,10 @@ const MapGenerator = {
 						const maxAttempts = 20;
 
 						// Try to find a position that doesn't overlap with existing sheep
-						repeat {
+						do {
 							const angle = math.rad(math.random(0, 360));
 							const dist = math.random(5, 25);
-							pos = worldPos.add(Vector3.new(math.cos(angle) * dist, baseY, math.sin(angle) * dist));
+							pos = worldPos.add(new Vector3(math.cos(angle) * dist, baseY, math.sin(angle) * dist));
 
 							let tooClose = false;
 							for (const existingPos of placedPositions) {
@@ -295,7 +296,7 @@ const MapGenerator = {
 							if (!tooClose) {
 								break;
 							}
-						} until (attempts >= maxAttempts);
+						} while (attempts < maxAttempts);
 
 						// Only place if we found a valid position
 						if (attempts < maxAttempts) {
@@ -306,14 +307,14 @@ const MapGenerator = {
 								// Apply random Y rotation using PivotTo
 								const randomAngle = math.rad(math.random(0, 360));
 								const currentPivot = sheep.GetPivot();
-								const rotatedCFrame = CFrame.new(currentPivot.Position).mul(CFrame.Angles(0, randomAngle, 0));
+								const rotatedCFrame = new CFrame(currentPivot.Position).mul(CFrame.Angles(0, randomAngle, 0));
 								sheep.PivotTo(rotatedCFrame);
 							} else if (!sheep) {
 								// Fallback: basic sheep shape
 								const body = new Instance("Part");
 								body.Shape = Enum.PartType.Ball;
-								body.Size = Vector3.new(6, 4, 8);
-								body.Position = pos.add(Vector3.new(0, 2, 0));
+								body.Size = new Vector3(6, 4, 8);
+								body.Position = pos.add(new Vector3(0, 2, 0));
 								body.Color = Color3.fromRGB(255, 255, 255);
 								body.Material = Enum.Material.SmoothPlastic;
 								body.Anchored = true;
@@ -327,7 +328,7 @@ const MapGenerator = {
 					for (let i = 1; i <= hillCount; i += 1) {
 						const angle = math.rad(math.random(0, 360));
 						const dist = math.random(5, 18);
-						const pos = worldPos.add(Vector3.new(math.cos(angle) * dist, baseY, math.sin(angle) * dist));
+						const pos = worldPos.add(new Vector3(math.cos(angle) * dist, baseY, math.sin(angle) * dist));
 
 						const hill = placeAsset("Hill/Hill1", pos, 1 / 2);
 						if (!hill) {
@@ -335,8 +336,8 @@ const MapGenerator = {
 							const fallbackHill = new Instance("Part");
 							fallbackHill.Shape = Enum.PartType.Ball;
 							const sz = math.random(12, 20);
-							fallbackHill.Size = Vector3.new(sz, sz / 2, sz);
-							fallbackHill.Position = pos.add(Vector3.new(0, sz / 4 - 2, 0));
+							fallbackHill.Size = new Vector3(sz, sz / 2, sz);
+							fallbackHill.Position = pos.add(new Vector3(0, sz / 4 - 2, 0));
 							fallbackHill.Color = tileData.Color;
 							fallbackHill.Material = Enum.Material.Ground;
 							fallbackHill.Anchored = true;
@@ -350,7 +351,7 @@ const MapGenerator = {
 					for (let i = 1; i <= rockCount; i += 1) {
 						const angle = math.rad(math.random(0, 360));
 						const dist = math.random(0, 20);
-						const pos = worldPos.add(Vector3.new(math.cos(angle) * dist, baseY, math.sin(angle) * dist));
+						const pos = worldPos.add(new Vector3(math.cos(angle) * dist, baseY, math.sin(angle) * dist));
 
 						// Randomly pick rock 1-4, but never the same as last one
 						let rockNum = math.random(1, 4);
@@ -364,9 +365,9 @@ const MapGenerator = {
 							// Fallback: basic peak
 							const peak = new Instance("Part");
 							const ps = math.random(10, 18);
-							peak.Size = Vector3.new(ps, ps * 1.5, ps);
-							peak.Position = pos.add(Vector3.new(0, ps * 0.5, 0));
-							peak.Rotation = Vector3.new(
+							peak.Size = new Vector3(ps, ps * 1.5, ps);
+							peak.Position = pos.add(new Vector3(0, ps * 0.5, 0));
+							peak.Rotation = new Vector3(
 								math.random(-10, 10),
 								math.random(0, 360),
 								math.random(-10, 10),
@@ -398,11 +399,11 @@ const MapGenerator = {
 
 	CreateVerticesAndEdges(mapFolder: Folder) {
 		const vertices: Record<string, VertexData> = {};
-		const vertexFolder = (workspace.FindFirstChild("Vertices") as Folder) ?? new Instance("Folder", workspace);
+		const vertexFolder = (game.Workspace.FindFirstChild("Vertices") as Folder) ?? new Instance("Folder", game.Workspace);
 		vertexFolder.Name = "Vertices";
 		vertexFolder.ClearAllChildren();
 
-		const edgeFolder = (workspace.FindFirstChild("Edges") as Folder) ?? new Instance("Folder", workspace);
+		const edgeFolder = (game.Workspace.FindFirstChild("Edges") as Folder) ?? new Instance("Folder", game.Workspace);
 		edgeFolder.Name = "Edges";
 		edgeFolder.ClearAllChildren();
 
@@ -432,7 +433,7 @@ const MapGenerator = {
 
 					if (!vertices[key]) {
 						vertices[key] = {
-							Position: Vector3.new(vx, HEIGHT + 0.5, vz),
+							Position: new Vector3(vx, HEIGHT + 0.5, vz),
 							AdjacentTiles: [],
 						};
 					}
@@ -485,7 +486,7 @@ const MapGenerator = {
 			const marker = new Instance("Part");
 			marker.Name = `Vertex_${vertexId}`;
 			marker.Shape = Enum.PartType.Ball;
-			marker.Size = Vector3.new(3, 3, 3);
+			marker.Size = new Vector3(3, 3, 3);
 			marker.Position = data.Position;
 			marker.Anchored = true;
 			marker.CanCollide = false;
@@ -511,7 +512,7 @@ const MapGenerator = {
 			const adjCount = data.AdjacentTiles.size();
 			const marker = new Instance("Part");
 			marker.Name = `Edge_${edgeId}`;
-			marker.Size = Vector3.new(37, 1, 3); // ~80% of vertex-to-vertex distance (~46 studs)
+			marker.Size = new Vector3(37, 1, 3); // ~80% of vertex-to-vertex distance (~46 studs)
 			marker.Position = data.Center;
 			marker.Anchored = true;
 			marker.CanCollide = false;
@@ -539,7 +540,7 @@ const MapGenerator = {
 	// Get all vertices (for building placement)
 	GetVertices() {
 		const vertices = new Array<BasePart>();
-		const vertexFolder = workspace.FindFirstChild("Vertices");
+		const vertexFolder = game.Workspace.FindFirstChild("Vertices");
 		if (vertexFolder) {
 			for (const v of vertexFolder.GetChildren()) {
 				if (v.IsA("BasePart")) {
@@ -557,7 +558,7 @@ const MapGenerator = {
 		let nearestDist = math.huge;
 
 		for (const vertex of vertices) {
-			const dist = Vector3.new(position.X, 0, position.Z).sub(Vector3.new(vertex.Position.X, 0, vertex.Position.Z)).Magnitude;
+			const dist = new Vector3(position.X, 0, position.Z).sub(new Vector3(vertex.Position.X, 0, vertex.Position.Z)).Magnitude;
 			if (dist < nearestDist) {
 				nearestDist = dist;
 				nearest = vertex;

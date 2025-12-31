@@ -1,12 +1,12 @@
 // Client-side Player Controller
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
-const Network = require(ReplicatedStorage.Shared.Network) as typeof import("shared/Network");
+import Network from "shared/Network";
 const Players = game.GetService("Players");
 const UserInputService = game.GetService("UserInputService");
 const RunService = game.GetService("RunService");
 
-const Logger = require(ReplicatedStorage.WaitForChild("Shared").WaitForChild("Logger")) as typeof import("shared/Logger");
-const Blueprints = require(ReplicatedStorage.WaitForChild("Shared").WaitForChild("Blueprints")) as typeof import("shared/Blueprints");
+import * as Logger from "shared/Logger";
+import Blueprints from "shared/Blueprints";
 
 type BlueprintBookUIType = {
 	Toggle: () => void;
@@ -47,7 +47,7 @@ task.spawn(() => {
 });
 
 const player = Players.LocalPlayer;
-const camera = workspace.CurrentCamera!;
+const camera = game.Workspace.CurrentCamera!;
 
 // Camera settings
 camera.FieldOfView = 80;
@@ -136,7 +136,7 @@ const findSnapPointAtMouse = () => {
 		folderName = "Edges";
 	}
 
-	const folder = workspace.FindFirstChild(folderName);
+	const folder = game.Workspace.FindFirstChild(folderName);
 	if (!folder) {
 		return undefined;
 	}
@@ -170,7 +170,7 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 
 	// Helper to find owner of a building at a position/key
 	const getOwnerAt = (key: string, folderName: string) => {
-		const folder = workspace.FindFirstChild(folderName);
+		const folder = game.Workspace.FindFirstChild(folderName);
 		if (!folder) {
 			return undefined;
 		}
@@ -192,7 +192,7 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 		}
 		const folders = ["Settlements", "Buildings"];
 		for (const folderName of folders) {
-			const folder = workspace.FindFirstChild(folderName);
+			const folder = game.Workspace.FindFirstChild(folderName);
 			if (folder) {
 				for (const model of folder.GetChildren()) {
 					if (model.IsA("Model")) {
@@ -228,7 +228,7 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 
 		// Check if player has any existing buildings/foundations
 		const checkOwnedBuildings = (fName: string) => {
-			const f = workspace.FindFirstChild(fName);
+			const f = game.Workspace.FindFirstChild(fName);
 			if (!f) {
 				return false;
 			}
@@ -246,20 +246,21 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 		const hasAnyBuildings = checkOwnedBuildings("Settlements") || checkOwnedBuildings("Buildings");
 
 		if (!hasAnyBuildings) {
-			Logger.Info("Placement", `VALID: First settlement placement (free) at ${myKey}`);
+			Logger.Debug("Placement", `VALID: First settlement placement (free) at ${myKey}`);
 			return true;
 		}
 
 		// Subsequent settlements must be connected via road (standard Catan)
 		let ownedRoadFound = false;
-		const bFolder = workspace.FindFirstChild("Buildings");
+		const bFolder = game.Workspace.FindFirstChild("Buildings");
 		if (bFolder) {
 			for (const m of bFolder.GetChildren()) {
 				if (m.IsA("Model")) {
 					const b = m.FindFirstChild("FoundationBase") ?? m.PrimaryPart;
 					if (b && b.IsA("BasePart") && b.GetAttribute("OwnerId") === player.UserId) {
 						const key = b.GetAttribute("Key") as string | undefined;
-						const [found] = key && myKey ? string.find(key, myKey) : $tuple(undefined, undefined);
+						const findResult = key && myKey ? string.find(key, myKey) : undefined;
+						const found = findResult ? findResult[0] : undefined;
 						if (found !== undefined) {
 							ownedRoadFound = true;
 							break;
@@ -285,7 +286,7 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 		// Check for owned settlement at either vertex
 		const folders = ["Settlements", "Buildings"];
 		for (const folder of folders) {
-			const f = workspace.FindFirstChild(folder);
+			const f = game.Workspace.FindFirstChild(folder);
 			if (f) {
 				for (const model of f.GetChildren()) {
 					if (model.IsA("Model")) {
@@ -306,15 +307,17 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 		}
 
 		// Check for owned road at either vertex
-		const f = workspace.FindFirstChild("Buildings");
+		const f = game.Workspace.FindFirstChild("Buildings");
 		if (f) {
 			for (const model of f.GetChildren()) {
 				if (model.IsA("Model")) {
 					const base = model.FindFirstChild("FoundationBase") ?? model.PrimaryPart;
 					if (base && base.IsA("BasePart") && base.GetAttribute("OwnerId") === player.UserId) {
 						const key = base.GetAttribute("Key") as string | undefined;
-						const [foundV1] = key && v1 ? string.find(key, v1) : $tuple(undefined, undefined);
-						const [foundV2] = key && v2 ? string.find(key, v2) : $tuple(undefined, undefined);
+						const findResultV1 = key && v1 ? string.find(key, v1) : undefined;
+						const foundV1 = findResultV1 ? findResultV1[0] : undefined;
+						const findResultV2 = key && v2 ? string.find(key, v2) : undefined;
+						const foundV2 = findResultV2 ? findResultV2[0] : undefined;
 						if (foundV1 !== undefined || foundV2 !== undefined) {
 							Logger.Info("Placement", `VALID: Road connected to owned road at ${v1}/${v2}`);
 							return true;
@@ -339,7 +342,7 @@ const updatePlacementPreview = () => {
 			buildingPreview = undefined;
 		}
 		// Hide markers when not in placement mode
-		const vFolder = workspace.FindFirstChild("Vertices");
+		const vFolder = game.Workspace.FindFirstChild("Vertices");
 		if (vFolder) {
 			for (const v of vFolder.GetChildren()) {
 				if (v.IsA("BasePart")) {
@@ -347,7 +350,7 @@ const updatePlacementPreview = () => {
 				}
 			}
 		}
-		const eFolder = workspace.FindFirstChild("Edges");
+		const eFolder = game.Workspace.FindFirstChild("Edges");
 		if (eFolder) {
 			for (const e of eFolder.GetChildren()) {
 				if (e.IsA("BasePart")) {
@@ -360,7 +363,7 @@ const updatePlacementPreview = () => {
 
 	// Make valid snap points visible while building
 	const folderName = Blueprints.Buildings[selectedBlueprint].PlacementType === "edge" ? "Edges" : "Vertices";
-	const folder = workspace.FindFirstChild(folderName);
+	const folder = game.Workspace.FindFirstChild(folderName);
 	if (folder) {
 		for (const marker of folder.GetChildren()) {
 			if (marker.IsA("BasePart")) {
@@ -392,16 +395,16 @@ const updatePlacementPreview = () => {
 		buildingPreview.CanCollide = false;
 		buildingPreview.Transparency = 0.3; // More visible
 		buildingPreview.Material = Enum.Material.Neon;
-		buildingPreview.Parent = workspace;
+		buildingPreview.Parent = game.Workspace;
 	}
 
 	// Update preview size and rotation
 	if (blueprint.PlacementType === "edge") {
-		buildingPreview.Size = Vector3.new(37, 0.5, 4);
-		buildingPreview.CFrame = snapPoint.CFrame.mul(CFrame.new(0, 0.25, 0));
+		buildingPreview.Size = new Vector3(37, 0.5, 4);
+		buildingPreview.CFrame = snapPoint.CFrame.mul(new CFrame(0, 0.25, 0));
 	} else {
-		buildingPreview.Size = Vector3.new(8, 0.5, 8);
-		buildingPreview.CFrame = CFrame.new(snapPoint.Position.add(Vector3.new(0, 0.25, 0)));
+		buildingPreview.Size = new Vector3(8, 0.5, 8);
+		buildingPreview.CFrame = new CFrame(snapPoint.Position.add(new Vector3(0, 0.25, 0)));
 	}
 
 	// Color based on validity
@@ -428,10 +431,10 @@ const exitPlacementMode = () => {
 // Foundation interaction state
 let nearbyFoundation:
 	| {
-			Id: unknown;
-			Model: Model;
-			Part: BasePart;
-		}
+		Id: unknown;
+		Model: Model;
+		Part: BasePart;
+	}
 	| undefined;
 
 const createDepositPrompt = () => {
@@ -442,8 +445,8 @@ const createDepositPrompt = () => {
 
 	const frame = new Instance("Frame");
 	frame.Name = "PromptFrame";
-	frame.Size = UDim2.new(0, 300, 0, 60);
-	frame.Position = UDim2.new(0.5, -150, 0.6, 0);
+	frame.Size = new UDim2(0, 300, 0, 60);
+	frame.Position = new UDim2(0.5, -150, 0.6, 0);
 	frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
 	frame.BackgroundTransparency = 0.3;
 	frame.BorderSizePixel = 0;
@@ -451,14 +454,14 @@ const createDepositPrompt = () => {
 	frame.Parent = screenGui;
 
 	const corner = new Instance("UICorner");
-	corner.CornerRadius = UDim.new(0, 10);
+	corner.CornerRadius = new UDim(0, 10);
 	corner.Parent = frame;
 
 	const label = new Instance("TextLabel");
 	label.Name = "Text";
-	label.Size = UDim2.new(1, 0, 1, 0);
+	label.Size = new UDim2(1, 0, 1, 0);
 	label.BackgroundTransparency = 1;
-	label.TextColor3 = Color3.new(1, 1, 1);
+	label.TextColor3 = new Color3(1, 1, 1);
 	label.Font = Enum.Font.GothamBold;
 	label.TextSize = 18;
 	label.Text = "Press E to deposit resource";
@@ -479,16 +482,16 @@ const findNearbyFoundation = () => {
 	const playerPos = character.PrimaryPart.Position;
 	let closest:
 		| {
-				Id: unknown;
-				Model: Model;
-				Part: BasePart;
-			}
+			Id: unknown;
+			Model: Model;
+			Part: BasePart;
+		}
 		| undefined;
 	let closestDist = 15; // Max interaction distance
 	let foundCount = 0;
 
-	// Search all of workspace to be more robust than just checking specific folders
-	for (const object of workspace.GetChildren()) {
+	// Search all of game.Workspace to be more robust than just checking specific folders
+	for (const object of game.Workspace.GetChildren()) {
 		// Also check inside folders if they exist
 		let searchArea = [object];
 		if (object.IsA("Folder") && (object.Name === "Buildings" || object.Name === "Settlements")) {
@@ -603,12 +606,12 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 			if (totalFound === 0) {
 				Logger.Debug(
 					"PlayerController",
-					"Pressing E, but NO foundations with 'FoundationBase' were found in workspace at all.",
+					"Pressing E, but NO foundations with 'FoundationBase' were found in game.Workspace at all.",
 				);
 			} else {
 				Logger.Debug(
 					"PlayerController",
-					`Pressing E, found ${totalFound} foundations in workspace, but none close enough (15 studs) or owned by you.`,
+					`Pressing E, found ${totalFound} foundations in game.Workspace, but none close enough (15 studs) or owned by you.`,
 				);
 			}
 		}

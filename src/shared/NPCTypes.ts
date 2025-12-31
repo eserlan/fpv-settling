@@ -16,7 +16,7 @@ type NPCInfo = {
 const NPCTypes: Record<string, NPCInfo> = {
 	Worker: {
 		Name: "Worker",
-		Description: "Gathers resources and constructs buildings",
+		Description: "Gathers resources and constructs buildings. Good guy to have around.",
 		HireCost: {
 			Wheat: 2,
 			Ore: 1,

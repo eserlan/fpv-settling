@@ -6,7 +6,7 @@ const UserInputService = game.GetService("UserInputService");
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
 
-const Logger = require(ReplicatedStorage.WaitForChild("Shared").WaitForChild("Logger")) as typeof import("shared/Logger");
+import * as Logger from "shared/Logger";
 
 const DevPanel = {} as Record<string, unknown>;
 
@@ -30,9 +30,9 @@ screenGui.Parent = playerGui;
 // Main panel frame
 const panelFrame = new Instance("Frame");
 panelFrame.Name = "Panel";
-panelFrame.Size = UDim2.new(0, 250, 0, 300);
+panelFrame.Size = new UDim2(0, 250, 0, 300);
 panelFrame.AnchorPoint = new Vector2(1, 1);
-panelFrame.Position = UDim2.new(1, -20, 1, -20);
+panelFrame.Position = new UDim2(1, -20, 1, -20);
 panelFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40);
 panelFrame.BackgroundTransparency = 0.1;
 panelFrame.BorderSizePixel = 0;
@@ -40,14 +40,14 @@ panelFrame.Visible = false; // Hidden by default, Alt+C to toggle
 panelFrame.Parent = screenGui;
 
 const panelCorner = new Instance("UICorner");
-panelCorner.CornerRadius = UDim.new(0, 12);
+panelCorner.CornerRadius = new UDim(0, 12);
 panelCorner.Parent = panelFrame;
 
 // Title
 const titleLabel = new Instance("TextLabel");
 titleLabel.Name = "Title";
-titleLabel.Size = UDim2.new(1, 0, 0, 40);
-titleLabel.Position = UDim2.new(0, 0, 0, 0);
+titleLabel.Size = new UDim2(1, 0, 0, 40);
+titleLabel.Position = new UDim2(0, 0, 0, 0);
 titleLabel.BackgroundColor3 = Color3.fromRGB(60, 60, 80);
 titleLabel.BackgroundTransparency = 0.5;
 titleLabel.TextColor3 = Color3.fromRGB(255, 200, 100);
@@ -57,20 +57,20 @@ titleLabel.Text = "🛠️ DEV PANEL";
 titleLabel.Parent = panelFrame;
 
 const titleCorner = new Instance("UICorner");
-titleCorner.CornerRadius = UDim.new(0, 12);
+titleCorner.CornerRadius = new UDim(0, 12);
 titleCorner.Parent = titleLabel;
 
 // Content area
 const contentFrame = new Instance("Frame");
 contentFrame.Name = "Content";
-contentFrame.Size = UDim2.new(1, -20, 1, -60);
-contentFrame.Position = UDim2.new(0, 10, 0, 50);
+contentFrame.Size = new UDim2(1, -20, 1, -60);
+contentFrame.Position = new UDim2(0, 10, 0, 50);
 contentFrame.BackgroundTransparency = 1;
 contentFrame.Parent = panelFrame;
 
 const contentLayout = new Instance("UIListLayout");
 contentLayout.FillDirection = Enum.FillDirection.Vertical;
-contentLayout.Padding = UDim.new(0, 8);
+contentLayout.Padding = new UDim(0, 8);
 contentLayout.Parent = contentFrame;
 
 // Helper to create a toggle button
@@ -82,16 +82,16 @@ const createToggleButton = (
 ) => {
 	const button = new Instance("TextButton");
 	button.Name = name;
-	button.Size = UDim2.new(1, 0, 0, 35);
+	button.Size = new UDim2(1, 0, 0, 35);
 	button.BackgroundColor3 = defaultState ? Color3.fromRGB(50, 150, 50) : Color3.fromRGB(80, 80, 80);
-	button.TextColor3 = Color3.new(1, 1, 1);
+	button.TextColor3 = new Color3(1, 1, 1);
 	button.TextScaled = true;
 	button.Font = Enum.Font.GothamBold;
 	button.Text = `${labelText}${defaultState ? " ✓" : " ✗"}`;
 	button.Parent = contentFrame;
 
 	const buttonCorner = new Instance("UICorner");
-	buttonCorner.CornerRadius = UDim.new(0, 8);
+	buttonCorner.CornerRadius = new UDim(0, 8);
 	buttonCorner.Parent = button;
 
 	let isOn = defaultState;
@@ -110,16 +110,16 @@ const createToggleButton = (
 const createActionButton = (name: string, labelText: string, callback: () => void) => {
 	const button = new Instance("TextButton");
 	button.Name = name;
-	button.Size = UDim2.new(1, 0, 0, 35);
+	button.Size = new UDim2(1, 0, 0, 35);
 	button.BackgroundColor3 = Color3.fromRGB(100, 80, 150);
-	button.TextColor3 = Color3.new(1, 1, 1);
+	button.TextColor3 = new Color3(1, 1, 1);
 	button.TextScaled = true;
 	button.Font = Enum.Font.GothamBold;
 	button.Text = labelText;
 	button.Parent = contentFrame;
 
 	const buttonCorner = new Instance("UICorner");
-	buttonCorner.CornerRadius = UDim.new(0, 8);
+	buttonCorner.CornerRadius = new UDim(0, 8);
 	buttonCorner.Parent = button;
 
 	button.MouseButton1Click.Connect(callback);
@@ -130,7 +130,7 @@ const createActionButton = (name: string, labelText: string, callback: () => voi
 // Section label helper
 const createSectionLabel = (text: string) => {
 	const label = new Instance("TextLabel");
-	label.Size = UDim2.new(1, 0, 0, 20);
+	label.Size = new UDim2(1, 0, 0, 20);
 	label.BackgroundTransparency = 1;
 	label.TextColor3 = Color3.fromRGB(150, 150, 150);
 	label.TextScaled = true;

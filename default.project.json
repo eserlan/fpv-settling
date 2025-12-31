@@ -4,18 +4,35 @@
     "$className": "DataModel",
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
+      "include": {
+        "$path": "include"
+      },
       "Shared": {
         "$path": "out/shared"
       },
       "Events": {
         "$className": "Folder",
-        "ResourceUpdate": { "$className": "RemoteEvent" },
-        "ConstructionStarted": { "$className": "RemoteEvent" },
-        "ConstructionCompleted": { "$className": "RemoteEvent" },
-        "NPCHired": { "$className": "RemoteEvent" },
-        "ResearchStarted": { "$className": "RemoteEvent" },
-        "ResearchCompleted": { "$className": "RemoteEvent" },
-        "ClientRequest": { "$className": "RemoteEvent" }
+        "ResourceUpdate": {
+          "$className": "RemoteEvent"
+        },
+        "ConstructionStarted": {
+          "$className": "RemoteEvent"
+        },
+        "ConstructionCompleted": {
+          "$className": "RemoteEvent"
+        },
+        "NPCHired": {
+          "$className": "RemoteEvent"
+        },
+        "ResearchStarted": {
+          "$className": "RemoteEvent"
+        },
+        "ResearchCompleted": {
+          "$className": "RemoteEvent"
+        },
+        "ClientRequest": {
+          "$className": "RemoteEvent"
+        }
       },
       "$ignoreUnknownInstances": true
     },

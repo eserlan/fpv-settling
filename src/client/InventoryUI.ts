@@ -6,7 +6,7 @@ const TweenService = game.GetService("TweenService");
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
 
-const Logger = require(ReplicatedStorage.WaitForChild("Shared").WaitForChild("Logger")) as typeof import("shared/Logger");
+import * as Logger from "shared/Logger";
 
 const InventoryUI = {} as Record<string, unknown>;
 
@@ -32,22 +32,22 @@ screenGui.Parent = playerGui;
 // Inventory bar (bottom center)
 const inventoryFrame = new Instance("Frame");
 inventoryFrame.Name = "InventoryFrame";
-inventoryFrame.Size = UDim2.new(0, 400, 0, 60);
-inventoryFrame.Position = UDim2.new(0.5, -200, 1, -80);
+inventoryFrame.Size = new UDim2(0, 400, 0, 60);
+inventoryFrame.Position = new UDim2(0.5, -200, 1, -80);
 inventoryFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40);
 inventoryFrame.BackgroundTransparency = 0.3;
 inventoryFrame.BorderSizePixel = 0;
 inventoryFrame.Parent = screenGui;
 
 const inventoryCorner = new Instance("UICorner");
-inventoryCorner.CornerRadius = UDim.new(0, 12);
+inventoryCorner.CornerRadius = new UDim(0, 12);
 inventoryCorner.Parent = inventoryFrame;
 
 const inventoryLayout = new Instance("UIListLayout");
 inventoryLayout.FillDirection = Enum.FillDirection.Horizontal;
 inventoryLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center;
 inventoryLayout.VerticalAlignment = Enum.VerticalAlignment.Center;
-inventoryLayout.Padding = UDim.new(0, 10);
+inventoryLayout.Padding = new UDim(0, 10);
 inventoryLayout.Parent = inventoryFrame;
 
 // Create resource slots
@@ -56,22 +56,22 @@ const resourceLabels: Record<string, TextLabel> = {};
 for (const resourceData of RESOURCES) {
 	const slot = new Instance("Frame");
 	slot.Name = `${resourceData.Key}Slot`;
-	slot.Size = UDim2.new(0, 70, 0, 50);
+	slot.Size = new UDim2(0, 70, 0, 50);
 	slot.BackgroundColor3 = resourceData.Color;
 	slot.BackgroundTransparency = 0.5;
 	slot.BorderSizePixel = 0;
 	slot.Parent = inventoryFrame;
 
 	const slotCorner = new Instance("UICorner");
-	slotCorner.CornerRadius = UDim.new(0, 8);
+	slotCorner.CornerRadius = new UDim(0, 8);
 	slotCorner.Parent = slot;
 
 	const iconLabel = new Instance("TextLabel");
 	iconLabel.Name = "Icon";
-	iconLabel.Size = UDim2.new(0.5, 0, 1, 0);
-	iconLabel.Position = UDim2.new(0, 0, 0, 0);
+	iconLabel.Size = new UDim2(0.5, 0, 1, 0);
+	iconLabel.Position = new UDim2(0, 0, 0, 0);
 	iconLabel.BackgroundTransparency = 1;
-	iconLabel.TextColor3 = Color3.new(1, 1, 1);
+	iconLabel.TextColor3 = new Color3(1, 1, 1);
 	iconLabel.TextScaled = true;
 	iconLabel.Font = Enum.Font.GothamBold;
 	iconLabel.Text = resourceData.Icon;
@@ -79,10 +79,10 @@ for (const resourceData of RESOURCES) {
 
 	const countLabel = new Instance("TextLabel");
 	countLabel.Name = "Count";
-	countLabel.Size = UDim2.new(0.5, 0, 1, 0);
-	countLabel.Position = UDim2.new(0.5, 0, 0, 0);
+	countLabel.Size = new UDim2(0.5, 0, 1, 0);
+	countLabel.Position = new UDim2(0.5, 0, 0, 0);
 	countLabel.BackgroundTransparency = 1;
-	countLabel.TextColor3 = Color3.new(1, 1, 1);
+	countLabel.TextColor3 = new Color3(1, 1, 1);
 	countLabel.TextScaled = true;
 	countLabel.Font = Enum.Font.GothamBold;
 	countLabel.Text = "0";
@@ -94,8 +94,8 @@ for (const resourceData of RESOURCES) {
 // Collection notification (floating text)
 const notificationLabel = new Instance("TextLabel");
 notificationLabel.Name = "Notification";
-notificationLabel.Size = UDim2.new(0, 300, 0, 50);
-notificationLabel.Position = UDim2.new(0.5, -150, 0.7, 0);
+notificationLabel.Size = new UDim2(0, 300, 0, 50);
+notificationLabel.Position = new UDim2(0.5, -150, 0.7, 0);
 notificationLabel.BackgroundTransparency = 1;
 notificationLabel.TextColor3 = Color3.fromRGB(100, 255, 100);
 notificationLabel.TextScaled = true;
@@ -125,14 +125,14 @@ const showCollectionNotification = (resourceType: string, amount: number) => {
 	const icon = icons[resourceType] ?? "📦";
 	notificationLabel.Text = `+${amount} ${icon} ${resourceType}`;
 	notificationLabel.TextTransparency = 0;
-	notificationLabel.Position = UDim2.new(0.5, -150, 0.7, 0);
+	notificationLabel.Position = new UDim2(0.5, -150, 0.7, 0);
 
 	// Animate upward and fade
 	const tween = TweenService.Create(
 		notificationLabel,
 		new TweenInfo(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 		{
-			Position: UDim2.new(0.5, -150, 0.6, 0),
+			Position: new UDim2(0.5, -150, 0.6, 0),
 			TextTransparency: 1,
 		},
 	);
@@ -140,7 +140,7 @@ const showCollectionNotification = (resourceType: string, amount: number) => {
 };
 
 // Handle collection events
-CollectEvent.OnClientEvent.Connect((eventType, data1, data2) => {
+CollectEvent.OnClientEvent.Connect((eventType: unknown, data1: unknown, data2: unknown) => {
 	if (eventType === "InventoryUpdate") {
 		updateInventory(data1 as Record<string, number>);
 	} else if (eventType === "Collected") {

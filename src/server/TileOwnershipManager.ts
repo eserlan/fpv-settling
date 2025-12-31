@@ -3,7 +3,7 @@
 // In Catan: settlements adjacent to tile corners give ownership
 
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
-const Logger = require(ReplicatedStorage.WaitForChild("Shared").WaitForChild("Logger")) as typeof import("shared/Logger");
+import * as Logger from "shared/Logger";
 
 type TileOwnershipRecord = {
 	playerUserId: number;
@@ -79,7 +79,7 @@ const TileOwnershipManager = {
 		const claimedTiles = new Array<{ Q: number; R: number }>();
 
 		// Find the vertex marker at this position
-		const vertexFolder = workspace.FindFirstChild("Vertices");
+		const vertexFolder = game.Workspace.FindFirstChild("Vertices");
 		if (!vertexFolder) {
 			Logger.Warn("TileOwnership", "No vertices folder found");
 			return claimedTiles;

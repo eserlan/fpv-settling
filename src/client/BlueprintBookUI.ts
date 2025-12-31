@@ -5,9 +5,9 @@ const ReplicatedStorage = game.GetService("ReplicatedStorage");
 const UserInputService = game.GetService("UserInputService");
 const Players = game.GetService("Players");
 
-const Blueprints = require(ReplicatedStorage.Shared.Blueprints) as typeof import("shared/Blueprints");
-const Logger = require(ReplicatedStorage.Shared.Logger) as typeof import("shared/Logger");
-const Network = require(ReplicatedStorage.Shared.Network) as typeof import("shared/Network");
+import Blueprints from "shared/Blueprints";
+import * as Logger from "shared/Logger";
+import Network from "shared/Network";
 
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
@@ -49,38 +49,38 @@ screenGui.Parent = playerGui;
 // Main frame
 const mainFrame = new Instance("Frame");
 mainFrame.Name = "MainFrame";
-mainFrame.Size = UDim2.new(0, 520, 0, 420);
-mainFrame.Position = UDim2.new(0.5, -260, 0.5, -210);
+mainFrame.Size = new UDim2(0, 520, 0, 420);
+mainFrame.Position = new UDim2(0.5, -260, 0.5, -210);
 mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 45);
 mainFrame.BorderSizePixel = 0;
 mainFrame.Parent = screenGui;
 
 const corner = new Instance("UICorner");
-corner.CornerRadius = UDim.new(0, 16);
+corner.CornerRadius = new UDim(0, 16);
 corner.Parent = mainFrame;
 
 // Title bar
 const titleBar = new Instance("Frame");
 titleBar.Name = "TitleBar";
-titleBar.Size = UDim2.new(1, 0, 0, 50);
+titleBar.Size = new UDim2(1, 0, 0, 50);
 titleBar.BackgroundColor3 = Color3.fromRGB(50, 50, 65);
 titleBar.BorderSizePixel = 0;
 titleBar.Parent = mainFrame;
 
 const titleCorner = new Instance("UICorner");
-titleCorner.CornerRadius = UDim.new(0, 16);
+titleCorner.CornerRadius = new UDim(0, 16);
 titleCorner.Parent = titleBar;
 
 const titleFix = new Instance("Frame");
-titleFix.Size = UDim2.new(1, 0, 0, 16);
-titleFix.Position = UDim2.new(0, 0, 1, -16);
+titleFix.Size = new UDim2(1, 0, 0, 16);
+titleFix.Position = new UDim2(0, 0, 1, -16);
 titleFix.BackgroundColor3 = Color3.fromRGB(50, 50, 65);
 titleFix.BorderSizePixel = 0;
 titleFix.Parent = titleBar;
 
 const titleLabel = new Instance("TextLabel");
 titleLabel.Name = "Title";
-titleLabel.Size = UDim2.new(1, 0, 1, 0);
+titleLabel.Size = new UDim2(1, 0, 1, 0);
 titleLabel.BackgroundTransparency = 1;
 titleLabel.Text = "📖 BLUEPRINT BOOK";
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255);
@@ -91,17 +91,17 @@ titleLabel.Parent = titleBar;
 // Close button
 const closeButton = new Instance("TextButton");
 closeButton.Name = "CloseButton";
-closeButton.Size = UDim2.new(0, 40, 0, 40);
-closeButton.Position = UDim2.new(1, -45, 0, 5);
+closeButton.Size = new UDim2(0, 40, 0, 40);
+closeButton.Position = new UDim2(1, -45, 0, 5);
 closeButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80);
 closeButton.Text = "✕";
-closeButton.TextColor3 = Color3.new(1, 1, 1);
+closeButton.TextColor3 = new Color3(1, 1, 1);
 closeButton.Font = Enum.Font.GothamBold;
 closeButton.TextSize = 20;
 closeButton.Parent = titleBar;
 
 const closeCorner = new Instance("UICorner");
-closeCorner.CornerRadius = UDim.new(0, 8);
+closeCorner.CornerRadius = new UDim(0, 8);
 closeCorner.Parent = closeButton;
 
 closeButton.MouseButton1Click.Connect(() => {
@@ -111,15 +111,15 @@ closeButton.MouseButton1Click.Connect(() => {
 // Blueprint container
 const container = new Instance("Frame");
 container.Name = "Container";
-container.Size = UDim2.new(1, -40, 1, -110);
-container.Position = UDim2.new(0, 20, 0, 60);
+container.Size = new UDim2(1, -40, 1, -110);
+container.Position = new UDim2(0, 20, 0, 60);
 container.BackgroundTransparency = 1;
 container.Parent = mainFrame;
 
 const containerLayout = new Instance("UIListLayout");
 containerLayout.FillDirection = Enum.FillDirection.Horizontal;
 containerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center;
-containerLayout.Padding = UDim.new(0, 20);
+containerLayout.Padding = new UDim(0, 20);
 containerLayout.Parent = container;
 
 // Refresh affordability
@@ -157,18 +157,18 @@ const refreshAffordability = () => {
 const createBlueprintCard = (blueprintName: string, blueprintData: import("shared/Blueprints").BlueprintInfo) => {
 	const card = new Instance("Frame");
 	card.Name = `${blueprintName}Card`;
-	card.Size = UDim2.new(0, 140, 0, 260);
+	card.Size = new UDim2(0, 140, 0, 260);
 	card.BackgroundColor3 = Color3.fromRGB(55, 55, 70);
 	card.BorderSizePixel = 0;
 
 	const cardCorner = new Instance("UICorner");
-	cardCorner.CornerRadius = UDim.new(0, 12);
+	cardCorner.CornerRadius = new UDim(0, 12);
 	cardCorner.Parent = card;
 
 	const icon = new Instance("TextLabel");
 	icon.Name = "Icon";
-	icon.Size = UDim2.new(1, 0, 0, 60);
-	icon.Position = UDim2.new(0, 0, 0, 10);
+	icon.Size = new UDim2(1, 0, 0, 60);
+	icon.Position = new UDim2(0, 0, 0, 10);
 	icon.BackgroundTransparency = 1;
 	icon.Text = blueprintData.Icon;
 	icon.TextSize = 48;
@@ -176,8 +176,8 @@ const createBlueprintCard = (blueprintName: string, blueprintData: import("share
 
 	const nameLabel = new Instance("TextLabel");
 	nameLabel.Name = "Name";
-	nameLabel.Size = UDim2.new(1, -10, 0, 25);
-	nameLabel.Position = UDim2.new(0, 5, 0, 70);
+	nameLabel.Size = new UDim2(1, -10, 0, 25);
+	nameLabel.Position = new UDim2(0, 5, 0, 70);
 	nameLabel.BackgroundTransparency = 1;
 	nameLabel.Text = blueprintData.Name;
 	nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255);
@@ -187,22 +187,22 @@ const createBlueprintCard = (blueprintName: string, blueprintData: import("share
 
 	const costFrame = new Instance("Frame");
 	costFrame.Name = "CostFrame";
-	costFrame.Size = UDim2.new(1, -10, 0, 110);
-	costFrame.Position = UDim2.new(0, 5, 0, 100);
+	costFrame.Size = new UDim2(1, -10, 0, 110);
+	costFrame.Position = new UDim2(0, 5, 0, 100);
 	costFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 50);
 	costFrame.BorderSizePixel = 0;
 	costFrame.Parent = card;
 
 	const costCorner = new Instance("UICorner");
-	costCorner.CornerRadius = UDim.new(0, 6);
+	costCorner.CornerRadius = new UDim(0, 6);
 	costCorner.Parent = costFrame;
 
 	const costLabels: Record<string, TextLabel> = {};
 	let y = 8;
 	for (const [resource, amount] of pairs(blueprintData.Cost)) {
 		const costLabel = new Instance("TextLabel");
-		costLabel.Size = UDim2.new(1, -10, 0, 18);
-		costLabel.Position = UDim2.new(0, 10, 0, y);
+		costLabel.Size = new UDim2(1, -10, 0, 18);
+		costLabel.Position = new UDim2(0, 10, 0, y);
 		costLabel.BackgroundTransparency = 1;
 		costLabel.Text = `${Blueprints.ResourceIcons[resource] ?? ""} ${resource}: ${amount}`;
 		costLabel.TextColor3 = Color3.fromRGB(200, 200, 200);
@@ -216,17 +216,17 @@ const createBlueprintCard = (blueprintName: string, blueprintData: import("share
 
 	const selectButton = new Instance("TextButton");
 	selectButton.Name = "SelectButton";
-	selectButton.Size = UDim2.new(1, -10, 0, 35);
-	selectButton.Position = UDim2.new(0, 5, 1, -40);
+	selectButton.Size = new UDim2(1, -10, 0, 35);
+	selectButton.Position = new UDim2(0, 5, 1, -40);
 	selectButton.BackgroundColor3 = Color3.fromRGB(80, 160, 80);
 	selectButton.Text = "SELECT";
-	selectButton.TextColor3 = Color3.new(1, 1, 1);
+	selectButton.TextColor3 = new Color3(1, 1, 1);
 	selectButton.Font = Enum.Font.GothamBold;
 	selectButton.TextSize = 9;
 	selectButton.Parent = card;
 
 	const btnCorner = new Instance("UICorner");
-	btnCorner.CornerRadius = UDim.new(0, 6);
+	btnCorner.CornerRadius = new UDim(0, 6);
 	btnCorner.Parent = selectButton;
 
 	selectButton.MouseButton1Click.Connect(() => {
@@ -266,8 +266,8 @@ Network.OnEvent("CollectEvent", (action, data) => {
 // Help text
 const helpText = new Instance("TextLabel");
 helpText.Name = "HelpText";
-helpText.Size = UDim2.new(1, 0, 0, 30);
-helpText.Position = UDim2.new(0, 0, 1, -30);
+helpText.Size = new UDim2(1, 0, 0, 30);
+helpText.Position = new UDim2(0, 0, 1, -30);
 helpText.BackgroundTransparency = 1;
 helpText.Text = "Click a blueprint to select, then click to place foundation • ESC or B to close";
 helpText.TextColor3 = Color3.fromRGB(150, 150, 150);

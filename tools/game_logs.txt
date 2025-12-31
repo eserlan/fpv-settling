@@ -1922,3 +1922,568 @@
 [16:30:30] [DEBUG] [SERVER] [Client] Loaded: PulseUI
 [16:30:30] [INFO ] [SERVER] [InventoryUI] Initialized
 [16:30:30] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[21:17:33] [INFO ] [SERVER] [Server] ===========================================
+[21:17:33] [INFO ] [SERVER] [Server] ===========================================
+[21:17:33] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[21:17:33] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[21:17:33] [INFO ] [SERVER] [CollectionManager] Initialized
+[21:17:33] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[21:17:33] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[21:17:33] [DEBUG] [SERVER] [Server] GameManager loaded.
+[21:17:33] [INFO ] [SERVER] [Server] ===========================================
+[21:17:34] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[21:17:34] [INFO ] [SERVER] [Server] ===========================================
+[21:17:34] [INFO ] [SERVER] [NetworkHandler] Initialized
+[21:17:35] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[21:17:35] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09 with starting resources
+[21:17:35] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[21:17:42] [INFO ] [SERVER] [Client] ===========================================
+[21:17:43] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[21:17:43] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[21:17:43] [INFO ] [SERVER] [Client] ===========================================
+[21:17:45] [INFO ] [SERVER] [Client] Character loaded!
+[21:17:45] [ERROR] [SERVER] [Client] Failed to find module: PlayerController
+[21:17:45] [ERROR] [SERVER] [Client] Failed to find module: UIManager
+[21:17:45] [ERROR] [SERVER] [Client] Failed to find module: PulseUI
+[21:17:45] [ERROR] [SERVER] [Client] Failed to find module: InventoryUI
+[21:17:45] [ERROR] [SERVER] [Client] Failed to find module: BlueprintBookUI
+[21:17:45] [ERROR] [SERVER] [Client] Failed to find module: DevPanel
+[21:17:45] [INFO ] [SERVER] [Client] ===========================================
+[21:17:45] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[21:17:45] [INFO ] [SERVER] [Client] Press B to open Blueprint Book
+[21:17:45] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[21:17:45] [INFO ] [SERVER] [Client] ===========================================
+[21:18:24] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[21:21:32] [INFO ] [SERVER] [Server] ===========================================
+[21:21:32] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[21:21:32] [INFO ] [SERVER] [Server] ===========================================
+[21:21:32] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[21:21:32] [INFO ] [SERVER] [CollectionManager] Initialized
+[21:21:32] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[21:21:32] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[21:21:32] [DEBUG] [SERVER] [Server] GameManager loaded.
+[21:21:32] [INFO ] [SERVER] [Server] ===========================================
+[21:21:32] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[21:21:32] [INFO ] [SERVER] [Server] ===========================================
+[21:21:32] [INFO ] [SERVER] [NetworkHandler] Initialized
+[21:21:33] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[21:21:33] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09 with starting resources
+[21:21:33] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[21:21:37] [INFO ] [SERVER] [Client] ===========================================
+[21:21:37] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[21:21:37] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[21:21:37] [INFO ] [SERVER] [Client] ===========================================
+[21:21:38] [INFO ] [SERVER] [Client] Character loaded!
+[21:21:38] [ERROR] [SERVER] [Client] Failed to find module: PlayerController
+[21:21:39] [ERROR] [SERVER] [Client] Failed to find module: UIManager
+[21:21:39] [ERROR] [SERVER] [Client] Failed to find module: PulseUI
+[21:21:39] [ERROR] [SERVER] [Client] Failed to find module: InventoryUI
+[21:21:39] [ERROR] [SERVER] [Client] Failed to find module: BlueprintBookUI
+[21:21:39] [ERROR] [SERVER] [Client] Failed to find module: DevPanel
+[21:21:39] [INFO ] [SERVER] [Client] ===========================================
+[21:21:39] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[21:21:39] [INFO ] [SERVER] [Client] Press B to open Blueprint Book
+[21:21:39] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[21:21:39] [INFO ] [SERVER] [Client] ===========================================
+[21:21:48] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[21:38:53] [INFO ] [SERVER] [Server] ===========================================
+[21:38:53] [INFO ] [SERVER] [Server] ===========================================
+[21:38:53] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[21:38:53] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[21:38:53] [INFO ] [SERVER] [CollectionManager] Initialized
+[21:38:54] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[21:38:54] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[21:38:54] [DEBUG] [SERVER] [Server] GameManager loaded.
+[21:38:54] [INFO ] [SERVER] [Server] ===========================================
+[21:38:54] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[21:38:54] [INFO ] [SERVER] [Server] ===========================================
+[21:38:54] [INFO ] [SERVER] [NetworkHandler] Initialized
+[21:38:55] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[21:38:55] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09 with starting resources
+[21:38:55] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[21:39:00] [INFO ] [SERVER] [Client] ===========================================
+[21:39:00] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[21:39:00] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[21:39:00] [INFO ] [SERVER] [Client] ===========================================
+[21:39:02] [INFO ] [SERVER] [Client] Character loaded!
+[21:39:02] [INFO ] [SERVER] [BlueprintBookUI] Initialized
+[21:39:02] [INFO ] [SERVER] [PlayerController] BlueprintBookUI loaded
+[21:39:02] [INFO ] [SERVER] [PlayerController] Initialized
+[21:39:02] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[21:39:02] [INFO ] [SERVER] [UIManager] Chat system ready
+[21:39:02] [INFO ] [SERVER] [UIManager] Initialized
+[21:39:02] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[21:39:02] [INFO ] [SERVER] [PulseUI] Initialized
+[21:39:02] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[21:39:02] [INFO ] [SERVER] [InventoryUI] Initialized
+[21:39:02] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[21:39:03] [DEBUG] [SERVER] [Client] Loaded: BlueprintBookUI
+[21:39:03] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[21:39:03] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[21:39:03] [INFO ] [SERVER] [Client] ===========================================
+[21:39:03] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[21:39:03] [INFO ] [SERVER] [Client] Press B to open Blueprint Book
+[21:39:03] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[21:39:03] [INFO ] [SERVER] [Client] ===========================================
+[21:39:21] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:21] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:22] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [DEBUG] [SERVER] [Network] Created RemoteEvent: FoundationPlaced
+[21:39:23] [INFO ] [SERVER] [BuildingManager] eserlan09 placed foundation for Settlement (ID: 1)
+[21:39:23] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:23] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [PulseManager] All players ready! Starting pulse timer...
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:23] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
+[21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
+[21:40:01] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
