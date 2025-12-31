@@ -8,6 +8,13 @@ local RunService = game:GetService("RunService")
 local Logger = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Logger"))
 local Blueprints = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Blueprints"))
 
+-- Building placement state
+local placementMode = false
+local selectedBlueprint = nil
+local buildingPreview = nil
+local currentVertex = nil
+local isValidPlacement = false
+
 -- Wait for BlueprintBookUI to be available
 local BlueprintBookUI = nil
 task.spawn(function()
@@ -46,12 +53,7 @@ local RUN_SPEED = 32
 local isFirstPerson = false
 local isSprinting = false
 
--- Building placement state
-local placementMode = false
-local selectedBlueprint = nil
-local buildingPreview = nil
-local currentVertex = nil
-local isValidPlacement = false
+
 
 -- Update player speed based on sprint state
 local function updateSpeed()
@@ -120,7 +122,7 @@ local function findSnapPointAtMouse()
 	if not folder then return nil end
 	
 	local closest = nil
-	local closestDist = 20 -- Max snap distance
+	local closestDist = 45 -- Max snap distance (Increased for better feel with HEX_SIZE 40)
 	
 	for _, marker in ipairs(folder:GetChildren()) do
 		local dist = (marker.Position - mousePos).Magnitude
@@ -155,6 +157,7 @@ local function isSnapPointValidForBlueprint(marker, blueprintName)
 	
 	-- Helper to check if a vertex key is occupied by ANY building
 	local function isVertexOccupied(key)
+		if not key then return false end -- NEVER occupy a nil key
 		local folders = {"Settlements", "Buildings"}
 		for _, folderName in ipairs(folders) do
 			local folder = workspace:FindFirstChild(folderName)
@@ -175,48 +178,66 @@ local function isSnapPointValidForBlueprint(marker, blueprintName)
 		local myKey = marker:GetAttribute("Key")
 		
 		-- DISTANCE RULE: Is there a building here or at ANY neighbor?
-		if isVertexOccupied(myKey) then return false end
+		if isVertexOccupied(myKey) then 
+			Logger.Info("Placement", "REJECTED: Vertex " .. tostring(myKey) .. " is already occupied.")
+			return false 
+		end
 		
 		-- Check all neighbors for settlements
-		for i = 1, 3 do -- Most hex vertices have up to 3 neighbors
+		for i = 1, 6 do
 			local neighborKey = marker:GetAttribute("Neighbor_" .. i)
 			if neighborKey and isVertexOccupied(neighborKey) then
-				return false -- Too close to another settlement!
+				Logger.Info("Placement", "REJECTED: Neighbor vertex " .. tostring(neighborKey) .. " is occupied (Distance Rule).")
+				return false 
 			end
 		end
 		
-		-- First settlement can be placed anywhere valid (no connection needed)
+		-- Check if player has any existing buildings/foundations
 		local hasAnyBuildings = false
-		for _, model in ipairs(workspace:GetChildren()) do
-			if model:IsA("Model") then
-				local base = model:FindFirstChild("FoundationBase") or model.PrimaryPart
-				if base and base:GetAttribute("OwnerId") == player.UserId then
-					hasAnyBuildings = true
-					break
+		local function checkOwnedBuildings(fName)
+			local f = workspace:FindFirstChild(fName)
+			if not f then return false end
+			for _, m in ipairs(f:GetChildren()) do
+				local b = m:FindFirstChild("FoundationBase") or m.PrimaryPart
+				if b and b:GetAttribute("OwnerId") == player.UserId then
+					return true
 				end
 			end
+			return false
 		end
 		
-		if not hasAnyBuildings then return true end -- First one is free (Distance rule still applies above)
+		hasAnyBuildings = checkOwnedBuildings("Settlements") or checkOwnedBuildings("Buildings")
+		
+		if not hasAnyBuildings then 
+			Logger.Info("Placement", "VALID: First settlement placement (free) at " .. tostring(myKey))
+			return true 
+		end 
 		
 		-- Subsequent settlements must be connected via road (standard Catan)
-		-- Check if any owned road touches this vertex
-		local f = workspace:FindFirstChild("Buildings")
-		if f then
-			for _, model in ipairs(f:GetChildren()) do
-				local base = model:FindFirstChild("FoundationBase") or model.PrimaryPart
-				if base and base:GetAttribute("OwnerId") == player.UserId then
-					local key = base:GetAttribute("Key")
-					-- Edge key is "V1:V2", check if myKey is part of it
+		local ownedRoadFound = false
+		local bFolder = workspace:FindFirstChild("Buildings")
+		if bFolder then
+			for _, m in ipairs(bFolder:GetChildren()) do
+				local b = m:FindFirstChild("FoundationBase") or m.PrimaryPart
+				if b and b:GetAttribute("OwnerId") == player.UserId then
+					local key = b:GetAttribute("Key")
 					if key and string.find(key, myKey) then
-						return true
+						ownedRoadFound = true
+						break
 					end
 				end
 			end
 		end
 		
-		return false -- Not connected
+		if ownedRoadFound then
+			Logger.Info("Placement", "VALID: Settlement connected to owned road at " .. tostring(myKey))
+			return true
+		end
+		
+		Logger.Info("Placement", "REJECTED: Settlement at " .. tostring(myKey) .. " is NOT connected to your road network.")
+		return false
 	elseif blueprint.PlacementType == "edge" then
+		Logger.Info("Placement", "Checking Edge placement connection...")
 		-- Roads MUST connect to a settlement or road you own
 		local v1 = marker:GetAttribute("Vertex1")
 		local v2 = marker:GetAttribute("Vertex2")
@@ -230,8 +251,8 @@ local function isSnapPointValidForBlueprint(marker, blueprintName)
 					local base = model:FindFirstChild("FoundationBase") or model.PrimaryPart
 					if base and base:GetAttribute("OwnerId") == player.UserId then
 						local pos = base.Position
-						-- Vertices are spheres, check distance
-						if (pos - marker.Position).Magnitude < 25 then
+						if (pos - marker.Position).Magnitude < 15 then
+							Logger.Info("Placement", "VALID: Road connected to owned settlement at " .. tostring(v1) .. "/" .. tostring(v2))
 							return true
 						end
 					end
@@ -240,7 +261,6 @@ local function isSnapPointValidForBlueprint(marker, blueprintName)
 		end
 		
 		-- Check for owned road at either vertex
-		-- A road at vertex V1 means its key has V1 in it
 		local f = workspace:FindFirstChild("Buildings")
 		if f then
 			for _, model in ipairs(f:GetChildren()) do
@@ -248,12 +268,14 @@ local function isSnapPointValidForBlueprint(marker, blueprintName)
 				if base and base:GetAttribute("OwnerId") == player.UserId then
 					local key = base:GetAttribute("Key")
 					if key and (string.find(key, v1) or string.find(key, v2)) then
+						Logger.Info("Placement", "VALID: Road connected to owned road at " .. tostring(v1) .. "/" .. tostring(v2))
 						return true
 					end
 				end
 			end
 		end
 		
+		Logger.Info("Placement", "REJECTED: Road must connect to your existing settlement or road.")
 		return false
 	end
 	
@@ -267,7 +289,24 @@ local function updatePlacementPreview()
 			buildingPreview:Destroy()
 			buildingPreview = nil
 		end
+		-- Hide markers when not in placement mode
+		local vFolder = workspace:FindFirstChild("Vertices")
+		if vFolder then for _, v in ipairs(vFolder:GetChildren()) do if v:IsA("BasePart") then v.Transparency = 1 end end end
+		local eFolder = workspace:FindFirstChild("Edges")
+		if eFolder then for _, e in ipairs(eFolder:GetChildren()) do if e:IsA("BasePart") then e.Transparency = 1 end end end
 		return
+	end
+	
+	-- Make valid snap points visible while building
+	local folderName = (Blueprints.Buildings[selectedBlueprint].PlacementType == "edge") and "Edges" or "Vertices"
+	local folder = workspace:FindFirstChild(folderName)
+	if folder then
+		for _, marker in ipairs(folder:GetChildren()) do
+			if marker:IsA("BasePart") then
+				marker.Transparency = 0.8
+				marker.Color = Color3.fromRGB(200, 200, 255)
+			end
+		end
 	end
 	
 	local snapPoint = findSnapPointAtMouse()
