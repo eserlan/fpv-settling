@@ -308,7 +308,10 @@ export const generateHexSpiral = (rings: number): AxialCoord[] => {
     const hexes: AxialCoord[] = [{ q: 0, r: 0 }]; // Center
 
     for (let ring = 1; ring <= rings; ring++) {
-        hexes.push(...getHexRing({ q: 0, r: 0 }, ring));
+        const ringHexes = getHexRing({ q: 0, r: 0 }, ring);
+        for (const hex of ringHexes) {
+            hexes.push(hex);
+        }
     }
 
     return hexes;

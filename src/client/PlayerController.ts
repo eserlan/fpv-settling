@@ -20,6 +20,8 @@ let selectedBlueprint: string | undefined;
 let buildingPreview: Part | undefined;
 let currentVertex: BasePart | undefined;
 let isValidPlacement = false;
+let lastValidPlacement: boolean | undefined; // Track to log only on change
+let lastBlueprintSelectionTime = 0;
 
 // Wait for BlueprintBookUI to be available
 let BlueprintBookUI: BlueprintBookUIType | undefined;
@@ -37,6 +39,13 @@ task.spawn(() => {
 
 		// Hook up selection callback immediately upon loading
 		BlueprintBookUI.OnBlueprintSelected((blueprintName, _blueprintData) => {
+			// Debounce: ignore if called within 100ms of last selection
+			const now = os.clock();
+			if (now - lastBlueprintSelectionTime < 0.1) {
+				return;
+			}
+			lastBlueprintSelectionTime = now;
+
 			selectedBlueprint = blueprintName;
 			placementMode = true;
 			Logger.Info("PlayerController", `Entering placement mode for: ${blueprintName}`);
@@ -278,12 +287,11 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 		Logger.Info("Placement", `REJECTED: Settlement at ${myKey} is NOT connected to your road network.`);
 		return false;
 	} else if (blueprint.PlacementType === "edge") {
-		Logger.Info("Placement", "Checking Edge placement connection...");
 		// Roads MUST connect to a settlement or road you own
 		const v1 = marker.GetAttribute("Vertex1") as string | undefined;
 		const v2 = marker.GetAttribute("Vertex2") as string | undefined;
 
-		// Check for owned settlement at either vertex
+		// Check for owned settlement at either vertex endpoint
 		const folders = ["Settlements", "Buildings"];
 		for (const folder of folders) {
 			const f = game.Workspace.FindFirstChild(folder);
@@ -291,13 +299,40 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 				for (const model of f.GetChildren()) {
 					if (model.IsA("Model")) {
 						const base = model.FindFirstChild("FoundationBase") ?? model.PrimaryPart;
-						if (base && base.IsA("BasePart") && base.GetAttribute("OwnerId") === player.UserId) {
-							const pos = base.Position;
-							if (pos.sub(marker.Position).Magnitude < 15) {
-								Logger.Info(
-									"Placement",
-									`VALID: Road connected to owned settlement at ${v1}/${v2}`,
-								);
+						if (base && base.IsA("BasePart")) {
+							const ownerId = base.GetAttribute("OwnerId");
+							const settlementKey = base.GetAttribute("Key") as string | undefined;
+
+							if (ownerId === player.UserId) {
+								// Check if settlement's key matches either vertex of this edge
+								if (settlementKey && (settlementKey === v1 || settlementKey === v2)) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// Check for owned road that shares a vertex
+		const f = game.Workspace.FindFirstChild("Buildings");
+		if (f) {
+			for (const model of f.GetChildren()) {
+				if (model.IsA("Model")) {
+					const base = model.FindFirstChild("FoundationBase") ?? model.PrimaryPart;
+					if (base && base.IsA("BasePart") && base.GetAttribute("OwnerId") === player.UserId) {
+						// Road keys are stored as "vertex1:vertex2"
+						// Check if this road shares a vertex with the new road
+						const roadKey = base.GetAttribute("Key") as string | undefined;
+						if (roadKey && v1 && v2) {
+							// Parse the existing road's vertices
+							const parts = string.split(roadKey, ":");
+							const roadV1 = parts[0];
+							const roadV2 = parts[1];
+
+							// Check if any vertex matches
+							if (roadV1 === v1 || roadV1 === v2 || roadV2 === v1 || roadV2 === v2) {
 								return true;
 							}
 						}
@@ -306,28 +341,7 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 			}
 		}
 
-		// Check for owned road at either vertex
-		const f = game.Workspace.FindFirstChild("Buildings");
-		if (f) {
-			for (const model of f.GetChildren()) {
-				if (model.IsA("Model")) {
-					const base = model.FindFirstChild("FoundationBase") ?? model.PrimaryPart;
-					if (base && base.IsA("BasePart") && base.GetAttribute("OwnerId") === player.UserId) {
-						const key = base.GetAttribute("Key") as string | undefined;
-						const findResultV1 = key && v1 ? string.find(key, v1) : undefined;
-						const foundV1 = findResultV1 ? findResultV1[0] : undefined;
-						const findResultV2 = key && v2 ? string.find(key, v2) : undefined;
-						const foundV2 = findResultV2 ? findResultV2[0] : undefined;
-						if (foundV1 !== undefined || foundV2 !== undefined) {
-							Logger.Info("Placement", `VALID: Road connected to owned road at ${v1}/${v2}`);
-							return true;
-						}
-					}
-				}
-			}
-		}
-
-		Logger.Info("Placement", "REJECTED: Road must connect to your existing settlement or road.");
+		// Only log rejection once when placement changes, not every frame
 		return false;
 	}
 
@@ -385,7 +399,18 @@ const updatePlacementPreview = () => {
 	}
 
 	const blueprint = Blueprints.Buildings[selectedBlueprint];
-	isValidPlacement = isSnapPointValidForBlueprint(snapPoint, selectedBlueprint);
+	const newValidState = isSnapPointValidForBlueprint(snapPoint, selectedBlueprint);
+
+	// Only log when validity state changes
+	if (newValidState !== lastValidPlacement) {
+		if (newValidState) {
+			Logger.Debug("Placement", `Valid placement location found`);
+		} else if (blueprint.PlacementType === "edge") {
+			Logger.Info("Placement", "REJECTED: Road must connect to your existing settlement or road.");
+		}
+		lastValidPlacement = newValidState;
+	}
+	isValidPlacement = newValidState;
 
 	// Create preview if it doesn't exist
 	if (!buildingPreview) {
@@ -421,6 +446,7 @@ const updatePlacementPreview = () => {
 const exitPlacementMode = () => {
 	placementMode = false;
 	selectedBlueprint = undefined;
+	lastValidPlacement = undefined; // Reset for next placement session
 	if (buildingPreview) {
 		buildingPreview.Destroy();
 		buildingPreview = undefined;

@@ -92,8 +92,8 @@ export const createStartingInventory = (): Inventory => {
  */
 export const cloneInventory = (inventory: Inventory): Inventory => {
     const clone: Inventory = {};
-    for (const key in inventory) {
-        clone[key] = inventory[key];
+    for (const [key, value] of pairs(inventory)) {
+        clone[key] = value;
     }
     return clone;
 };
@@ -107,8 +107,8 @@ export const cloneInventory = (inventory: Inventory): Inventory => {
  */
 export const getTotalResourceCount = (inventory: Inventory): number => {
     let total = 0;
-    for (const key in inventory) {
-        total += inventory[key] ?? 0;
+    for (const [_, amount] of pairs(inventory)) {
+        total += amount ?? 0;
     }
     return total;
 };
@@ -135,8 +135,7 @@ export const hasResource = (
  * Check if inventory has all required resources for a cost
  */
 export const hasResources = (inventory: Inventory, cost: ResourceCost): boolean => {
-    for (const resourceType in cost) {
-        const required = cost[resourceType];
+    for (const [resourceType, required] of pairs(cost)) {
         const available = getResourceAmount(inventory, resourceType);
         if (available < required) {
             return false;
@@ -151,8 +150,7 @@ export const hasResources = (inventory: Inventory, cost: ResourceCost): boolean 
 export const countAffordable = (inventory: Inventory, cost: ResourceCost): number => {
     let minAffordable = math.huge;
 
-    for (const resourceType in cost) {
-        const required = cost[resourceType];
+    for (const [resourceType, required] of pairs(cost)) {
         if (required <= 0) continue;
 
         const available = getResourceAmount(inventory, resourceType);
@@ -217,8 +215,8 @@ export const applyCost = (inventory: Inventory, cost: ResourceCost): Inventory |
     }
 
     const newInventory = cloneInventory(inventory);
-    for (const resourceType in cost) {
-        newInventory[resourceType] -= cost[resourceType];
+    for (const [resourceType, amount] of pairs(cost)) {
+        newInventory[resourceType] -= amount;
     }
     return newInventory;
 };
@@ -254,8 +252,7 @@ export const getResourcesForRandomSelection = (
     inventory: Inventory
 ): Array<[string, number]> => {
     const result: Array<[string, number]> = [];
-    for (const resourceType in inventory) {
-        const count = inventory[resourceType];
+    for (const [resourceType, count] of pairs(inventory)) {
         if (count > 0) {
             result.push([resourceType, count]);
         }
@@ -286,8 +283,7 @@ export const calculateRandomRobberLoss = (
         const pick = randomPicker(total);
         let acc = 0;
 
-        for (const resourceType in tempInventory) {
-            const amount = tempInventory[resourceType];
+        for (const [resourceType, amount] of pairs(tempInventory)) {
             if (amount > 0) {
                 acc += amount;
                 if (acc >= pick) {
@@ -317,8 +313,7 @@ export const getMissingResources = (
 ): ResourceCost => {
     const missing: ResourceCost = {};
 
-    for (const resourceType in cost) {
-        const required = cost[resourceType];
+    for (const [resourceType, required] of pairs(cost)) {
         const available = getResourceAmount(inventory, resourceType);
         if (available < required) {
             missing[resourceType] = required - available;
@@ -347,8 +342,7 @@ export const formatInventory = (inventory: Inventory): string => {
  */
 export const formatCost = (cost: ResourceCost): string => {
     const parts: string[] = [];
-    for (const resourceType in cost) {
-        const amount = cost[resourceType];
+    for (const [resourceType, amount] of pairs(cost)) {
         if (amount > 0) {
             parts.push(`${amount} ${resourceType}`);
         }

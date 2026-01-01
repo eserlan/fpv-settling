@@ -89,7 +89,7 @@ export const validateTradeRequest = (
         return "Trade amount must be positive";
     }
 
-    if (!Number.isInteger(amount)) {
+    if (math.floor(amount) !== amount) {
         return "Trade amount must be a whole number";
     }
 

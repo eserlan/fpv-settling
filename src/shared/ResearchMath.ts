@@ -133,8 +133,8 @@ export const getAvailableTechs = (
     techTree: TechTree
 ): string[] => {
     const available: string[] = [];
-    for (const techName in techTree) {
-        if (isTechAvailable(state, techName, techTree[techName])) {
+    for (const [techName, tech] of pairs(techTree)) {
+        if (isTechAvailable(state, techName, tech)) {
             available.push(techName);
         }
     }
@@ -181,14 +181,14 @@ export const validateTechTree = (
 ): { valid: boolean; errors: string[] } => {
     const errors: string[] = [];
 
-    for (const techName in techTree) {
+    for (const [techName, tech] of pairs(techTree)) {
         const circular = detectCircularDependency(techTree, techName);
         if (circular) {
             errors.push(`Circular dependency: ${circular.join(" -> ")}`);
         }
 
         // Check that all prerequisites exist
-        for (const prereq of techTree[techName].Prerequisites) {
+        for (const prereq of tech.Prerequisites) {
             if (!techTree[prereq]) {
                 errors.push(`${techName} has unknown prerequisite: ${prereq}`);
             }
@@ -196,7 +196,7 @@ export const validateTechTree = (
     }
 
     return {
-        valid: errors.length === 0,
+        valid: errors.size() === 0,
         errors,
     };
 };

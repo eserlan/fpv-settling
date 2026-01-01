@@ -73,7 +73,7 @@ export type ProbabilityTier = "low" | "medium" | "high";
  * Validate that a dice roll is in valid range
  */
 export const isValidDiceRoll = (roll: number): boolean => {
-    return Number.isInteger(roll) && roll >= MIN_ROLL && roll <= MAX_ROLL;
+    return math.floor(roll) === roll && roll >= MIN_ROLL && roll <= MAX_ROLL;
 };
 
 /**
@@ -255,10 +255,10 @@ export const getNumberHeat = (roll: number): number => {
  * Useful for detecting "lucky" or "unlucky" dice
  */
 export const calculateRollVariance = (rolls: number[]): number => {
-    if (rolls.length === 0) return 0;
+    if (rolls.size() === 0) return 0;
 
     // Calculate expected distribution
-    const total = rolls.length;
+    const total = rolls.size();
     const actual: Record<number, number> = {};
 
     for (const roll of rolls) {
