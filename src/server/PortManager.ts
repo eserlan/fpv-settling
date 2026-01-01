@@ -5,6 +5,7 @@ import PortTypes, { StandardPortConfiguration, DEFAULT_TRADE_RATIO } from "share
 import ResourceTypes from "shared/ResourceTypes";
 import Network from "shared/Network";
 import * as Logger from "shared/Logger";
+import ResourceManager = require("./ResourceManager");
 
 type PortLocation = {
 	PortType: string;
@@ -15,11 +16,11 @@ type PortLocation = {
 
 class PortManager {
 	Player: Player;
-	ResourceManager: import("./ResourceManager");
+	ResourceManager: ResourceManager;
 	PortLocations: PortLocation[];
 	OwnedPorts: string[]; // List of port types owned by this player
 
-	constructor(player: Player, resourceManager: import("./ResourceManager")) {
+	constructor(player: Player, resourceManager: ResourceManager) {
 		this.Player = player;
 		this.ResourceManager = resourceManager;
 		this.PortLocations = [];
