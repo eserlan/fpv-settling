@@ -7,6 +7,7 @@ const Players = game.GetService("Players");
 import TileTypes from "shared/TileTypes";
 import ResourceTypes from "shared/ResourceTypes";
 import * as Logger from "shared/Logger";
+import RobberManager = require("./RobberManager");
 
 // Configuration
 const PULSE_INTERVAL = 60; // Seconds between pulses
@@ -23,6 +24,7 @@ let waitTimer = 0;
 const tileNumbers: Record<string, number> = {}; // Maps tile coordinates to numbers
 let gameStarted = false; // Pulse doesn't start until all players place settlements
 let GameManagerRef: { PlayerData: Record<number, { BuildingManager: { HasPlacedFirstSettlement: boolean } }> } | undefined;
+let pulsesSinceLastSeven = 0;
 
 // Events
 const events = (ReplicatedStorage.FindFirstChild("Events") as Folder) ?? new Instance("Folder", ReplicatedStorage);
@@ -147,17 +149,38 @@ const PulseManager = {
 		const matchingTiles = PulseManager.GetMatchingTiles(total);
 
 		if (total === 7) {
-			// Robber! (TODO: Implement robber mechanics)
+			pulsesSinceLastSeven = 0;
 			Logger.Warn("PulseManager", "ROBBER! No resources this pulse.");
 			PulseEvent.FireAllClients("Robber");
 			SystemMessageEvent.FireAllClients("🏴‍☠️ Robber! No resources this round.");
+
+			if (GameManagerRef) {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				RobberManager.OnSevenRolled(GameManagerRef as any);
+			}
 		} else {
+			pulsesSinceLastSeven++;
+			// Check for Desert Reset
+			if (pulsesSinceLastSeven > 5) {
+				RobberManager.ResetToDesert();
+			}
+
 			Logger.Info("PulseManager", `${matchingTiles.size()} tiles match!`);
 
 			// Track spawned resources for the message
 			const spawnedResources: Record<string, number> = {};
+			const robberPos = RobberManager.GetRobberPosition();
 
 			for (const tile of matchingTiles) {
+				const tileQ = tile.PrimaryPart?.GetAttribute("Q") as number;
+				const tileR = tile.PrimaryPart?.GetAttribute("R") as number;
+
+				// Skip if Robber is on this tile
+				if (robberPos.Q === tileQ && robberPos.R === tileR) {
+					Logger.Info("PulseManager", `Tile at ${tileQ},${tileR} blocked by Robber!`);
+					continue;
+				}
+
 				const tileType = tile.PrimaryPart?.GetAttribute("TileType") as string | undefined;
 				if (!tileType) {
 					continue;
@@ -280,6 +303,7 @@ const PulseManager = {
 		// Assign numbers after a short delay to ensure map is generated
 		task.delay(1, () => {
 			PulseManager.AssignTileNumbers();
+			RobberManager.Initialize();
 		});
 	},
 

@@ -87,6 +87,52 @@ class ResourceManager {
 	GetResource(resourceType: string) {
 		return this.Resources[resourceType] ?? 0;
 	}
+
+	// Get total count of all resources
+	GetTotalResourceCount() {
+		let total = 0;
+		for (const [_, amount] of pairs(this.Resources)) {
+			total += amount;
+		}
+		return total;
+	}
+
+	// Remove random resources (for Robber penalty)
+	RemoveRandomResources(count: number) {
+		let removedCount = 0;
+		const resourcesToRemove: string[] = [];
+
+		// We need to remove 'count' resources
+		// Algorithm: Pick a random index from 1 to Total, find that resource, remove it. Repeat.
+		// Note: This is slightly inefficient if count is large, but simpler than bulk removal logic
+
+		for (let i = 0; i < count; i++) {
+			const currentTotal = this.GetTotalResourceCount();
+			if (currentTotal === 0) break;
+
+			let pick = math.random(1, currentTotal);
+			let acc = 0;
+
+			for (const [resType, amount] of pairs(this.Resources)) {
+				if (amount > 0) {
+					acc += amount;
+					if (acc >= pick) {
+						// Found the victim
+						this.Resources[resType] = amount - 1;
+						removedCount++;
+						resourcesToRemove.push(resType);
+						break;
+					}
+				}
+			}
+		}
+
+		if (removedCount > 0) {
+			Network.FireClient(this.Player, "ResourceUpdate", this.Resources);
+		}
+
+		return resourcesToRemove;
+	}
 }
 
 export = ResourceManager;
