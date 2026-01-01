@@ -216,12 +216,13 @@ const createResourceDropdown = (
 		if (!typeIs(resourceInfo, "table")) {
 			continue;
 		}
+		const info = resourceInfo as unknown as import("shared/ResourceTypes").ResourceInfo;
 
 		const button = new Instance("TextButton");
 		button.Name = resourceName;
 		button.Size = new UDim2(0, 60, 0, 45);
-		button.BackgroundColor3 = resourceInfo.Color;
-		button.Text = resourceInfo.Icon;
+		button.BackgroundColor3 = info.Color;
+		button.Text = info.Icon;
 		button.TextColor3 = Color3.fromRGB(255, 255, 255);
 		button.Font = Enum.Font.GothamBold;
 		button.TextSize = 24;
@@ -286,4 +287,4 @@ Network.OnEvent("TradeCompleted", (giveResource: unknown, giveAmount: unknown, r
 
 Logger.Info("TradeUI", "Trade UI initialized! Press T to open trade menu");
 
-export {};
+export { };

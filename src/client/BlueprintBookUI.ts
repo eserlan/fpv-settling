@@ -125,10 +125,12 @@ containerLayout.Parent = container;
 // Refresh affordability
 const refreshAffordability = () => {
 	for (const [name, cardData] of pairs(cards)) {
-		const blueprint = Blueprints.Buildings[name];
-		const canAfford = Blueprints.CanAfford(currentResources, name);
+		const blueprintName = name as string;
+		const data = cardData as CardData;
+		const blueprint = Blueprints.Buildings[blueprintName];
+		const canAfford = Blueprints.CanAfford(currentResources, blueprintName);
 
-		const selectBtn = cardData.SelectButton;
+		const selectBtn = data.SelectButton;
 		if (canAfford) {
 			selectBtn.BackgroundColor3 = Color3.fromRGB(80, 160, 80);
 			selectBtn.AutoButtonColor = true;
@@ -141,9 +143,10 @@ const refreshAffordability = () => {
 			selectBtn.TextTransparency = 0.5;
 		}
 
-		for (const [resource, label] of pairs(cardData.CostLabels)) {
-			const required = blueprint.Cost[resource] ?? 0;
-			const has = currentResources[resource] ?? 0;
+		for (const [resource, label] of pairs(data.CostLabels)) {
+			const res = resource as string;
+			const required = blueprint.Cost[res] ?? 0;
+			const has = currentResources[res] ?? 0;
 			if (has >= required) {
 				label.TextColor3 = Color3.fromRGB(200, 200, 200);
 			} else {
@@ -200,17 +203,19 @@ const createBlueprintCard = (blueprintName: string, blueprintData: import("share
 	const costLabels: Record<string, TextLabel> = {};
 	let y = 8;
 	for (const [resource, amount] of pairs(blueprintData.Cost)) {
+		const res = resource as string;
+		const amt = amount as number;
 		const costLabel = new Instance("TextLabel");
 		costLabel.Size = new UDim2(1, -10, 0, 18);
 		costLabel.Position = new UDim2(0, 10, 0, y);
 		costLabel.BackgroundTransparency = 1;
-		costLabel.Text = `${Blueprints.ResourceIcons[resource] ?? ""} ${resource}: ${amount}`;
+		costLabel.Text = `${Blueprints.ResourceIcons[res] ?? ""} ${res}: ${amt}`;
 		costLabel.TextColor3 = Color3.fromRGB(200, 200, 200);
 		costLabel.Font = Enum.Font.Gotham;
 		costLabel.TextSize = 12;
 		costLabel.TextXAlignment = Enum.TextXAlignment.Left;
 		costLabel.Parent = costFrame;
-		costLabels[resource] = costLabel;
+		costLabels[res] = costLabel;
 		y += 18;
 	}
 
@@ -250,8 +255,9 @@ const createBlueprintCard = (blueprintName: string, blueprintData: import("share
 // Initialize
 const sortedNames = Blueprints.GetBlueprintNames();
 for (const name of sortedNames) {
-	const data = Blueprints.Buildings[name];
-	const card = createBlueprintCard(name, data);
+	const n = name as string;
+	const data = Blueprints.Buildings[n];
+	const card = createBlueprintCard(n, data);
 	card.Parent = container;
 }
 

@@ -10,6 +10,13 @@ type PortInfo = {
 	Color: Color3;
 };
 
+type PortLocation = {
+	PortType: string;
+	Position: Vector3;
+	Vertices: [Vector3, Vector3]; // Two adjacent vertices where settlements can be built
+	OwnerUserId?: number; // Player who has a settlement on this port
+};
+
 const PortTypes: Record<string, PortInfo> = {
 	GenericPort: {
 		Name: "Generic Port",
@@ -82,6 +89,6 @@ const StandardPortConfiguration = [
 // Default trade ratio without a port
 const DEFAULT_TRADE_RATIO = 4;
 
-export type { PortInfo };
+export type { PortInfo, PortLocation };
 export { StandardPortConfiguration, DEFAULT_TRADE_RATIO };
 export default PortTypes;

@@ -1,18 +1,13 @@
 // Server-side Port Manager
 // Handles port ownership and trading logic
 
-import PortTypes, { StandardPortConfiguration, DEFAULT_TRADE_RATIO } from "shared/PortTypes";
+import PortTypes, { StandardPortConfiguration, DEFAULT_TRADE_RATIO, PortLocation } from "shared/PortTypes";
 import ResourceTypes from "shared/ResourceTypes";
 import Network from "shared/Network";
 import * as Logger from "shared/Logger";
 import ResourceManager = require("./ResourceManager");
 
-type PortLocation = {
-	PortType: string;
-	Position: Vector3;
-	Vertices: [Vector3, Vector3]; // Two adjacent vertices where settlements can be built
-	OwnerUserId?: number; // Player who has a settlement on this port
-};
+
 
 class PortManager {
 	Player: Player;
@@ -170,5 +165,5 @@ class PortManager {
 	}
 }
 
-export type { PortLocation };
+
 export = PortManager;

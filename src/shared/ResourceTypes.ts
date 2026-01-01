@@ -71,8 +71,8 @@ const BaseResources: Record<string, ResourceInfo> = {
 const ResourceTypes = BaseResources as ResourceTypesMap;
 
 ResourceTypes.GetByTileType = (tileType: string) => {
-	for (const [key, data] of pairs(ResourceTypes)) {
-		if (typeIs(data, "table") && data.TileType === tileType) {
+	for (const [key, data] of pairs(BaseResources)) {
+		if (data.TileType === tileType) {
 			return $tuple(key, data);
 		}
 	}

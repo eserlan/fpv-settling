@@ -1,8 +1,7 @@
 // HEXAGONAL MAP GENERATOR (Catan-Style with Exact Frequencies)
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
 import TileTypes from "shared/TileTypes";
-import PortTypes, { StandardPortConfiguration } from "shared/PortTypes";
-import type { PortLocation } from "./PortManager";
+import PortTypes, { StandardPortConfiguration, PortLocation } from "shared/PortTypes";
 
 const HEX_SIZE = 40; // Radius: center to corner
 const HEIGHT = 4;
