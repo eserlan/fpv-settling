@@ -41,9 +41,11 @@ safeRequire("PulseUI");
 safeRequire("InventoryUI");
 safeRequire("BlueprintBookUI");
 safeRequire("DevPanel");
+safeRequire("TradeUI");
 
 Logger.Info("Client", "===========================================");
 Logger.Info("Client", "Welcome to FPV Settling!");
 Logger.Info("Client", "Press B to open Blueprint Book");
+Logger.Info("Client", "Press T to open Trade Menu");
 Logger.Info("Client", "Press Alt+C to open dev panel");
 Logger.Info("Client", "===========================================");

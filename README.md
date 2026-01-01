@@ -6,11 +6,25 @@ A first-person view Roblox game inspired by The Settlers, featuring resource man
 
 ### 🎮 Gameplay
 - **First-Person View**: Immersive first-person camera control with mouse look
-- **Resource Management**: Gather and manage four key resources:
-  - **Wood**: Basic building material
-  - **Stone**: Durable construction material
-  - **Food**: Sustain your workers and guards
-  - **Gold**: Currency for hiring and trading
+- **Resource Management**: Gather and manage five key resources:
+  - **Wood**: Basic building material from forests
+  - **Brick**: Construction material from hills
+  - **Wheat**: Grain from fields for settlements
+  - **Wool**: From pastures for trading
+  - **Ore**: Iron ore from mountains for advanced construction
+
+### ⚓ Port Trading System
+Trade resources at advantageous rates by building settlements on port intersections:
+- **Bank Trading (4:1)**: Available to all players - trade 4 of any resource for 1 of any other
+- **Generic Ports (3:1)**: Trade 3 of any resource for 1 of any other (marked with ❓)
+- **Specialized Ports (2:1)**: Trade 2 of a specific resource for 1 of any other
+  - Wood Port (🌲): 2 Wood → 1 of any resource
+  - Brick Port (🧱): 2 Brick → 1 of any resource
+  - Wheat Port (🌾): 2 Wheat → 1 of any resource
+  - Ore Port (⛏): 2 Ore → 1 of any resource
+  - Wool Port (🧶): 2 Wool → 1 of any resource
+- **Harbor Master Bonus**: Own 3+ ports to unlock special abilities and recognition
+- **Port Control**: Build settlements on coastal intersections marked by port icons to gain trading advantages
 
 ### 🏗️ Building System
 Build and manage your settlement with various structures:
@@ -94,16 +108,20 @@ fpv-settling/
 ├── src/
 │   ├── client/              # Client-side scripts
 │   │   ├── PlayerController.ts     # First-person camera & controls
-│   │   └── UIManager.ts            # User interface
+│   │   ├── UIManager.ts            # User interface
+│   │   └── TradeUI.ts              # Port trading interface
 │   ├── server/              # Server-side scripts
 │   │   ├── GameManager.ts          # Main game loop
 │   │   ├── ResourceManager.ts      # Resource management
 │   │   ├── BuildingManager.ts      # Building construction
+│   │   ├── PortManager.ts          # Port trading & ownership
+│   │   ├── MapGenerator.ts         # Hexagonal map with ports
 │   │   ├── NPCManager.ts           # NPC hiring & AI
 │   │   └── ResearchManager.ts      # Technology research
 │   └── shared/              # Shared modules
 │       ├── ResourceTypes.ts        # Resource definitions
 │       ├── BuildingTypes.ts        # Building definitions
+│       ├── PortTypes.ts            # Port definitions & trade ratios
 │       ├── NPCTypes.ts             # NPC definitions
 │       └── TechTree.ts             # Technology tree
 └── README.md
@@ -112,11 +130,12 @@ fpv-settling/
 ## 🎯 Controls
 
 - **WASD**: Move character
+- **Shift**: Sprint
 - **Mouse**: Look around (first-person view)
-- **B**: Toggle build mode
-- **H**: Hire worker
-- **G**: Hire guard
-- **R**: Open research menu
+- **B**: Open blueprint book
+- **T**: Open trade menu (port/bank trading)
+- **E**: Deposit resources into foundations
+- **Alt+C**: Open dev panel
 
 ## 🚀 Future Development
 
