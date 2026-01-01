@@ -23,7 +23,6 @@ out/
 
 # Logs
 *.log
-game_logs.txt
 
 # Temporary files
 *.tmp

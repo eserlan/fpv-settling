@@ -11,7 +11,7 @@ Usage:
 
 Then in Roblox Studio:
   1. Enable HTTP Requests: Home → Game Settings → Security → Allow HTTP Requests
-  2. Start the game - logs will appear here and in game_logs.txt
+  2. Start the game - logs will appear here and in game.log
 """
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -20,7 +20,7 @@ import json
 import os
 import sys
 
-LOG_FILE = "game_logs.txt"
+LOG_FILE = "game.log"
 PORT = 8765
 
 # ANSI colors for terminal output
@@ -91,7 +91,7 @@ class LogHandler(BaseHTTPRequestHandler):
             <body style="font-family: monospace; background: #1e1e1e; color: #d4d4d4; padding: 20px;">
                 <h1>FPV Settling Log Server</h1>
                 <p>Status: <span style="color: #4ec9b0;">Running</span></p>
-                <p>Logs are being written to: game_logs.txt</p>
+                <p>Logs are being written to: game.log</p>
                 <p>View this terminal for real-time colored logs.</p>
             </body>
             </html>
