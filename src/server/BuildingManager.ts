@@ -41,6 +41,7 @@ type BuildingRecord = {
 class BuildingManager {
 	Player: Player;
 	ResourceManager: import("./ResourceManager");
+	PortManager?: import("./PortManager");
 	Buildings: BuildingRecord[];
 	Settlements: BuildingRecord[];
 	BuildingInProgress: BuildingRecord[];
@@ -54,6 +55,11 @@ class BuildingManager {
 		this.Settlements = [];
 		this.BuildingInProgress = [];
 		this.HasPlacedFirstSettlement = false;
+	}
+
+	// Set PortManager reference (called after initialization)
+	SetPortManager(portManager: import("./PortManager")) {
+		this.PortManager = portManager;
 	}
 
 	// Start building construction
@@ -426,6 +432,11 @@ class BuildingManager {
 
 			this.Settlements.push(building);
 			Logger.Info("BuildingManager", `Settlement claimed ${claimedTiles.size()} tiles`);
+
+			// Check if this settlement is on a port
+			if (this.PortManager) {
+				this.PortManager.ClaimPort(building.Position, settlementId);
+			}
 		}
 
 		Network.FireClient(this.Player, "ConstructionCompleted", building.Id, building.Type);

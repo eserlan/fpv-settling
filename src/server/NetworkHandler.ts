@@ -54,6 +54,14 @@ const NetworkHandler = {
 			} else if (actionType === "StartResearch") {
 				const [techName] = args as [string];
 				playerData.ResearchManager.StartResearch(techName);
+			} else if (actionType === "ExecuteTrade") {
+				// Port/Bank trading
+				const [giveResource, receiveResource, amount] = args as [string, string, number];
+				Logger.Debug(
+					"NetworkHandler",
+					`${(player as Player).Name} requesting trade: ${amount ?? 1} x (${giveResource} -> ${receiveResource})`,
+				);
+				playerData.PortManager.ExecuteTrade(giveResource, receiveResource, amount ?? 1);
 			}
 		});
 

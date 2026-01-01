@@ -6,6 +6,7 @@ import ResourceManager = require("./ResourceManager");
 import BuildingManager = require("./BuildingManager");
 import NPCManager = require("./NPCManager");
 import ResearchManager = require("./ResearchManager");
+import PortManager = require("./PortManager");
 import NetworkHandler = require("./NetworkHandler");
 import MapGenerator = require("./MapGenerator");
 import PulseManager = require("./PulseManager");
@@ -40,6 +41,13 @@ const onPlayerAdded = (player: Player) => {
 	const buildingManager = new BuildingManager(player, resourceManager);
 	const npcManager = new NPCManager(player, resourceManager);
 	const researchManager = new ResearchManager(player, resourceManager);
+	const portManager = new PortManager(player, resourceManager);
+
+	// Set port locations from map generator
+	portManager.SetPortLocations(MapGenerator.GetPortLocations());
+
+	// Connect BuildingManager to PortManager
+	buildingManager.SetPortManager(portManager);
 
 	GameManager.PlayerData[player.UserId] = {
 		Player: player,
@@ -47,6 +55,7 @@ const onPlayerAdded = (player: Player) => {
 		BuildingManager: buildingManager,
 		NPCManager: npcManager,
 		ResearchManager: researchManager,
+		PortManager: portManager,
 		GameTime: 0,
 		Settlements: [],
 		NeedsFirstSettlement: true, // Player must place first settlement

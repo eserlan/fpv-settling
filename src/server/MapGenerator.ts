@@ -1,6 +1,8 @@
 // HEXAGONAL MAP GENERATOR (Catan-Style with Exact Frequencies)
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
 import TileTypes from "shared/TileTypes";
+import PortTypes, { StandardPortConfiguration } from "shared/PortTypes";
+import type { PortLocation } from "./PortManager";
 
 const HEX_SIZE = 40; // Radius: center to corner
 const HEIGHT = 4;
@@ -112,6 +114,8 @@ const createExactTilePool = () => {
 };
 
 const MapGenerator = {
+	PortLocations: [] as PortLocation[],
+
 	Generate(rings = 2) {
 		// Default: 2 rings = 19 hexes (standard Catan)
 		const mapFolder = (game.Workspace.FindFirstChild("Map") as Folder) ?? new Instance("Folder", game.Workspace);
@@ -395,6 +399,9 @@ const MapGenerator = {
 
 		// Create hex vertices and edges
 		MapGenerator.CreateVerticesAndEdges(mapFolder);
+
+		// Create ports on coastal edges
+		MapGenerator.CreatePorts();
 	},
 
 	CreateVerticesAndEdges(mapFolder: Folder) {
@@ -566,6 +573,123 @@ const MapGenerator = {
 		}
 
 		return $tuple(nearest, nearestDist);
+	},
+
+	// Generate port locations on coastal edges
+	CreatePorts() {
+		const edgeFolder = game.Workspace.FindFirstChild("Edges");
+		if (!edgeFolder) {
+			return;
+		}
+
+		const portFolder = (game.Workspace.FindFirstChild("Ports") as Folder) ?? new Instance("Folder", game.Workspace);
+		portFolder.Name = "Ports";
+		portFolder.ClearAllChildren();
+
+		// Find coastal edges (edges with only 1 adjacent tile)
+		const coastalEdges: BasePart[] = [];
+		for (const edge of edgeFolder.GetChildren()) {
+			if (edge.IsA("BasePart")) {
+				const adjCount = edge.GetAttribute("AdjacentTileCount") as number;
+				if (adjCount === 1) {
+					coastalEdges.push(edge);
+				}
+			}
+		}
+
+		// Shuffle coastal edges
+		for (let i = coastalEdges.size(); i >= 2; i -= 1) {
+			const j = math.random(1, i);
+			const temp = coastalEdges[i - 1];
+			coastalEdges[i - 1] = coastalEdges[j - 1];
+			coastalEdges[j - 1] = temp;
+		}
+
+		// Place ports from the standard configuration
+		const portCount = math.min(StandardPortConfiguration.size(), coastalEdges.size());
+		MapGenerator.PortLocations = [];
+
+		for (let i = 0; i < portCount; i += 1) {
+			const edge = coastalEdges[i];
+			const portType = StandardPortConfiguration[i];
+			const portInfo = PortTypes[portType];
+
+			if (!portInfo) {
+				continue;
+			}
+
+			// Get the two vertices of this edge
+			const vertex1Key = edge.GetAttribute("Vertex1") as string;
+			const vertex2Key = edge.GetAttribute("Vertex2") as string;
+
+			const vertexFolder = game.Workspace.FindFirstChild("Vertices");
+			let v1Pos: Vector3 | undefined;
+			let v2Pos: Vector3 | undefined;
+
+			if (vertexFolder) {
+				for (const v of vertexFolder.GetChildren()) {
+					if (v.IsA("BasePart")) {
+						const key = v.GetAttribute("Key") as string;
+						if (key === vertex1Key) {
+							v1Pos = v.Position;
+						}
+						if (key === vertex2Key) {
+							v2Pos = v.Position;
+						}
+					}
+				}
+			}
+
+			if (!v1Pos || !v2Pos) {
+				continue;
+			}
+
+			// Create port marker at the edge center
+			const portMarker = new Instance("Part");
+			portMarker.Name = `Port_${portType}`;
+			portMarker.Size = new Vector3(8, 6, 8);
+			portMarker.Position = edge.Position.add(new Vector3(0, 3, 0));
+			portMarker.Anchored = true;
+			portMarker.Color = portInfo.Color;
+			portMarker.Material = Enum.Material.Neon;
+			portMarker.Transparency = 0.3;
+			portMarker.Parent = portFolder;
+
+			// Add port label
+			const billboard = new Instance("BillboardGui");
+			billboard.Name = "PortLabel";
+			billboard.Size = new UDim2(0, 150, 0, 60);
+			billboard.StudsOffset = new Vector3(0, 4, 0);
+			billboard.AlwaysOnTop = true;
+			billboard.Adornee = portMarker;
+			billboard.Parent = portMarker;
+
+			const label = new Instance("TextLabel");
+			label.Size = new UDim2(1, 0, 1, 0);
+			label.BackgroundColor3 = new Color3(0, 0, 0);
+			label.BackgroundTransparency = 0.3;
+			label.TextColor3 = new Color3(1, 1, 1);
+			label.TextScaled = true;
+			label.Font = Enum.Font.GothamBold;
+			label.Text = `${portInfo.Icon}\n${portInfo.TradeRatio}:1`;
+			label.Parent = billboard;
+
+			// Store port location
+			MapGenerator.PortLocations.push({
+				PortType: portType,
+				Position: edge.Position,
+				Vertices: [v1Pos, v2Pos] as [Vector3, Vector3],
+			});
+
+			print(`[MapGenerator] Created port: ${portType} at ${edge.Position}`);
+		}
+
+		print(`[MapGenerator] Created ${portCount} ports`);
+	},
+
+	// Get port locations for PortManager
+	GetPortLocations(): PortLocation[] {
+		return MapGenerator.PortLocations;
 	},
 };
 

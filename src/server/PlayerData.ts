@@ -4,6 +4,7 @@ export interface PlayerData {
 	BuildingManager: import("./BuildingManager");
 	NPCManager: import("./NPCManager");
 	ResearchManager: import("./ResearchManager");
+	PortManager: import("./PortManager");
 	GameTime: number;
 	Settlements: unknown[];
 	NeedsFirstSettlement: boolean;
