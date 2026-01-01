@@ -92,6 +92,15 @@ class Color3Mock {
         return new Color3Mock(r / 255, g / 255, b / 255);
     }
 
+    static fromHex(hex: string): Color3Mock {
+        // Remove # if present
+        const cleanHex = hex.startsWith("#") ? hex.slice(1) : hex;
+        const r = parseInt(cleanHex.substring(0, 2), 16) / 255;
+        const g = parseInt(cleanHex.substring(2, 4), 16) / 255;
+        const b = parseInt(cleanHex.substring(4, 6), 16) / 255;
+        return new Color3Mock(r, g, b);
+    }
+
     static fromHSV(h: number, s: number, v: number): Color3Mock {
         // Simplified HSV to RGB conversion
         const c = v * s;

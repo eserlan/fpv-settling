@@ -2487,3 +2487,1003 @@
 [21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-12
 [21:39:24] [INFO ] [SERVER] [Placement] VALID: First settlement placement (free) at -10_-6
 [21:40:01] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[19:21:40] [INFO ] [SERVER] [Server] ===========================================
+[19:21:40] [INFO ] [SERVER] [Server] ===========================================
+[19:21:40] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[19:21:40] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[19:21:40] [INFO ] [SERVER] [CollectionManager] Initialized
+[19:21:40] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[19:21:40] [INFO ] [SERVER] [NetworkHandler] Initialized
+[19:21:40] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[19:21:40] [DEBUG] [SERVER] [Server] GameManager loaded.
+[19:21:40] [INFO ] [SERVER] [Server] ===========================================
+[19:21:40] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[19:21:40] [INFO ] [SERVER] [Server] ===========================================
+[19:21:41] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[19:21:41] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09 with starting resources
+[19:21:41] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[19:21:41] [INFO ] [SERVER] [RobberManager] Desert found at 0, -2
+[19:21:41] [INFO ] [SERVER] [RobberManager] Robber moved to 0, -2
+[19:21:41] [INFO ] [SERVER] [RobberManager] Initializing Robber...
+[19:21:49] [INFO ] [SERVER] [Client] ===========================================
+[19:21:49] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[19:21:50] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[19:21:51] [INFO ] [SERVER] [Client] ===========================================
+[19:21:52] [INFO ] [SERVER] [Client] Character loaded!
+[19:21:52] [INFO ] [SERVER] [BlueprintBookUI] Initialized
+[19:21:52] [INFO ] [SERVER] [PlayerController] BlueprintBookUI loaded
+[19:21:52] [INFO ] [SERVER] [PlayerController] Initialized
+[19:21:52] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[19:21:52] [INFO ] [SERVER] [UIManager] Chat system ready
+[19:21:52] [INFO ] [SERVER] [UIManager] Initialized
+[19:21:52] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[19:21:52] [INFO ] [SERVER] [PulseUI] Initialized
+[19:21:52] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[19:21:52] [INFO ] [SERVER] [InventoryUI] Initialized
+[19:21:53] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[19:21:53] [DEBUG] [SERVER] [Client] Loaded: BlueprintBookUI
+[19:21:53] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[19:21:53] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[19:21:56] [ERROR] [SERVER] [Client] Failed to load TradeUI: Requested module experienced an error while loading
+[19:21:56] [INFO ] [SERVER] [Client] ===========================================
+[19:21:56] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[19:21:56] [INFO ] [SERVER] [Client] Press B to open Blueprint Book
+[19:21:56] [INFO ] [SERVER] [Client] Press T to open Trade Menu
+[19:21:56] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[19:21:56] [INFO ] [SERVER] [Client] ===========================================
+[19:22:26] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:26] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:27] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Network] Created RemoteEvent: FoundationPlaced
+[19:22:28] [INFO ] [SERVER] [BuildingManager] eserlan09 placed foundation for Settlement (ID: 1)
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:28] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Settlement
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [INFO ] [SERVER] [PulseManager] All players ready! Starting pulse timer...
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:29] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:30] [DEBUG] [SERVER] [Placement] VALID: First settlement placement (free) at 15_3
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:22:59] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:22:59] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:00] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:00] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:01] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [PlayerController] Entering placement mode for: Road
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] Checking Edge placement connection...
+[19:23:02] [INFO ] [SERVER] [Placement] REJECTED: Road must connect to your existing settlement or road.

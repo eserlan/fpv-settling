@@ -1,43 +1,101 @@
+// Import mocks before any other imports
+import "../testUtils";
 
-// 1. Define Mocks locally
-class Vector3Mock {
-	constructor(public x: number, public y: number, public z: number) {}
-}
-
-const pairsMock = <T>(obj: Record<string, T> | T[]): [string, T][] => {
-	if (Array.isArray(obj)) {
-		return obj.map((v, i) => [String(i + 1), v]);
-	}
-	return Object.entries(obj) as [string, T][];
-};
-
-const tableMock = {
-	sort: (arr: any[]) => arr.sort(),
-};
-
-// 2. Assign to global before ANY imports
-(global as any).Vector3 = Vector3Mock;
-(global as any).pairs = pairsMock;
-(global as any).table = tableMock;
-
-// 3. Import Vitest
 import { describe, it, expect, beforeAll } from "vitest";
 
 describe("Blueprints", () => {
-    let Blueprints: any;
+	let Blueprints: any;
 
-    beforeAll(async () => {
-        // Dynamic import ensures this runs after globals are set
-        const module = await import("../../src/shared/Blueprints");
-        Blueprints = module.default;
-    });
-
-	it("should have valid buildings", () => {
-		expect(Blueprints.Buildings).toBeDefined();
-		expect(Blueprints.Buildings["Settlement"]).toBeDefined();
-		expect(Blueprints.Buildings["City"]).toBeDefined();
-		expect(Blueprints.Buildings["Road"]).toBeDefined();
+	beforeAll(async () => {
+		const module = await import("../../src/shared/Blueprints");
+		Blueprints = module.default;
 	});
+
+	// ═══════════════════════════════════════════════════════════════════════════════
+	// BUILDING DEFINITIONS
+	// ═══════════════════════════════════════════════════════════════════════════════
+
+	describe("Buildings", () => {
+		it("should have all 3 building types defined", () => {
+			expect(Blueprints.Buildings).toBeDefined();
+			expect(Blueprints.Buildings["Settlement"]).toBeDefined();
+			expect(Blueprints.Buildings["City"]).toBeDefined();
+			expect(Blueprints.Buildings["Road"]).toBeDefined();
+		});
+
+		it("should have valid Settlement properties", () => {
+			const settlement = Blueprints.Buildings["Settlement"];
+			expect(settlement.Name).toBe("Settlement");
+			expect(settlement.Icon).toBe("🏠");
+			expect(settlement.PlacementType).toBe("3-way");
+			expect(settlement.ClaimsTiles).toBe(true);
+			expect(settlement.FirstIsFree).toBe(true);
+		});
+
+		it("should have valid City properties", () => {
+			const city = Blueprints.Buildings["City"];
+			expect(city.Name).toBe("City");
+			expect(city.Icon).toBe("🏰");
+			expect(city.PlacementType).toBe("upgrade");
+			expect(city.RequiresExisting).toBe("Settlement");
+			expect(city.ProductionMultiplier).toBe(2);
+		});
+
+		it("should have valid Road properties", () => {
+			const road = Blueprints.Buildings["Road"];
+			expect(road.Name).toBe("Road");
+			expect(road.Icon).toBe("🛣️");
+			expect(road.PlacementType).toBe("edge");
+			expect(road.RequiresConnection).toBe(true);
+		});
+
+		it("should have Size as Vector3 for all buildings", () => {
+			for (const name of ["Settlement", "City", "Road"]) {
+				const building = Blueprints.Buildings[name];
+				expect(building.Size).toBeDefined();
+				expect(building.Size.x).toBeDefined();
+				expect(building.Size.y).toBeDefined();
+				expect(building.Size.z).toBeDefined();
+			}
+		});
+	});
+
+	// ═══════════════════════════════════════════════════════════════════════════════
+	// COSTS
+	// ═══════════════════════════════════════════════════════════════════════════════
+
+	describe("Building Costs", () => {
+		it("should have correct Settlement cost (1 of each basic)", () => {
+			const cost = Blueprints.Buildings["Settlement"].Cost;
+			expect(cost.Wood).toBe(1);
+			expect(cost.Brick).toBe(1);
+			expect(cost.Wheat).toBe(1);
+			expect(cost.Wool).toBe(1);
+			expect(cost.Ore).toBeUndefined();
+		});
+
+		it("should have correct City cost (Wheat + Ore)", () => {
+			const cost = Blueprints.Buildings["City"].Cost;
+			expect(cost.Wheat).toBe(2);
+			expect(cost.Ore).toBe(3);
+			expect(cost.Wood).toBeUndefined();
+			expect(cost.Brick).toBeUndefined();
+			expect(cost.Wool).toBeUndefined();
+		});
+
+		it("should have correct Road cost (Wood + Brick)", () => {
+			const cost = Blueprints.Buildings["Road"].Cost;
+			expect(cost.Wood).toBe(1);
+			expect(cost.Brick).toBe(1);
+			expect(cost.Wheat).toBeUndefined();
+			expect(cost.Ore).toBeUndefined();
+			expect(cost.Wool).toBeUndefined();
+		});
+	});
+
+	// ═══════════════════════════════════════════════════════════════════════════════
+	// GET COST STRING
+	// ═══════════════════════════════════════════════════════════════════════════════
 
 	describe("GetCostString", () => {
 		it("should return correct cost string for Road", () => {
@@ -46,35 +104,146 @@ describe("Blueprints", () => {
 			expect(costString).toContain("🧱1");
 		});
 
+		it("should return correct cost string for Settlement", () => {
+			const costString = Blueprints.GetCostString("Settlement");
+			expect(costString).toContain("🌲1");
+			expect(costString).toContain("🧱1");
+			expect(costString).toContain("🌾1");
+			expect(costString).toContain("🧶1");
+		});
+
+		it("should return correct cost string for City", () => {
+			const costString = Blueprints.GetCostString("City");
+			expect(costString).toContain("🌾2");
+			expect(costString).toContain("⛏3");
+		});
+
 		it("should return empty string for invalid blueprint", () => {
 			expect(Blueprints.GetCostString("Invalid")).toBe("");
+			expect(Blueprints.GetCostString("")).toBe("");
 		});
 	});
+
+	// ═══════════════════════════════════════════════════════════════════════════════
+	// CAN AFFORD
+	// ═══════════════════════════════════════════════════════════════════════════════
 
 	describe("CanAfford", () => {
-		it("should return true if resources are sufficient", () => {
-			const resources = { Wood: 1, Brick: 1 };
-			expect(Blueprints.CanAfford(resources, "Road")).toBe(true);
+		describe("Road affordability", () => {
+			it("should return true if resources are exactly sufficient", () => {
+				const resources = { Wood: 1, Brick: 1 };
+				expect(Blueprints.CanAfford(resources, "Road")).toBe(true);
+			});
+
+			it("should return true if resources are more than enough", () => {
+				const resources = { Wood: 5, Brick: 5 };
+				expect(Blueprints.CanAfford(resources, "Road")).toBe(true);
+			});
+
+			it("should return false if missing Wood", () => {
+				const resources = { Brick: 1 };
+				expect(Blueprints.CanAfford(resources, "Road")).toBe(false);
+			});
+
+			it("should return false if missing Brick", () => {
+				const resources = { Wood: 1 };
+				expect(Blueprints.CanAfford(resources, "Road")).toBe(false);
+			});
+
+			it("should return false if both resources are 0", () => {
+				const resources = { Wood: 0, Brick: 0 };
+				expect(Blueprints.CanAfford(resources, "Road")).toBe(false);
+			});
 		});
 
-		it("should return false if resources are insufficient", () => {
-			const resources = { Wood: 1 };
-			expect(Blueprints.CanAfford(resources, "Road")).toBe(false);
+		describe("Settlement affordability", () => {
+			it("should return true with all 4 resources", () => {
+				const resources = { Wood: 1, Brick: 1, Wheat: 1, Wool: 1 };
+				expect(Blueprints.CanAfford(resources, "Settlement")).toBe(true);
+			});
+
+			it("should return false if missing any resource", () => {
+				expect(Blueprints.CanAfford({ Brick: 1, Wheat: 1, Wool: 1 }, "Settlement")).toBe(false);
+				expect(Blueprints.CanAfford({ Wood: 1, Wheat: 1, Wool: 1 }, "Settlement")).toBe(false);
+				expect(Blueprints.CanAfford({ Wood: 1, Brick: 1, Wool: 1 }, "Settlement")).toBe(false);
+				expect(Blueprints.CanAfford({ Wood: 1, Brick: 1, Wheat: 1 }, "Settlement")).toBe(false);
+			});
 		});
 
-		it("should return true if resources are more than enough", () => {
-			const resources = { Wood: 5, Brick: 5 };
-			expect(Blueprints.CanAfford(resources, "Road")).toBe(true);
+		describe("City affordability", () => {
+			it("should return true with 2 Wheat and 3 Ore", () => {
+				const resources = { Wheat: 2, Ore: 3 };
+				expect(Blueprints.CanAfford(resources, "City")).toBe(true);
+			});
+
+			it("should return false with insufficient Wheat", () => {
+				const resources = { Wheat: 1, Ore: 3 };
+				expect(Blueprints.CanAfford(resources, "City")).toBe(false);
+			});
+
+			it("should return false with insufficient Ore", () => {
+				const resources = { Wheat: 2, Ore: 2 };
+				expect(Blueprints.CanAfford(resources, "City")).toBe(false);
+			});
+		});
+
+		describe("Edge cases", () => {
+			it("should return false for invalid blueprint", () => {
+				const resources = { Wood: 100, Brick: 100, Wheat: 100, Ore: 100, Wool: 100 };
+				expect(Blueprints.CanAfford(resources, "Invalid")).toBe(false);
+			});
+
+			it("should return false for empty resources", () => {
+				expect(Blueprints.CanAfford({}, "Road")).toBe(false);
+				expect(Blueprints.CanAfford({}, "Settlement")).toBe(false);
+				expect(Blueprints.CanAfford({}, "City")).toBe(false);
+			});
 		});
 	});
 
+	// ═══════════════════════════════════════════════════════════════════════════════
+	// GET BLUEPRINT NAMES
+	// ═══════════════════════════════════════════════════════════════════════════════
+
 	describe("GetBlueprintNames", () => {
-		it("should return all blueprint names sorted", () => {
+		it("should return all 3 blueprint names", () => {
+			const names = Blueprints.GetBlueprintNames();
+			expect(names.length).toBe(3);
+		});
+
+		it("should contain all expected names", () => {
 			const names = Blueprints.GetBlueprintNames();
 			expect(names).toContain("Settlement");
 			expect(names).toContain("City");
 			expect(names).toContain("Road");
-			expect(names.length).toBe(3);
+		});
+
+		it("should return sorted names", () => {
+			const names = Blueprints.GetBlueprintNames();
+			const sorted = [...names].sort();
+			expect(names).toEqual(sorted);
+		});
+
+		it("should return a new array each time", () => {
+			const names1 = Blueprints.GetBlueprintNames();
+			const names2 = Blueprints.GetBlueprintNames();
+			expect(names1).not.toBe(names2);
+			expect(names1).toEqual(names2);
+		});
+	});
+
+	// ═══════════════════════════════════════════════════════════════════════════════
+	// RESOURCE ICONS
+	// ═══════════════════════════════════════════════════════════════════════════════
+
+	describe("ResourceIcons", () => {
+		it("should have all 5 resource icons", () => {
+			const icons = Blueprints.ResourceIcons;
+			expect(icons.Wood).toBe("🌲");
+			expect(icons.Brick).toBe("🧱");
+			expect(icons.Wheat).toBe("🌾");
+			expect(icons.Ore).toBe("⛏");
+			expect(icons.Wool).toBe("🧶");
 		});
 	});
 });
