@@ -244,10 +244,47 @@ const tableMock = {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MATH MOCK (Luau-compatible)
+// Note: We must explicitly list Math methods because they are non-enumerable
+// and { ...Math } doesn't copy them
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const mathMock = {
-    ...Math,
+    // Standard Math methods (non-enumerable, must be listed explicitly)
+    abs: Math.abs,
+    acos: Math.acos,
+    acosh: Math.acosh,
+    asin: Math.asin,
+    asinh: Math.asinh,
+    atan: Math.atan,
+    atan2: Math.atan2,
+    atanh: Math.atanh,
+    cbrt: Math.cbrt,
+    ceil: Math.ceil,
+    cos: Math.cos,
+    cosh: Math.cosh,
+    exp: Math.exp,
+    expm1: Math.expm1,
+    floor: Math.floor,
+    fround: Math.fround,
+    hypot: Math.hypot,
+    imul: Math.imul,
+    log: Math.log,
+    log10: Math.log10,
+    log1p: Math.log1p,
+    log2: Math.log2,
+    max: Math.max,
+    min: Math.min,
+    pow: Math.pow,
+    round: Math.round,
+    sign: Math.sign,
+    sin: Math.sin,
+    sinh: Math.sinh,
+    sqrt: Math.sqrt,
+    tan: Math.tan,
+    tanh: Math.tanh,
+    trunc: Math.trunc,
+
+    // Luau-specific aliases and additions
     pi: Math.PI,
     huge: Infinity,
     rad: (degrees: number) => (degrees * Math.PI) / 180,
@@ -258,7 +295,6 @@ const mathMock = {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     },
     clamp: (x: number, min: number, max: number) => Math.max(min, Math.min(max, x)),
-    sign: Math.sign,
     noise: () => Math.random() * 2 - 1, // Simplified Perlin noise mock
 };
 

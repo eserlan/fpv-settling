@@ -57,7 +57,7 @@ export type WorldPos = {
 export const axialToCube = (coord: AxialCoord): CubeCoord => {
     const x = coord.q;
     const z = coord.r;
-    const y = -x - z;
+    const y = -x - z + 0; // +0 normalizes -0 to +0
     return { x, y, z };
 };
 
@@ -65,7 +65,7 @@ export const axialToCube = (coord: AxialCoord): CubeCoord => {
  * Convert cube coordinates to axial coordinates
  */
 export const cubeToAxial = (coord: CubeCoord): AxialCoord => {
-    return { q: coord.x, r: coord.z };
+    return { q: coord.x + 0, r: coord.z + 0 }; // +0 normalizes -0 to +0
 };
 
 /**
