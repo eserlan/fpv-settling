@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "rbxtsc",
+    "lint": "rbxtsc --noInclude",
     "watch": "rbxtsc -w",
     "test": "vitest run",
     "coverage": "vitest run --coverage"

@@ -116,8 +116,8 @@ const sendSystemMessage = (message: string) => {
 	return success;
 };
 
-SystemMessageEvent.OnClientEvent.Connect((message) => {
-	sendSystemMessage(message as string);
+SystemMessageEvent.OnClientEvent.Connect((message: string) => {
+	sendSystemMessage(message);
 });
 
 Logger.Info("UIManager", "Initialized");

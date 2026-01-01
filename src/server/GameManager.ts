@@ -16,16 +16,7 @@ import TileOwnershipManager = require("./TileOwnershipManager");
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
 import * as Logger from "shared/Logger";
 
-type PlayerData = {
-	Player: Player;
-	ResourceManager: import("./ResourceManager");
-	BuildingManager: import("./BuildingManager");
-	NPCManager: import("./NPCManager");
-	ResearchManager: import("./ResearchManager");
-	GameTime: number;
-	Settlements: unknown[];
-	NeedsFirstSettlement: boolean;
-};
+type PlayerData = import("./PlayerData").PlayerData;
 
 const GameManager = {
 	PlayerData: {} as Record<number, PlayerData>,
