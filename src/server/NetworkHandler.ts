@@ -6,15 +6,7 @@ import Network from "shared/Network";
 import * as Logger from "shared/Logger";
 import CollectionManager = require("./CollectionManager");
 
-type BuildingManager = InstanceType<typeof import("./BuildingManager")>;
-type NPCManager = InstanceType<typeof import("./NPCManager")>;
-type ResearchManager = InstanceType<typeof import("./ResearchManager")>;
-
-interface PlayerData {
-	BuildingManager: BuildingManager;
-	NPCManager: NPCManager;
-	ResearchManager: ResearchManager;
-}
+type PlayerData = import("./PlayerData").PlayerData;
 
 const NetworkHandler = {
 	Init(gameManager: { PlayerData: Record<number, PlayerData> }) {
