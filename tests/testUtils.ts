@@ -308,6 +308,17 @@ const osMock = {
 // APPLY ALL MOCKS TO GLOBAL
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// Polyfill Array.prototype.size() for Luau compatibility
+// In roblox-ts, arrays use .size() instead of .length
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const arrayProto = Array.prototype as any;
+if (!arrayProto.size) {
+    // eslint-disable-next-line no-extend-native
+    arrayProto.size = function (this: unknown[]) {
+        return this.length;
+    };
+}
+
 // Type assertion to allow setting globals
 // Use globalThis for Node.js/Vitest compatibility
 const g = globalThis as unknown as Record<string, unknown>;
