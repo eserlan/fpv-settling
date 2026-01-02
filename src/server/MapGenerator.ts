@@ -20,9 +20,51 @@ type EdgeData = {
 };
 
 const createHexagon = (name: string, position: Vector3, color: Color3, material?: Enum.Material) => {
-	const model = new Instance("Model");
-	model.Name = name;
+	const assetPack = ReplicatedStorage.FindFirstChild("Assets");
+	const basePlateFolder = assetPack?.FindFirstChild("BasePlate");
+	const hexTemplate = basePlateFolder?.FindFirstChild("Hexagon");
 
+	const finalModel = new Instance("Model");
+	finalModel.Name = name;
+
+	const targetPos = position.add(new Vector3(0, HEIGHT / 2, 0));
+
+	if (hexTemplate && (hexTemplate.IsA("BasePart") || hexTemplate.IsA("Model"))) {
+		const clone = hexTemplate.Clone();
+		clone.Name = "MainContent";
+		clone.Parent = finalModel;
+
+		if (clone.IsA("Model")) {
+			if (clone.PrimaryPart) {
+				clone.SetPrimaryPartCFrame(new CFrame(targetPos));
+				finalModel.PrimaryPart = clone.PrimaryPart;
+			} else {
+				const firstPart = clone.FindFirstChildWhichIsA("BasePart");
+				if (firstPart) {
+					clone.MoveTo(targetPos);
+					finalModel.PrimaryPart = firstPart;
+				}
+			}
+
+			for (const part of clone.GetDescendants()) {
+				if (part.IsA("BasePart")) {
+					part.Color = color;
+					if (material) part.Material = material;
+					part.Anchored = true;
+				}
+			}
+		} else if (clone.IsA("BasePart")) {
+			clone.CFrame = new CFrame(targetPos);
+			clone.Color = color;
+			if (material) clone.Material = material;
+			clone.Anchored = true;
+			finalModel.PrimaryPart = clone;
+		}
+
+		return finalModel;
+	}
+
+	// Procedural Fallback
 	const rectWidth = HEX_SIZE * 2;
 	const rectDepth = (HEX_SIZE * 2) / math.sqrt(3);
 
@@ -36,15 +78,15 @@ const createHexagon = (name: string, position: Vector3, color: Color3, material?
 		part.TopSurface = Enum.SurfaceType.Smooth;
 		part.BottomSurface = Enum.SurfaceType.Smooth;
 
-		part.CFrame = new CFrame(position.add(new Vector3(0, HEIGHT / 2, 0))).mul(CFrame.Angles(0, math.rad(i * 60), 0));
-		part.Parent = model;
+		part.CFrame = new CFrame(targetPos).mul(CFrame.Angles(0, math.rad(i * 60), 0));
+		part.Parent = finalModel;
 
 		if (i === 0) {
-			model.PrimaryPart = part;
+			finalModel.PrimaryPart = part;
 		}
 	}
 
-	return model;
+	return finalModel;
 };
 
 // Add a label above the hex (includes dice number if available)
@@ -164,7 +206,7 @@ const MapGenerator = {
 				addLabel(hex, tileData.Name);
 
 				// Get asset pack from ReplicatedStorage
-				const assetPack = ReplicatedStorage.FindFirstChild("Supers Asset Pack!");
+				const assetPack = ReplicatedStorage.FindFirstChild("Assets");
 				const baseY = HEIGHT;
 
 				// Helper function to clone and place an asset with automatic height adjustment
