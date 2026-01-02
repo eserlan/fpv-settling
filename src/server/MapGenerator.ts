@@ -503,6 +503,13 @@ const MapGenerator = {
 			marker.SetAttribute("Key", key);
 			marker.SetAttribute("AdjacentTileCount", adjCount);
 
+			// Store adjacent tile coordinates for ownership claiming
+			for (let i = 0; i < data.AdjacentTiles.size(); i += 1) {
+				const tile = data.AdjacentTiles[i];
+				marker.SetAttribute(`Tile${i + 1}Q`, tile.Q);
+				marker.SetAttribute(`Tile${i + 1}R`, tile.R);
+			}
+
 			// Store neighbor keys for distance rule
 			const neighbors = vertexNeighbors[key] ?? [];
 			for (let i = 0; i < neighbors.size(); i += 1) {

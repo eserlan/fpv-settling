@@ -7,6 +7,10 @@ import Network from "shared/Network";
 import * as Logger from "shared/Logger";
 import ResourceManager = require("./ResourceManager");
 
+// Pre-create events that clients will listen to
+Network.GetEvent("PortClaimed");
+Network.GetEvent("HarborMasterUpdate");
+Network.GetEvent("TradeCompleted");
 
 
 class PortManager {

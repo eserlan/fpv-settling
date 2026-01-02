@@ -216,10 +216,10 @@ const PulseManager = {
 	SpawnResource(tile: Model, resourceKey: string, resourceData: import("shared/ResourceTypes").ResourceInfo) {
 		const tilePos = tile.PrimaryPart!.Position;
 
-		// Random position on the tile
+		// Random position on the tile, spawn high in the sky so it falls down
 		const angle = math.random() * math.pi * 2;
 		const dist = math.random(5, 20);
-		const spawnPos = tilePos.add(new Vector3(math.cos(angle) * dist, 10, math.sin(angle) * dist));
+		const spawnPos = tilePos.add(new Vector3(math.cos(angle) * dist, 50, math.sin(angle) * dist));
 
 		// Create physical resource
 		const resource = new Instance("Part");

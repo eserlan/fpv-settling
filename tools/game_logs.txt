@@ -5314,3 +5314,54 @@
 [00:59:30] [DEBUG] [SERVER] [PulseManager] Spawned Ore at tile
 [00:59:30] [DEBUG] [SERVER] [PulseManager] Spawned Wheat at tile
 [00:59:30] [INFO ] [SERVER] [System] 🎲 Rolled 8! Spawned: 1x Wheat, 1x Ore
+[01:00:30] [INFO ] [SERVER] [PulseManager] THE PULSE! Rolled 5 + 2 = 7
+[01:00:33] [WARN ] [SERVER] [PulseManager] ROBBER! No resources this pulse.
+[01:00:33] [INFO ] [SERVER] [RobberManager] Leader has no tiles to target.
+[01:00:33] [INFO ] [SERVER] [RobberManager] 7 Rolled! Executing Robber Logic...
+[01:00:33] [INFO ] [SERVER] [RobberManager] Leader identified: eserlan09 with 1 VP
+[01:00:33] [INFO ] [SERVER] [System] 🏴‍☠️ Robber! No resources this round.
+[01:00:34] [INFO ] [SERVER] [GameManager] Player leaving: eserlan09
+[01:00:44] [INFO ] [SERVER] [Server] ===========================================
+[01:00:44] [INFO ] [SERVER] [Server] ===========================================
+[01:00:44] [INFO ] [SERVER] [Server] FPV Settling - Server Starting
+[01:00:44] [INFO ] [SERVER] [TileOwnershipManager] Initialized
+[01:00:44] [INFO ] [SERVER] [CollectionManager] Initialized
+[01:00:45] [INFO ] [SERVER] [PulseManager] Initialized - Waiting for players to place settlements...
+[01:00:45] [DEBUG] [SERVER] [Server] GameManager loaded.
+[01:00:45] [INFO ] [SERVER] [Server] ===========================================
+[01:00:45] [INFO ] [SERVER] [Server] Server ready! Waiting for players...
+[01:00:45] [INFO ] [SERVER] [Server] ===========================================
+[01:00:45] [INFO ] [SERVER] [NetworkHandler] Initialized
+[01:00:45] [INFO ] [SERVER] [GameManager] Game Manager initialized!
+[01:00:45] [INFO ] [SERVER] [GameManager] Player joined: eserlan09
+[01:00:45] [DEBUG] [SERVER] [CollectionManager] Initialized inventory for eserlan09 with starting resources
+[01:00:47] [INFO ] [SERVER] [Client] ===========================================
+[01:00:47] [INFO ] [SERVER] [PulseManager] Assigned numbers to tiles
+[01:00:47] [INFO ] [SERVER] [RobberManager] Initializing Robber...
+[01:00:47] [INFO ] [SERVER] [RobberManager] Desert found at 1, -1
+[01:00:47] [INFO ] [SERVER] [RobberManager] Robber moved to 1, -1
+[01:00:47] [INFO ] [SERVER] [Client] FPV Settling - Client Starting
+[01:00:47] [INFO ] [SERVER] [GameManager] eserlan09 needs to place first settlement (Press B)
+[01:00:47] [INFO ] [SERVER] [Client] ===========================================
+[01:00:48] [INFO ] [SERVER] [Client] Character loaded!
+[01:00:49] [INFO ] [SERVER] [BlueprintBookUI] Initialized
+[01:00:49] [INFO ] [SERVER] [PlayerController] BlueprintBookUI loaded
+[01:00:49] [INFO ] [SERVER] [PlayerController] Initialized
+[01:00:49] [DEBUG] [SERVER] [Client] Loaded: PlayerController
+[01:00:49] [INFO ] [SERVER] [UIManager] Chat system ready
+[01:00:49] [INFO ] [SERVER] [UIManager] Initialized
+[01:00:49] [DEBUG] [SERVER] [Client] Loaded: UIManager
+[01:00:49] [INFO ] [SERVER] [PulseUI] Initialized
+[01:00:49] [DEBUG] [SERVER] [Client] Loaded: PulseUI
+[01:00:49] [INFO ] [SERVER] [InventoryUI] Initialized
+[01:00:49] [DEBUG] [SERVER] [Client] Loaded: InventoryUI
+[01:00:49] [DEBUG] [SERVER] [Client] Loaded: BlueprintBookUI
+[01:00:50] [INFO ] [SERVER] [DevPanel] Initialized - Press Alt+C to open
+[01:00:50] [DEBUG] [SERVER] [Client] Loaded: DevPanel
+[01:00:53] [ERROR] [SERVER] [Client] Failed to load TradeUI: Requested module experienced an error while loading
+[01:00:53] [INFO ] [SERVER] [Client] ===========================================
+[01:00:53] [INFO ] [SERVER] [Client] Welcome to FPV Settling!
+[01:00:53] [INFO ] [SERVER] [Client] Press B to open Blueprint Book
+[01:00:53] [INFO ] [SERVER] [Client] Press T to open Trade Menu
+[01:00:53] [INFO ] [SERVER] [Client] Press Alt+C to open dev panel
+[01:00:53] [INFO ] [SERVER] [Client] ===========================================

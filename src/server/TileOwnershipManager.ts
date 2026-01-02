@@ -104,7 +104,6 @@ const TileOwnershipManager = {
 
 		// Get adjacent tiles from vertex attributes
 		const adjCount = (closestVertex.GetAttribute("AdjacentTileCount") as number | undefined) ?? 0;
-		Logger.Debug("TileOwnership", `Vertex ${closestVertex.Name} has ${adjCount} adjacent tiles`);
 
 		for (let i = 1; i <= adjCount; i += 1) {
 			const q = closestVertex.GetAttribute(`Tile${i}Q`) as number | undefined;
@@ -117,7 +116,7 @@ const TileOwnershipManager = {
 			}
 		}
 
-		Logger.Info(
+		Logger.Debug(
 			"TileOwnership",
 			`${player.Name} claimed ${claimedTiles.size()} tiles with settlement at vertex ${closestVertex.Name}`,
 		);

@@ -262,22 +262,41 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 	}
 });
 
-// Network events
-Network.OnEvent("PortClaimed", (portType: unknown) => {
-	const portTypeName = portType as string;
-	if (!ownedPorts.includes(portTypeName)) {
-		ownedPorts.push(portTypeName);
-		Logger.Info("TradeUI", `Port claimed: ${portTypeName}`);
+// Network events - delayed to allow server to create events first
+task.spawn(() => {
+	task.wait(2); // Wait for server to initialize events
+
+	const [success1] = pcall(() => {
+		Network.OnEvent("PortClaimed", (portType: unknown) => {
+			const portTypeName = portType as string;
+			if (!ownedPorts.includes(portTypeName)) {
+				ownedPorts.push(portTypeName);
+				Logger.Info("TradeUI", `Port claimed: ${portTypeName}`);
+			}
+		});
+	});
+	if (!success1) {
+		Logger.Debug("TradeUI", "PortClaimed event not available yet");
 	}
-});
 
-Network.OnEvent("HarborMasterUpdate", (points: unknown) => {
-	harborMasterPoints = points as number;
-	Logger.Info("TradeUI", `Harbor Master points: ${harborMasterPoints}`);
-});
+	const [success2] = pcall(() => {
+		Network.OnEvent("HarborMasterUpdate", (points: unknown) => {
+			harborMasterPoints = points as number;
+			Logger.Info("TradeUI", `Harbor Master points: ${harborMasterPoints}`);
+		});
+	});
+	if (!success2) {
+		Logger.Debug("TradeUI", "HarborMasterUpdate event not available yet");
+	}
 
-Network.OnEvent("TradeCompleted", (giveResource: unknown, giveAmount: unknown, receiveResource: unknown, receiveAmount: unknown, ratio: unknown) => {
-	Logger.Info("TradeUI", `Trade completed: ${giveAmount} ${giveResource} -> ${receiveAmount} ${receiveResource} (${ratio}:1)`);
+	const [success3] = pcall(() => {
+		Network.OnEvent("TradeCompleted", (giveResource: unknown, giveAmount: unknown, receiveResource: unknown, receiveAmount: unknown, ratio: unknown) => {
+			Logger.Info("TradeUI", `Trade completed: ${giveAmount} ${giveResource} -> ${receiveAmount} ${receiveResource} (${ratio}:1)`);
+		});
+	});
+	if (!success3) {
+		Logger.Debug("TradeUI", "TradeCompleted event not available yet");
+	}
 });
 
 Logger.Info("TradeUI", "Trade UI initialized! Press T to open trade menu");
