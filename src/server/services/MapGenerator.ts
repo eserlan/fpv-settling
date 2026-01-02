@@ -31,6 +31,55 @@ export class MapGenerator implements OnStart {
 		// Initialization if needed
 	}
 
+	public GenerateLobby() {
+		const lobbyFolder = (game.Workspace.FindFirstChild("Lobby") as Folder) ?? new Instance("Folder", game.Workspace);
+		lobbyFolder.Name = "Lobby";
+		lobbyFolder.ClearAllChildren();
+
+		const platform = new Instance("Part");
+		platform.Name = "LobbyPlatform";
+		platform.Size = new Vector3(50, 2, 50);
+		platform.Position = new Vector3(0, 100, 0);
+		platform.Anchored = true;
+		platform.Color = new Color3(0.5, 0.5, 0.5);
+		platform.Material = Enum.Material.Concrete;
+		platform.Parent = lobbyFolder;
+
+		const spawn = new Instance("SpawnLocation");
+		spawn.Name = "LobbySpawn";
+		spawn.Size = new Vector3(12, 1, 12);
+		spawn.Position = new Vector3(0, 101.5, 0);
+		spawn.Anchored = true;
+		spawn.CanCollide = false;
+		spawn.Transparency = 0;
+		spawn.Parent = lobbyFolder;
+
+		// Add walls
+		const wallHeight = 10;
+		const wallThickness = 2;
+		const offset = 25 - wallThickness / 2;
+
+		const walls = [
+			{ size: new Vector3(50, wallHeight, wallThickness), pos: new Vector3(0, 100 + wallHeight / 2, -offset) },
+			{ size: new Vector3(50, wallHeight, wallThickness), pos: new Vector3(0, 100 + wallHeight / 2, offset) },
+			{ size: new Vector3(wallThickness, wallHeight, 50), pos: new Vector3(-offset, 100 + wallHeight / 2, 0) },
+			{ size: new Vector3(wallThickness, wallHeight, 50), pos: new Vector3(offset, 100 + wallHeight / 2, 0) },
+		];
+
+		walls.forEach((w, i) => {
+			const wall = new Instance("Part");
+			wall.Name = `Wall_${i}`;
+			wall.Size = w.size;
+			wall.Position = w.pos;
+			wall.Anchored = true;
+			wall.Transparency = 0.5;
+			wall.Color = new Color3(0.3, 0.3, 0.3);
+			wall.Parent = lobbyFolder;
+		});
+
+		Logger.Info("MapGenerator", "Lobby generated at (0, 100, 0)");
+	}
+
 	private createHexagon(name: string, position: Vector3, color: Color3, material?: Enum.Material) {
 		const assetRoot = ReplicatedStorage.FindFirstChild("Assets");
 		const basePlateFolder = assetRoot?.FindFirstChild("BasePlate");
@@ -171,6 +220,9 @@ export class MapGenerator implements OnStart {
 	}
 
 	public Generate(rings = 2) {
+		const lobbyFolder = game.Workspace.FindFirstChild("Lobby");
+		if (lobbyFolder) lobbyFolder.Destroy();
+
 		const mapFolder = (game.Workspace.FindFirstChild("Map") as Folder) ?? new Instance("Folder", game.Workspace);
 		mapFolder.Name = "Map";
 		mapFolder.ClearAllChildren();
