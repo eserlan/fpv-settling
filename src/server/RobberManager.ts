@@ -8,6 +8,7 @@ const TweenService = game.GetService("TweenService");
 import * as Logger from "shared/Logger";
 import * as TileKey from "shared/TileKey";
 import TileOwnershipManager = require("./TileOwnershipManager");
+import type { GameState } from "./GameState";
 
 // Events
 const events = (ReplicatedStorage.FindFirstChild("Events") as Folder) ?? new Instance("Folder", ReplicatedStorage);
@@ -155,11 +156,11 @@ const RobberManager = {
 	},
 
 	// Main logic trigger
-	OnSevenRolled(GameManager: typeof import("./GameManager")) {
+	OnSevenRolled(gameState: GameState) {
 		Logger.Info("RobberManager", "7 Rolled! Executing Robber Logic...");
 
 		// 1. Hand Check (Drop half if > 7)
-		for (const [userId, playerData] of pairs(GameManager.PlayerData)) {
+		for (const [userId, playerData] of pairs(gameState.PlayerData)) {
 			const total = playerData.ResourceManager.GetTotalResourceCount();
 			if (total > 7) {
 				const toRemove = math.floor(total / 2);
@@ -169,10 +170,10 @@ const RobberManager = {
 		}
 
 		// 2. Identify Leader
-		let leader: typeof GameManager.PlayerData[number] | undefined;
+		let leader: typeof gameState.PlayerData[number] | undefined;
 		let maxVP = -1;
 
-		for (const [userId, playerData] of pairs(GameManager.PlayerData)) {
+		for (const [userId, playerData] of pairs(gameState.PlayerData)) {
 			let vp = 0;
 			// Calculate VP: Settlement=1, City=2
 			for (const b of playerData.BuildingManager.GetSettlements()) {
