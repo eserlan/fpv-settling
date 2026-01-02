@@ -1,6 +1,6 @@
 // Resource types for The Pulse system (Catan-inspired)
 
-type ResourceInfo = {
+export type ResourceInfo = {
 	Name: string;
 	Icon: string;
 	Description: string;
@@ -11,18 +11,15 @@ type ResourceInfo = {
 	BuildingCost: Record<string, number>;
 };
 
-type ResourceTypesMap = Record<string, ResourceInfo> & {
-	GetByTileType: (tileType: string) => LuaTuple<[string | undefined, ResourceInfo | undefined]>;
-};
-
-const BaseResources: Record<string, ResourceInfo> = {
+// Resource definitions (pure data, no functions)
+const Resources: Record<string, ResourceInfo> = {
 	Brick: {
 		Name: "Brick",
 		Icon: "🧱",
 		Description: "Clay bricks for building foundations",
 		Color: Color3.fromRGB(178, 102, 59),
 		Material: Enum.Material.Brick,
-		TileType: "Hills", // Spawns from Hills tiles
+		TileType: "Hills",
 		MaxStack: 50,
 		BuildingCost: { Settlement: 1, Road: 1 },
 	},
@@ -68,10 +65,9 @@ const BaseResources: Record<string, ResourceInfo> = {
 	},
 };
 
-const ResourceTypes = BaseResources as ResourceTypesMap;
-
-ResourceTypes.GetByTileType = (tileType: string) => {
-	for (const [key, data] of pairs(BaseResources)) {
+// Utility functions
+const GetByTileType = (tileType: string): LuaTuple<[string | undefined, ResourceInfo | undefined]> => {
+	for (const [key, data] of pairs(Resources)) {
 		if (data.TileType === tileType) {
 			return $tuple(key, data);
 		}
@@ -79,5 +75,34 @@ ResourceTypes.GetByTileType = (tileType: string) => {
 	return $tuple(undefined, undefined);
 };
 
-export type { ResourceInfo };
+const GetResourceNames = (): string[] => {
+	const names: string[] = [];
+	for (const [key] of pairs(Resources)) {
+		names.push(key);
+	}
+	return names;
+};
+
+const Get = (name: string): ResourceInfo | undefined => {
+	return Resources[name];
+};
+
+// Combined module export
+const ResourceTypes = {
+	// Data - index signature via Resources
+	Resources,
+
+	// Direct named access
+	Brick: Resources.Brick,
+	Wood: Resources.Wood,
+	Wheat: Resources.Wheat,
+	Ore: Resources.Ore,
+	Wool: Resources.Wool,
+
+	// Functions
+	GetByTileType,
+	GetResourceNames,
+	Get,
+};
+
 export default ResourceTypes;

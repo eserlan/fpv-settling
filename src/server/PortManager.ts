@@ -51,7 +51,7 @@ class PortManager {
 		amount: number = 1,
 	): [boolean, string] {
 		// Validate resources
-		if (!ResourceTypes[giveResourceType] || !ResourceTypes[receiveResourceType]) {
+		if (!ResourceTypes.Get(giveResourceType) || !ResourceTypes.Get(receiveResourceType)) {
 			return $tuple(false, "Invalid resource type");
 		}
 

@@ -188,7 +188,7 @@ const CollectionManager = {
 
 	// Create visual effect when collecting
 	CreateCollectionEffect(position: Vector3, resourceType: string) {
-		const data = ResourceTypes[resourceType];
+		const data = ResourceTypes.Get(resourceType);
 		if (!data) {
 			return;
 		}

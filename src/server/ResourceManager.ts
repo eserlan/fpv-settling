@@ -29,7 +29,7 @@ class ResourceManager {
 
 	// Add resources to player inventory
 	AddResource(resourceType: string, amount: number) {
-		const resourceInfo = ResourceTypes[resourceType];
+		const resourceInfo = ResourceTypes.Get(resourceType);
 		if (!resourceInfo) {
 			Logger.Warn("ResourceManager", `Invalid resource type: ${resourceType}`);
 			return false;
@@ -53,7 +53,7 @@ class ResourceManager {
 
 	// Remove resources from player inventory
 	RemoveResource(resourceType: string, amount: number) {
-		const resourceInfo = ResourceTypes[resourceType];
+		const resourceInfo = ResourceTypes.Get(resourceType);
 		if (!resourceInfo) {
 			Logger.Warn("ResourceManager", `Invalid resource type: ${resourceType}`);
 			return false;

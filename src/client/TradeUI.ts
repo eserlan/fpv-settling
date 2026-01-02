@@ -212,17 +212,12 @@ const createResourceDropdown = (
 	layout.Parent = dropdown;
 
 	// Create a button for each resource type
-	for (const [resourceName, resourceInfo] of pairs(ResourceTypes)) {
-		if (!typeIs(resourceInfo, "table")) {
-			continue;
-		}
-		const info = resourceInfo as unknown as import("shared/ResourceTypes").ResourceInfo;
-
+	for (const [resourceName, resourceInfo] of pairs(ResourceTypes.Resources)) {
 		const button = new Instance("TextButton");
 		button.Name = resourceName;
 		button.Size = new UDim2(0, 60, 0, 45);
-		button.BackgroundColor3 = info.Color;
-		button.Text = info.Icon;
+		button.BackgroundColor3 = resourceInfo.Color;
+		button.Text = resourceInfo.Icon;
 		button.TextColor3 = Color3.fromRGB(255, 255, 255);
 		button.Font = Enum.Font.GothamBold;
 		button.TextSize = 24;
