@@ -4,10 +4,13 @@ interface ServerEvents {
     ClientRequest(actionType: string, ...args: unknown[]): void;
     DevEvent(action: string): void;
     CollectEvent(action: "GetInventory"): void;
+    ToggleReady(): void;
 }
 
 interface ClientEvents {
     // Traditional individual events
+    LobbyUpdate(readyCount: number, totalCount: number): void;
+    GameStart(): void;
     ResourceUpdate(resources: Record<string, number>): void;
     ConstructionStarted(buildingId: number, buildingType: string, position: Vector3): void;
     ConstructionCompleted(buildingId: number, buildingType: string): void;
