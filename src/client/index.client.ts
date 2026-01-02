@@ -1,4 +1,4 @@
 import { Flamework } from "@flamework/core";
 
-Flamework.addPaths("client/controllers");
+Flamework.addPaths("src/client/controllers");
 Flamework.ignite();

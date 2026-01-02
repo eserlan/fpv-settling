@@ -7,8 +7,12 @@
       "rbxts_include": {
         "$path": "include",
         "node_modules": {
+          "$className": "Folder",
           "@flamework": {
             "$path": "node_modules/@flamework"
+          },
+          "@rbxts": {
+            "$path": "node_modules/@rbxts"
           }
         }
       },
@@ -73,7 +77,7 @@
     },
     "ServerScriptService": {
       "$className": "ServerScriptService",
-      "Server": {
+      "server": {
         "$path": "out/server"
       },
       "$ignoreUnknownInstances": true
@@ -82,7 +86,7 @@
       "$className": "StarterPlayer",
       "StarterPlayerScripts": {
         "$className": "StarterPlayerScripts",
-        "Client": {
+        "client": {
           "$path": "out/client"
         }
       },

@@ -1,4 +1,4 @@
 import { Flamework } from "@flamework/core";
 
-Flamework.addPaths("server/services");
+Flamework.addPaths("src/server/services");
 Flamework.ignite();

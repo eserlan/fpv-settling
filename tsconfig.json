@@ -16,6 +16,11 @@
     ],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "plugins": [
+      {
+        "transform": "rbxts-transformer-flamework"
+      }
+    ],
     "baseUrl": "src",
     "paths": {
       "shared/*": [
