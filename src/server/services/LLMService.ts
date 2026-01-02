@@ -10,6 +10,23 @@ export interface AIAction {
 	reason?: string; // Thought process
 }
 
+// Gemini API Response Types
+interface GeminiResponsePart {
+	text: string;
+}
+
+interface GeminiContent {
+	parts: GeminiResponsePart[];
+}
+
+interface GeminiCandidate {
+	content: GeminiContent;
+}
+
+interface GeminiResponse {
+	candidates?: GeminiCandidate[];
+}
+
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 // Note: In a real production environment, the API key should be stored in ScriptService or environment variables.
 // For this prototype, we assume it's set in an environment variable or config.
@@ -79,15 +96,19 @@ export class LLMService {
 			});
 
 			if (response.Success) {
-				const data = HttpService.JSONDecode(response.Body) as any;
+				const data = HttpService.JSONDecode(response.Body) as GeminiResponse;
 				if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
-					let text = data.candidates[0].content.parts[0].text;
+					let text: string = data.candidates[0].content.parts[0].text;
 
 					// Clean up markdown code blocks if present
-					text = text.gsub("```json", "")[0]; // Remove start
-					text = text.gsub("```", "")[0];     // Remove end
-					text = text.gsub("^%s+", "")[0];    // Trim left
-					text = text.gsub("%s+$", "")[0];    // Trim right
+					const [cleanedJson] = text.gsub("```json", "");
+					text = cleanedJson;
+					const [cleanedBackticks] = text.gsub("```", "");
+					text = cleanedBackticks;
+					const [trimmedLeft] = text.gsub("^%s+", "");
+					text = trimmedLeft;
+					const [trimmedRight] = text.gsub("%s+$", "");
+					text = trimmedRight;
 
 					// Parse the JSON response
 					return HttpService.JSONDecode(text) as AIAction;
