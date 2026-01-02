@@ -22,7 +22,10 @@ export const HEX_SIZE = 40;
 export const HEX_HEIGHT = 4;
 
 /** Square root of 3, used frequently in hex math */
-export const SQRT_3 = 1.7320508075688772; // math.sqrt(3)
+export const SQRT_3 = 1.7320508075688772;
+
+/** The factor by which these hexes are stretched compared to standard (2 / sqrt(3)) */
+export const HEX_STRETCH = 2 / SQRT_3; // approx 1.1547
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -78,8 +81,11 @@ export const cubeToAxial = (coord: CubeCoord): AxialCoord => {
  * @returns World position { x, z }
  */
 export const axialToWorld = (q: number, r: number, hexSize: number = HEX_SIZE): WorldPos => {
-    const x = hexSize * (SQRT_3 * q + (SQRT_3 / 2) * r);
-    const z = hexSize * 1.5 * r;
+    // These hexes use a custom scaling:
+    // x distance between columns is 2 * size
+    // z distance between rows is sqrt(3) * size
+    const x = hexSize * 2 * (q + r / 2);
+    const z = hexSize * SQRT_3 * r;
     return { x, z };
 };
 
@@ -93,8 +99,8 @@ export const axialToWorld = (q: number, r: number, hexSize: number = HEX_SIZE): 
  * @returns Fractional axial coordinates { q, r }
  */
 export const worldToAxialFractional = (x: number, z: number, hexSize: number = HEX_SIZE): AxialCoord => {
-    const r = z / (hexSize * 1.5);
-    const q = x / (hexSize * SQRT_3) - r / 2;
+    const r = z / (hexSize * SQRT_3);
+    const q = x / (hexSize * 2) - r / 2;
     return { q, r };
 };
 
@@ -224,7 +230,7 @@ export const getHexRing = (center: AxialCoord, radius: number): AxialCoord[] => 
  */
 export const getHexVertices = (centerX: number, centerZ: number, hexSize: number = HEX_SIZE): WorldPos[] => {
     const vertices: WorldPos[] = [];
-    const cornerRadius = hexSize * 1.15; // Adjusted for visual hex shape
+    const cornerRadius = hexSize * HEX_STRETCH; // Matches the 1.15 factor in MapGenerator
 
     for (let i = 0; i < 6; i++) {
         const angle = (math.pi / 3) * i + (math.pi / 6); // 30° offset for pointy-top

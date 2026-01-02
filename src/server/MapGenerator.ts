@@ -432,7 +432,6 @@ const MapGenerator = {
 				const center = tile.PrimaryPart.Position;
 				const q = tile.PrimaryPart.GetAttribute("Q") as number;
 				const r = tile.PrimaryPart.GetAttribute("R") as number;
-				const cornerRadius = HEX_SIZE * 1.15; // Adjusted for the visual hex shape
 
 				const tileVertexKeys = new Array<string>();
 
