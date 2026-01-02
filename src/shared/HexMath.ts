@@ -78,8 +78,8 @@ export const cubeToAxial = (coord: CubeCoord): AxialCoord => {
  * @returns World position { x, z }
  */
 export const axialToWorld = (q: number, r: number, hexSize: number = HEX_SIZE): WorldPos => {
-    const x = hexSize * 2 * (q + r / 2);
-    const z = hexSize * SQRT_3 * r;
+    const x = hexSize * (SQRT_3 * q + (SQRT_3 / 2) * r);
+    const z = hexSize * 1.5 * r;
     return { x, z };
 };
 
@@ -93,8 +93,8 @@ export const axialToWorld = (q: number, r: number, hexSize: number = HEX_SIZE): 
  * @returns Fractional axial coordinates { q, r }
  */
 export const worldToAxialFractional = (x: number, z: number, hexSize: number = HEX_SIZE): AxialCoord => {
-    const q = (x / (hexSize * 2)) - (z / (hexSize * 2 * SQRT_3));
-    const r = z / (hexSize * SQRT_3);
+    const r = z / (hexSize * 1.5);
+    const q = x / (hexSize * SQRT_3) - r / 2;
     return { q, r };
 };
 

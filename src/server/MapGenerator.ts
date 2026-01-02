@@ -2,6 +2,7 @@
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
 import TileTypes from "shared/TileTypes";
 import PortTypes, { StandardPortConfiguration, PortLocation } from "shared/PortTypes";
+import HexMath from "shared/HexMath";
 
 const HEX_SIZE = 40; // Radius: center to corner
 const HEIGHT = 4;
@@ -82,13 +83,6 @@ const addLabel = (hex: Model, text: string) => {
 	diceLabel.Parent = billboard;
 };
 
-// Convert axial coordinates (q, r) to world position
-const axialToWorld = (q: number, r: number) => {
-	const x = HEX_SIZE * 2 * (q + r / 2);
-	const z = HEX_SIZE * math.sqrt(3) * r;
-	return new Vector3(x, 0, z);
-};
-
 // Create an EXACT tile pool based on frequencies (no duplicates beyond frequency)
 const createExactTilePool = () => {
 	const pool = new Array<string>();
@@ -115,6 +109,23 @@ const createExactTilePool = () => {
 const MapGenerator = {
 	PortLocations: [] as PortLocation[],
 
+	// Convert axial coordinates (q, r) to world position
+	axialToWorld(q: number, r: number) {
+		const pos = HexMath.axialToWorld(q, r, HEX_SIZE);
+		return new Vector3(pos.x, 0, pos.z);
+	},
+
+	// Convert world position to axial coordinates
+	worldToAxial(position: Vector3) {
+		const axial = HexMath.worldToAxial(position.X, position.Z, HEX_SIZE);
+		return axial;
+	},
+
+	// Round axial coordinates
+	hexRound(q: number, r: number) {
+		return HexMath.hexRound({ q, r });
+	},
+
 	Generate(rings = 2) {
 		// Default: 2 rings = 19 hexes (standard Catan)
 		const mapFolder = (game.Workspace.FindFirstChild("Map") as Folder) ?? new Instance("Folder", game.Workspace);
@@ -131,7 +142,7 @@ const MapGenerator = {
 			const r2 = math.min(rings, -q + rings);
 
 			for (let r = r1; r <= r2; r += 1) {
-				const worldPos = axialToWorld(q, r);
+				const worldPos = MapGenerator.axialToWorld(q, r);
 
 				// Get tile from exact pool (or fallback if pool exhausted)
 				const typeKey = tilePool[tileIndex] ?? "Desert";
@@ -426,15 +437,13 @@ const MapGenerator = {
 				const tileVertexKeys = new Array<string>();
 
 				// Generate 6 vertices for this hex
-				for (let i = 0; i <= 5; i += 1) {
-					const angle = math.pi / 3 * i + math.pi / 6;
-					const vx = center.X + cornerRadius * math.cos(angle);
-					const vz = center.Z + cornerRadius * math.sin(angle);
+				const verticesArr = HexMath.getHexVertices(center.X, center.Z, HEX_SIZE);
+				for (let i = 0; i < 6; i += 1) {
+					const vx = verticesArr[i].x;
+					const vz = verticesArr[i].z;
 
-					const gridSize = 8;
-					const keyX = math.floor(vx / gridSize + 0.5);
-					const keyZ = math.floor(vz / gridSize + 0.5);
-					const key = `${keyX}_${keyZ}`;
+					// Use HexMath for consistent vertex keys
+					const key = HexMath.makeVertexKey(vx, vz);
 					tileVertexKeys[i] = key;
 
 					if (!vertices[key]) {

@@ -8,6 +8,7 @@ import ResourceTypes from "shared/ResourceTypes";
 import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
 import ownershipModule = require("./TileOwnershipManager");
+import HexMath from "shared/HexMath";
 
 // Configuration
 const COLLECTION_RANGE = 8; // Studs - how close player needs to be
@@ -151,12 +152,11 @@ const CollectionManager = {
 			return false;
 		}
 
-		// Check tile ownership (if TileOwnershipManager exists)
-		if (tileQ !== undefined && tileR !== undefined) {
-			if (!ownershipModule.PlayerOwnsTile(player, tileQ, tileR)) {
-				// Player doesn't own this tile - can't collect
-				return false;
-			}
+		// Check tile ownership based on CURRENT position (Resource Stealing Mechanic)
+		const currentAxial = HexMath.worldToAxial(resource.Position.X, resource.Position.Z);
+		if (!ownershipModule.PlayerOwnsTile(player, currentAxial.q, currentAxial.r)) {
+			// Player doesn't own the tile the resource is CURRENTLY on
+			return false;
 		}
 
 		// Add to inventory
