@@ -1,8 +1,8 @@
 import { OnStart, Service } from "@flamework/core";
 import { GlobalEvents } from "shared/Events";
 import * as Logger from "shared/Logger";
-import CollectionManager = require("../CollectionManager");
-import PulseManager = require("../PulseManager");
+import { CollectionManager } from "./CollectionManager";
+import { PulseManager } from "./PulseManager";
 import { GameService } from "./GameService";
 import { ServerEvents } from "../ServerEvents";
 
@@ -10,15 +10,16 @@ import { ServerEvents } from "../ServerEvents";
 export class NetworkService implements OnStart {
     private serverEvents = ServerEvents;
 
-    constructor(private gameService: GameService) { }
+    constructor(
+        private gameService: GameService,
+        private collectionManager: CollectionManager,
+        private pulseManager: PulseManager,
+    ) { }
 
     onStart() {
-        // General client requests
         this.serverEvents.ClientRequest.connect((player: Player, actionType: string, ...args: any[]) => {
             const playerData = this.gameService.PlayerData[player.UserId];
-            if (!playerData) {
-                return;
-            }
+            if (!playerData) return;
 
             if (actionType === "PlaceBuilding") {
                 const [buildingType, position] = args as [string, Vector3];
@@ -28,16 +29,13 @@ export class NetworkService implements OnStart {
                 playerData.BuildingManager.PlaceFoundation(blueprintName, position, rotation, snapKey);
             } else if (actionType === "DepositResource") {
                 const [foundationId, resourceType] = args as [number, string];
-                Logger.Debug(
-                    "NetworkService",
-                    `${player.Name} requesting deposit of ${resourceType} into foundation ${foundationId}`,
-                );
+                Logger.Debug("NetworkService", `${player.Name} requesting deposit of ${resourceType} into foundation ${foundationId}`);
 
-                const inventory = CollectionManager.GetInventory(player);
+                const inventory = this.collectionManager.GetInventory(player);
                 if (inventory && inventory[resourceType] && inventory[resourceType] > 0) {
                     const [success] = playerData.BuildingManager.DepositResource(foundationId, resourceType);
                     if (success) {
-                        CollectionManager.RemoveResource(player, resourceType, 1);
+                        this.collectionManager.RemoveResource(player, resourceType, 1);
                     }
                 } else {
                     Logger.Warn("NetworkService", `${player.Name} tried to deposit ${resourceType} but doesn't have any`);
@@ -50,18 +48,14 @@ export class NetworkService implements OnStart {
                 playerData.ResearchManager.StartResearch(techName);
             } else if (actionType === "ExecuteTrade") {
                 const [giveResource, receiveResource, amount] = args as [string, string, number];
-                Logger.Debug(
-                    "NetworkService",
-                    `${player.Name} requesting trade: ${amount ?? 1} x (${giveResource} -> ${receiveResource})`,
-                );
+                Logger.Debug("NetworkService", `${player.Name} requesting trade: ${amount ?? 1} x (${giveResource} -> ${receiveResource})`);
                 playerData.PortManager.ExecuteTrade(giveResource, receiveResource, amount ?? 1);
             }
         });
 
-        // Specialized events
         this.serverEvents.CollectEvent.connect((player: Player, action: string) => {
             if (action === "GetInventory") {
-                const inventory = CollectionManager.GetInventory(player);
+                const inventory = this.collectionManager.GetInventory(player);
                 if (inventory) {
                     this.serverEvents.CollectEvent.fire(player, "InventoryUpdate", inventory as any);
                 }
@@ -71,7 +65,7 @@ export class NetworkService implements OnStart {
         this.serverEvents.DevEvent.connect((player: Player, action: string) => {
             if (action === "ForcePulse") {
                 Logger.Info("NetworkService", `Force pulse triggered by ${player.Name}`);
-                PulseManager.ForcePulse();
+                this.pulseManager.ForcePulse();
             }
         });
 

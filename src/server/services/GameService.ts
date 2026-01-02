@@ -8,9 +8,10 @@ import BuildingManager = require("../BuildingManager");
 import NPCManager = require("../NPCManager");
 import ResearchManager = require("../ResearchManager");
 import PortManager = require("../PortManager");
-import MapGenerator = require("../MapGenerator");
-import PulseManager = require("../PulseManager");
-import CollectionManager = require("../CollectionManager");
+import { MapGenerator } from "./MapGenerator";
+import { PulseManager } from "./PulseManager";
+import { CollectionManager } from "./CollectionManager";
+import { TileOwnershipManager } from "./TileOwnershipManager";
 import LogService = require("../LogService");
 import type { PlayerData } from "../PlayerData";
 import type { GameState } from "../GameState";
@@ -20,6 +21,13 @@ import * as Logger from "shared/Logger";
 export class GameService implements OnStart, GameState {
 	public PlayerData: Record<number, PlayerData> = {};
 
+	constructor(
+		private mapGenerator: MapGenerator,
+		private pulseManager: PulseManager,
+		private collectionManager: CollectionManager,
+		private tileOwnershipManager: TileOwnershipManager,
+	) { }
+
 	onStart() {
 		void LogService;
 
@@ -27,10 +35,8 @@ export class GameService implements OnStart, GameState {
 		Logger.Info("Server", "FPV Settling - Server Starting");
 		Logger.Info("Server", "===========================================");
 
-		MapGenerator.Generate();
-
-		PulseManager.Initialize();
-		PulseManager.SetGameManager(this);
+		this.mapGenerator.Generate();
+		this.pulseManager.SetGameManager(this);
 
 		Players.PlayerAdded.Connect((player) => this.handlePlayerAdded(player));
 		Players.PlayerRemoving.Connect((player) => this.handlePlayerRemoving(player));
@@ -50,15 +56,15 @@ export class GameService implements OnStart, GameState {
 	private handlePlayerAdded(player: Player) {
 		Logger.Info("GameManager", `Player joined: ${player.Name}`);
 
-		CollectionManager.InitPlayer(player);
+		this.collectionManager.InitPlayer(player);
 
 		const resourceManager = new ResourceManager(player);
-		const buildingManager = new BuildingManager(player, resourceManager);
+		const buildingManager = new BuildingManager(player, resourceManager, this.mapGenerator, this.tileOwnershipManager);
 		const npcManager = new NPCManager(player, resourceManager);
 		const researchManager = new ResearchManager(player, resourceManager);
 		const portManager = new PortManager(player, resourceManager);
 
-		portManager.SetPortLocations(MapGenerator.GetPortLocations());
+		portManager.SetPortLocations(this.mapGenerator.GetPortLocations());
 		buildingManager.SetPortManager(portManager);
 
 		this.PlayerData[player.UserId] = {
@@ -86,14 +92,11 @@ export class GameService implements OnStart, GameState {
 
 	private handlePlayerRemoving(player: Player) {
 		Logger.Info("GameManager", `Player leaving: ${player.Name}`);
-		CollectionManager.RemovePlayer(player);
+		this.collectionManager.RemovePlayer(player);
 		delete this.PlayerData[player.UserId];
 	}
 
 	private handleHeartbeat(deltaTime: number) {
-		PulseManager.Update(deltaTime);
-		CollectionManager.Update(deltaTime);
-
 		for (const [userId, playerData] of pairs(this.PlayerData)) {
 			playerData.GameTime += deltaTime;
 			playerData.BuildingManager.UpdateBuildings(deltaTime);
