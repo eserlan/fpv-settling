@@ -3,14 +3,11 @@
 
 import PortTypes, { StandardPortConfiguration, DEFAULT_TRADE_RATIO, PortLocation } from "shared/PortTypes";
 import ResourceTypes from "shared/ResourceTypes";
-import Network from "shared/Network";
+import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
 import ResourceManager = require("./ResourceManager");
 
-// Pre-create events that clients will listen to
-Network.GetEvent("PortClaimed");
-Network.GetEvent("HarborMasterUpdate");
-Network.GetEvent("TradeCompleted");
+// Events handled by Flamework automatically
 
 
 class PortManager {
@@ -96,14 +93,10 @@ class PortManager {
 		);
 
 		// Notify client of successful trade
-		Network.FireClient(
+		ServerEvents.TradeCompleted.fire(this.Player, giveResourceType, totalCost, receiveResourceType, amount, tradeRatio);
+		ServerEvents.SystemMessageEvent.fire(
 			this.Player,
-			"TradeCompleted",
-			giveResourceType,
-			totalCost,
-			receiveResourceType,
-			amount,
-			tradeRatio,
+			`📦 Trade Success: ${totalCost} ${giveResourceType} -> ${amount} ${receiveResourceType}`,
 		);
 
 		return $tuple(true, "Trade successful");
@@ -128,7 +121,7 @@ class PortManager {
 						);
 
 						// Notify client about port ownership
-						Network.FireClient(this.Player, "PortClaimed", portLocation.PortType);
+						ServerEvents.PortClaimed.fire(this.Player, portLocation.PortType);
 
 						// Check for Harbor Master bonus
 						this.CheckHarborMaster();
@@ -149,7 +142,7 @@ class PortManager {
 		const points = this.GetHarborMasterPoints();
 		if (points >= 3) {
 			Logger.Info("PortManager", `${this.Player.Name} has ${points} ports - Harbor Master candidate!`);
-			Network.FireClient(this.Player, "HarborMasterUpdate", points);
+			ServerEvents.HarborMasterUpdate.fire(this.Player, points);
 		}
 	}
 

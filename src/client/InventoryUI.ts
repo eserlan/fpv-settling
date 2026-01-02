@@ -7,12 +7,9 @@ const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
 
 import * as Logger from "shared/Logger";
+import { ClientEvents } from "./ClientEvents";
 
 const InventoryUI = {} as Record<string, unknown>;
-
-// Wait for events
-const events = ReplicatedStorage.WaitForChild("Events");
-const CollectEvent = events.WaitForChild("CollectEvent") as RemoteEvent;
 
 // Resource display data (icons must match Blueprints.ResourceIcons)
 const RESOURCES = [
@@ -140,17 +137,17 @@ const showCollectionNotification = (resourceType: string, amount: number) => {
 };
 
 // Handle collection events
-CollectEvent.OnClientEvent.Connect((eventType: unknown, data1: unknown, data2: unknown) => {
+ClientEvents.CollectEvent.connect((eventType, ...args) => {
 	if (eventType === "InventoryUpdate") {
-		updateInventory(data1 as Record<string, number>);
+		updateInventory(args[0] as Record<string, number>);
 	} else if (eventType === "Collected") {
-		showCollectionNotification(data1 as string, data2 as number);
+		showCollectionNotification(args[0] as string, args[1] as number);
 	}
 });
 
 // Request initial inventory
 task.delay(1, () => {
-	CollectEvent.FireServer("GetInventory");
+	ClientEvents.CollectEvent.fire("GetInventory");
 });
 
 Logger.Info("InventoryUI", "Initialized");

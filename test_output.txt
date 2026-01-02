@@ -1,0 +1,42 @@
+
+ RUN  v3.2.4 /home/espen/proj/fpv-settling
+
+ DEPRECATED  'basic' reporter is deprecated and will be removed in Vitest v3.
+Remove 'basic' from 'reporters' option. To match 'basic' reporter 100%, use configuration:
+{
+  "test": {
+    "reporters": [
+      [
+        "default",
+        {
+          "summary": false
+        }
+      ]
+    ]
+  }
+}
+ ✓ tests/shared/NPCTypes.test.ts (4 tests) 34ms
+ ✓ tests/shared/BuildingTypes.test.ts (4 tests) 37ms
+ ✓ tests/shared/PortTypes.test.ts (9 tests) 38ms
+ ✓ tests/shared/TileTypes.test.ts (36 tests) 39ms
+ ✓ tests/shared/Blueprints.test.ts (29 tests) 45ms
+ ✓ tests/shared/ResourceTypes.test.ts (41 tests) 37ms
+ ✓ tests/shared/TechTree.test.ts (28 tests) 19ms
+ ✓ tests/shared/ResearchMath.test.ts (29 tests) 19ms
+ ✓ tests/shared/ResourceMath.test.ts (46 tests) 17ms
+ ✓ tests/shared/HexMath.test.ts (50 tests) 19ms
+ ✓ tests/shared/DiceMath.test.ts (30 tests) 14ms
+ ✓ tests/shared/TradeMath.test.ts (31 tests) 11ms
+ ✓ tests/shared/tileKey.test.ts (8 tests) 5ms
+stderr | tests/server/NPCManager.test.ts > NPCManager > should return false for maintenance if out of food
+[NPCManager] Not enough food to maintain NPCs!
+
+ ✓ tests/server/ResourceManager.test.ts (8 tests) 6ms
+ ✓ tests/server/NPCManager.test.ts (6 tests) 6ms
+
+
+ Test Files  15 passed (15)
+      Tests  359 passed (359)
+   Start at  07:31:23
+   Duration  846ms (transform 819ms, setup 0ms, collect 1.53s, tests 348ms, environment 4ms, prepare 1.70s)
+

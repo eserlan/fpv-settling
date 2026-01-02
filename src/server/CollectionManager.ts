@@ -5,6 +5,7 @@ const ReplicatedStorage = game.GetService("ReplicatedStorage");
 const Players = game.GetService("Players");
 
 import ResourceTypes from "shared/ResourceTypes";
+import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
 import ownershipModule = require("./TileOwnershipManager");
 
@@ -14,13 +15,6 @@ const COLLECTION_COOLDOWN = 0.5; // Seconds between collections
 
 // Player collection cooldowns
 const playerCooldowns = new Map<number, number>();
-
-// Events
-const events = (ReplicatedStorage.FindFirstChild("Events") as Folder) ?? new Instance("Folder", ReplicatedStorage);
-events.Name = "Events";
-
-const CollectEvent = (events.FindFirstChild("CollectEvent") as RemoteEvent) ?? new Instance("RemoteEvent", events);
-CollectEvent.Name = "CollectEvent";
 
 // Player inventories (simple table for now)
 const playerInventories = new Map<number, Record<string, number>>();
@@ -44,7 +38,7 @@ const CollectionManager = {
 		task.delay(0.5, () => {
 			const inventory = playerInventories.get(player.UserId);
 			if (inventory) {
-				CollectEvent.FireClient(player, "InventoryUpdate", inventory);
+				ServerEvents.CollectEvent.fire(player, "InventoryUpdate", inventory);
 			}
 		});
 
@@ -73,7 +67,7 @@ const CollectionManager = {
 			inventory[resourceType] += amount;
 
 			// Notify client
-			CollectEvent.FireClient(player, "InventoryUpdate", inventory);
+			ServerEvents.CollectEvent.fire(player, "InventoryUpdate", inventory);
 
 			return true;
 		}
@@ -92,7 +86,7 @@ const CollectionManager = {
 			inventory[resourceType] -= amount;
 
 			// Notify client
-			CollectEvent.FireClient(player, "InventoryUpdate", inventory);
+			ServerEvents.CollectEvent.fire(player, "InventoryUpdate", inventory);
 
 			return true;
 		}
@@ -174,7 +168,7 @@ const CollectionManager = {
 			CollectionManager.CreateCollectionEffect(resource.Position, resourceType);
 
 			// Notify client
-			CollectEvent.FireClient(player, "Collected", resourceType, amount);
+			ServerEvents.CollectEvent.fire(player, "Collected", resourceType, amount);
 
 			// Destroy the resource
 			resource.Destroy();
@@ -261,15 +255,7 @@ const CollectionManager = {
 	},
 };
 
-// Handle client request for inventory
-CollectEvent.OnServerEvent.Connect((player, action) => {
-	if (action === "GetInventory") {
-		const inventory = CollectionManager.GetInventory(player);
-		if (inventory) {
-			CollectEvent.FireClient(player, "InventoryUpdate", inventory);
-		}
-	}
-});
+// Event handling moved to NetworkService.ts
 
 Logger.Info("CollectionManager", "Initialized");
 

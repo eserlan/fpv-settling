@@ -7,7 +7,7 @@ const Players = game.GetService("Players");
 
 import Blueprints from "shared/Blueprints";
 import * as Logger from "shared/Logger";
-import Network from "shared/Network";
+import { ClientEvents } from "./ClientEvents";
 
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
@@ -262,9 +262,9 @@ for (const name of sortedNames) {
 }
 
 // Listen for inventory updates
-Network.OnEvent("CollectEvent", (action, data) => {
+ClientEvents.CollectEvent.connect((action, ...args) => {
 	if (action === "InventoryUpdate") {
-		currentResources = data as Record<string, number>;
+		currentResources = args[0] as Record<string, number>;
 		refreshAffordability();
 	}
 });

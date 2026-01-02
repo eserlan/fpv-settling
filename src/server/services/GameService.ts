@@ -8,7 +8,6 @@ import BuildingManager = require("../BuildingManager");
 import NPCManager = require("../NPCManager");
 import ResearchManager = require("../ResearchManager");
 import PortManager = require("../PortManager");
-import NetworkHandler = require("../NetworkHandler");
 import MapGenerator = require("../MapGenerator");
 import PulseManager = require("../PulseManager");
 import CollectionManager = require("../CollectionManager");
@@ -41,8 +40,6 @@ export class GameService implements OnStart, GameState {
 		}
 
 		RunService.Heartbeat.Connect((deltaTime) => this.handleHeartbeat(deltaTime));
-
-		NetworkHandler.Init(this);
 
 		Logger.Info("GameManager", "Game Manager initialized!");
 		Logger.Info("Server", "===========================================");

@@ -7,18 +7,12 @@ const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
 
 import * as Logger from "shared/Logger";
+import { ClientEvents } from "./ClientEvents";
 
 const DevPanel = {} as Record<string, unknown>;
 
-// Configuration
+// DevPanel specific configuration
 const TOGGLE_KEY = Enum.KeyCode.C; // Press Alt+C to toggle dev panel
-
-// State
-const showDiceNumbers = false;
-
-// Wait for events
-const events = ReplicatedStorage.WaitForChild("Events");
-const DevEvent = events.WaitForChild("DevEvent") as RemoteEvent;
 
 // Create UI
 const screenGui = new Instance("ScreenGui");
@@ -145,7 +139,7 @@ const createSectionLabel = (text: string) => {
 createSectionLabel("Pulse Controls");
 
 createActionButton("ForcePulse", "⚡ Force Dice Roll", () => {
-	DevEvent.FireServer("ForcePulse");
+	ClientEvents.DevEvent.fire("ForcePulse");
 });
 
 // Toggle panel visibility

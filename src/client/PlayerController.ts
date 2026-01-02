@@ -1,6 +1,6 @@
 // Client-side Player Controller
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
-import Network from "shared/Network";
+import { ClientEvents } from "./ClientEvents";
 const Players = game.GetService("Players");
 const UserInputService = game.GetService("UserInputService");
 const RunService = game.GetService("RunService");
@@ -610,7 +610,7 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 		if (currentVertex && isValidPlacement && selectedBlueprint) {
 			const rotation = currentVertex.Rotation;
 			const snapKey = currentVertex.GetAttribute("Key") as string | undefined;
-			Network.FireServer("PlaceFoundation", selectedBlueprint, currentVertex.Position, rotation, snapKey);
+			ClientEvents.ClientRequest.fire("PlaceFoundation", selectedBlueprint, currentVertex.Position, rotation, snapKey);
 			Logger.Info("PlayerController", `Placed foundation for ${selectedBlueprint}`);
 			exitPlacementMode();
 		} else {
@@ -625,7 +625,7 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 			// Deposit wood first, then brick, wheat, wool, ore in order
 			const resourcesToTry = ["Wood", "Brick", "Wheat", "Wool", "Ore"];
 			for (const resourceType of resourcesToTry) {
-				Network.FireServer("DepositResource", nearbyFoundation.Id, resourceType);
+				ClientEvents.ClientRequest.fire("DepositResource", nearbyFoundation.Id, resourceType);
 			}
 		} else {
 			const totalFound = (_G as Record<string, number>).FoundFoundations ?? 0;
@@ -647,7 +647,7 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 	if (input.KeyCode === Enum.KeyCode.H) {
 		const character = player.Character;
 		if (character && character.PrimaryPart) {
-			Network.FireServer("HireNPC", "Worker", character.PrimaryPart.Position);
+			ClientEvents.ClientRequest.fire("HireNPC", "Worker", character.PrimaryPart.Position);
 			Logger.Debug("PlayerController", "Requested Worker hire");
 		}
 	}
@@ -656,14 +656,14 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 	if (input.KeyCode === Enum.KeyCode.G) {
 		const character = player.Character;
 		if (character && character.PrimaryPart) {
-			Network.FireServer("HireNPC", "Guard", character.PrimaryPart.Position);
+			ClientEvents.ClientRequest.fire("HireNPC", "Guard", character.PrimaryPart.Position);
 			Logger.Debug("PlayerController", "Requested Guard hire");
 		}
 	}
 
 	// Open Research with 'R' key
 	if (input.KeyCode === Enum.KeyCode.R) {
-		Network.FireServer("StartResearch", "ImprovedTools");
+		ClientEvents.ClientRequest.fire("StartResearch", "ImprovedTools");
 		Logger.Debug("PlayerController", "Requested research: ImprovedTools");
 	}
 

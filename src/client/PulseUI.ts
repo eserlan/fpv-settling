@@ -5,14 +5,10 @@ const Players = game.GetService("Players");
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
 
+import { ClientEvents } from "./ClientEvents";
 import * as Logger from "shared/Logger";
 
 const PulseUI = {} as Record<string, unknown>;
-
-// Wait for events
-const events = ReplicatedStorage.WaitForChild("Events");
-const PulseEvent = events.WaitForChild("PulseEvent") as RemoteEvent;
-const TimerEvent = events.WaitForChild("TimerEvent") as RemoteEvent;
 
 // Create UI elements
 const screenGui = new Instance("ScreenGui");
@@ -105,7 +101,7 @@ resultLabel.Text = "";
 resultLabel.Parent = diceFrame;
 
 // Handle timer updates
-TimerEvent.OnClientEvent.Connect((seconds: unknown) => {
+ClientEvents.TimerEvent.connect((seconds) => {
 	if (seconds === -1) {
 		// Waiting for all players to place settlements
 		countdownLabel.Text = "Place Settlement!";
@@ -116,7 +112,7 @@ TimerEvent.OnClientEvent.Connect((seconds: unknown) => {
 		countdownLabel.Text = tostring(seconds);
 
 		// Flash when low
-		if ((seconds as number) <= 5) {
+		if (seconds <= 5) {
 			countdownLabel.TextColor3 = Color3.fromRGB(255, 100, 100);
 		} else {
 			countdownLabel.TextColor3 = Color3.fromRGB(255, 200, 100);
@@ -125,8 +121,9 @@ TimerEvent.OnClientEvent.Connect((seconds: unknown) => {
 });
 
 // Handle pulse events
-PulseEvent.OnClientEvent.Connect((eventType: unknown, die1: unknown, die2: unknown, total: unknown, matchingCount: unknown) => {
+ClientEvents.PulseEvent.connect((eventType, ...args) => {
 	if (eventType === "RollStart") {
+		const [die1, die2, total] = args as [number, number, number];
 		// Show dice rolling animation
 		diceFrame.Visible = true;
 		diceDisplay.Text = "🎲 Rolling... 🎲";
@@ -143,7 +140,8 @@ PulseEvent.OnClientEvent.Connect((eventType: unknown, die1: unknown, die2: unkno
 		// Show final result
 		diceDisplay.Text = `🎲 ${die1} + ${die2} = ${total} 🎲`;
 	} else if (eventType === "RollComplete") {
-		if ((matchingCount as number) > 0) {
+		const [die1, die2, total, matchingCount] = args as [number, number, number, number];
+		if (matchingCount > 0) {
 			resultLabel.Text = `✅ ${matchingCount} tiles produce resources!`;
 			resultLabel.TextColor3 = Color3.fromRGB(100, 255, 100);
 		} else {

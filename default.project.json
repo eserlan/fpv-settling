@@ -4,8 +4,13 @@
     "$className": "DataModel",
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
-      "include": {
-        "$path": "include"
+      "rbxts_include": {
+        "$path": "include",
+        "node_modules": {
+          "@flamework": {
+            "$path": "node_modules/@flamework"
+          }
+        }
       },
       "Shared": {
         "$path": "out/shared"
@@ -21,6 +26,12 @@
         "ConstructionCompleted": {
           "$className": "RemoteEvent"
         },
+        "FoundationPlaced": {
+          "$className": "RemoteEvent"
+        },
+        "ResourceDeposited": {
+          "$className": "RemoteEvent"
+        },
         "NPCHired": {
           "$className": "RemoteEvent"
         },
@@ -28,6 +39,30 @@
           "$className": "RemoteEvent"
         },
         "ResearchCompleted": {
+          "$className": "RemoteEvent"
+        },
+        "CollectEvent": {
+          "$className": "RemoteEvent"
+        },
+        "PulseEvent": {
+          "$className": "RemoteEvent"
+        },
+        "TimerEvent": {
+          "$className": "RemoteEvent"
+        },
+        "PortClaimed": {
+          "$className": "RemoteEvent"
+        },
+        "HarborMasterUpdate": {
+          "$className": "RemoteEvent"
+        },
+        "TradeCompleted": {
+          "$className": "RemoteEvent"
+        },
+        "SystemMessageEvent": {
+          "$className": "RemoteEvent"
+        },
+        "DevEvent": {
           "$className": "RemoteEvent"
         },
         "ClientRequest": {

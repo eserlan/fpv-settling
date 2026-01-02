@@ -3,7 +3,7 @@
 
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
 import BuildingTypes from "shared/BuildingTypes";
-import Network from "shared/Network";
+import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
 import Blueprints from "shared/Blueprints";
 
@@ -122,7 +122,7 @@ class BuildingManager {
 			this.OnBuildingComplete(building);
 		} else {
 			this.BuildingInProgress.push(building);
-			Network.FireClient(this.Player, "ConstructionStarted", buildingId, buildingType, finalPosition);
+			ServerEvents.ConstructionStarted.fire(this.Player, buildingId, buildingType, finalPosition);
 		}
 
 		// Mark first settlement as placed
@@ -182,7 +182,13 @@ class BuildingManager {
 		}
 
 		// Notify client about new foundation
-		Network.FireClient(this.Player, "FoundationPlaced", foundationId, blueprintName, position, foundation.RequiredResources);
+		ServerEvents.FoundationPlaced.fire(
+			this.Player,
+			foundationId,
+			blueprintName,
+			position,
+			foundation.RequiredResources ?? {},
+		);
 
 		Logger.Info(
 			"BuildingManager",
@@ -234,7 +240,7 @@ class BuildingManager {
 		}
 
 		// Notify client
-		Network.FireClient(this.Player, "ResourceDeposited", foundationId, resourceType, foundation.Progress);
+		ServerEvents.ResourceDeposited.fire(this.Player, foundationId, resourceType, foundation.Progress);
 
 		Logger.Debug(
 			"BuildingManager",
@@ -439,7 +445,7 @@ class BuildingManager {
 			}
 		}
 
-		Network.FireClient(this.Player, "ConstructionCompleted", building.Id, building.Type);
+		ServerEvents.ConstructionCompleted.fire(this.Player, building.Id, building.Type);
 	}
 
 	// Create the physical building model

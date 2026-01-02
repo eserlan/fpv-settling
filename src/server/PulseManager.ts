@@ -6,6 +6,7 @@ const Players = game.GetService("Players");
 
 import TileTypes from "shared/TileTypes";
 import ResourceTypes from "shared/ResourceTypes";
+import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
 import RobberManager = require("./RobberManager");
 import type { GameState } from "./GameState";
@@ -26,19 +27,6 @@ const tileNumbers: Record<string, number> = {}; // Maps tile coordinates to numb
 let gameStarted = false; // Pulse doesn't start until all players place settlements
 let GameManagerRef: GameState | undefined;
 let pulsesSinceLastSeven = 0;
-
-// Events
-const events = (ReplicatedStorage.FindFirstChild("Events") as Folder) ?? new Instance("Folder", ReplicatedStorage);
-events.Name = "Events";
-
-const PulseEvent = (events.FindFirstChild("PulseEvent") as RemoteEvent) ?? new Instance("RemoteEvent", events);
-PulseEvent.Name = "PulseEvent";
-
-const TimerEvent = (events.FindFirstChild("TimerEvent") as RemoteEvent) ?? new Instance("RemoteEvent", events);
-TimerEvent.Name = "TimerEvent";
-
-const SystemMessageEvent = (events.FindFirstChild("SystemMessageEvent") as RemoteEvent) ?? new Instance("RemoteEvent", events);
-SystemMessageEvent.Name = "SystemMessageEvent";
 
 // Roll 2d6 dice
 const rollDice = () => {
@@ -141,7 +129,7 @@ const PulseManager = {
 		Logger.Info("PulseManager", `THE PULSE! Rolled ${die1} + ${die2} = ${total}`);
 
 		// Broadcast to all clients for visual effects
-		PulseEvent.FireAllClients("RollStart", die1, die2, total);
+		ServerEvents.PulseEvent.broadcast("RollStart", die1, die2, total);
 
 		// Wait for animation
 		task.wait(DICE_ROLL_DURATION);
@@ -152,8 +140,8 @@ const PulseManager = {
 		if (total === 7) {
 			pulsesSinceLastSeven = 0;
 			Logger.Warn("PulseManager", "ROBBER! No resources this pulse.");
-			PulseEvent.FireAllClients("Robber");
-			SystemMessageEvent.FireAllClients("🏴‍☠️ Robber! No resources this round.");
+			ServerEvents.PulseEvent.broadcast("Robber");
+			ServerEvents.SystemMessageEvent.broadcast("🏴‍☠️ Robber! No resources this round.");
 
 			if (GameManagerRef) {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -201,12 +189,12 @@ const PulseManager = {
 					resourceList.push(`${count}x ${resource}`);
 				}
 				const message = `🎲 Rolled ${total}! Spawned: ${resourceList.join(", ")}`;
-				SystemMessageEvent.FireAllClients(message);
+				ServerEvents.SystemMessageEvent.broadcast(message);
 			} else {
-				SystemMessageEvent.FireAllClients(`🎲 Rolled ${total} - No matching tiles`);
+				ServerEvents.SystemMessageEvent.broadcast(`🎲 Rolled ${total} - No matching tiles`);
 			}
 
-			PulseEvent.FireAllClients("RollComplete", die1, die2, total, matchingTiles.size());
+			ServerEvents.PulseEvent.broadcast("RollComplete", die1, die2, total, matchingTiles.size());
 		}
 
 		isRolling = false;
@@ -271,22 +259,20 @@ const PulseManager = {
 					gameStarted = true;
 					pulseTimer = PULSE_INTERVAL;
 					Logger.Info("PulseManager", "All players ready! Starting pulse timer...");
-					TimerEvent.FireAllClients(math.floor(pulseTimer));
+					ServerEvents.TimerEvent.broadcast(math.floor(pulseTimer));
 				} else {
-					// Show "waiting for players" status
-					TimerEvent.FireAllClients(-1); // -1 means waiting
+					// Pulse Manager hasn't started yet (waiting for settlement placement)
+					ServerEvents.TimerEvent.broadcast(-1); // -1 means waiting
 				}
 			}
-			return;
+		} else {
+			// Count down normally
+			pulseTimer -= deltaTime;
+			// Broadcast timer to clients every second
+			if (math.floor(pulseTimer) < math.floor(pulseTimer + deltaTime)) {
+				ServerEvents.TimerEvent.broadcast(math.floor(pulseTimer));
+			}
 		}
-
-		pulseTimer -= deltaTime;
-
-		// Broadcast timer to clients every second
-		if (math.floor(pulseTimer) !== math.floor(pulseTimer + deltaTime)) {
-			TimerEvent.FireAllClients(math.floor(pulseTimer));
-		}
-
 		if (pulseTimer <= 0) {
 			PulseManager.ExecutePulse();
 		}
@@ -346,15 +332,6 @@ const allPlayersReady = () => {
 	return true;
 };
 
-// Dev panel event handler
-const DevEvent = (events.FindFirstChild("DevEvent") as RemoteEvent) ?? new Instance("RemoteEvent", events);
-DevEvent.Name = "DevEvent";
-
-DevEvent.OnServerEvent.Connect((player, action) => {
-	if (action === "ForcePulse") {
-		Logger.Info("PulseManager", `Force pulse triggered by ${player.Name}`);
-		PulseManager.ForcePulse();
-	}
-});
+// Event handling moved to NetworkService.ts
 
 export = PulseManager;

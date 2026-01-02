@@ -1,7 +1,7 @@
 // Server-side Research Manager
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
 import TechTree from "shared/TechTree";
-import Network from "shared/Network";
+import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
 
 class ResearchManager {
@@ -58,7 +58,7 @@ class ResearchManager {
 		this.CurrentResearch = techName;
 		this.ResearchProgress = 0;
 
-		Network.FireClient(this.Player, "ResearchStarted", techName, tech.ResearchTime);
+		ServerEvents.ResearchStarted.fire(this.Player, techName, tech.ResearchTime);
 
 		return $tuple(true, techName);
 	}
@@ -90,7 +90,7 @@ class ResearchManager {
 		this.CurrentResearch = undefined;
 		this.ResearchProgress = 0;
 
-		Network.FireClient(this.Player, "ResearchCompleted", techName);
+		ServerEvents.ResearchCompleted.fire(this.Player, techName);
 	}
 
 	// Apply technology effect

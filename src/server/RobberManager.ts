@@ -5,14 +5,11 @@ const ReplicatedStorage = game.GetService("ReplicatedStorage");
 const Workspace = game.GetService("Workspace");
 const TweenService = game.GetService("TweenService");
 
+import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
 import * as TileKey from "shared/TileKey";
 import TileOwnershipManager = require("./TileOwnershipManager");
 import type { GameState } from "./GameState";
-
-// Events
-const events = (ReplicatedStorage.FindFirstChild("Events") as Folder) ?? new Instance("Folder", ReplicatedStorage);
-const SystemMessageEvent = (events.FindFirstChild("SystemMessageEvent") as RemoteEvent) ?? new Instance("RemoteEvent", events);
 
 // Types
 type RobberState = {
@@ -148,7 +145,7 @@ const RobberManager = {
 	ResetToDesert() {
 		Logger.Info("RobberManager", "Robber returning to desert (Reset)");
 		this.MoveRobber(this.DesertLocation.Q, this.DesertLocation.R);
-		SystemMessageEvent.FireAllClients("🕊️ The Robber has returned to the Desert.");
+		ServerEvents.SystemMessageEvent.broadcast("🕊️ The Robber has returned to the Desert.");
 	},
 
 	GetRobberPosition() {
@@ -165,7 +162,7 @@ const RobberManager = {
 			if (total > 7) {
 				const toRemove = math.floor(total / 2);
 				playerData.ResourceManager.RemoveRandomResources(toRemove);
-				SystemMessageEvent.FireClient(playerData.Player, `🏴‍☠️ Robber Penalty! You lost ${toRemove} resources.`);
+				ServerEvents.SystemMessageEvent.fire(playerData.Player, `🏴‍☠️ Robber Penalty! You lost ${toRemove} resources.`);
 			}
 		}
 
@@ -240,7 +237,7 @@ const RobberManager = {
 		if (bestTile) {
 			// 4. Move Robber
 			this.MoveRobber(bestTile.q, bestTile.r);
-			SystemMessageEvent.FireAllClients(`🏴‍☠️ The Robber blocked ${leader.Player.Name}'s tile!`);
+			ServerEvents.SystemMessageEvent.broadcast(`🏴‍☠️ The Robber blocked ${leader.Player.Name}'s tile!`);
 
 			// 5. Automated Theft
 			const stolen = leader.ResourceManager.RemoveRandomResources(1);

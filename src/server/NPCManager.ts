@@ -1,7 +1,7 @@
 // Server-side NPC Manager
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
 import NPCTypes from "shared/NPCTypes";
-import Network from "shared/Network";
+import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
 
 type NPCRecord = {
@@ -65,7 +65,7 @@ class NPCManager {
 		// Create physical NPC model
 		this.CreateNPCModel(npc);
 
-		Network.FireClient(this.Player, "NPCHired", npc.Id, npcType, position);
+		ServerEvents.NPCHired.fire(this.Player, npc.Id, npcType, position ?? new Vector3(0, 5, 0));
 
 		return $tuple(true, npc.Id);
 	}

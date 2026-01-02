@@ -161,6 +161,127 @@ const EnumMock = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// BRICKCOLOR MOCK
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class BrickColorMock {
+    Name: string;
+
+    constructor(name: string) {
+        this.Name = name;
+    }
+
+    static random(): BrickColorMock {
+        return new BrickColorMock("White");
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CFRAME MOCK
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class CFrameMock {
+    Position: Vector3Mock;
+
+    constructor(x: number | Vector3Mock = 0, y = 0, z = 0) {
+        if (typeof x === "object") {
+            this.Position = x;
+        } else {
+            this.Position = new Vector3Mock(x, y, z);
+        }
+    }
+
+    static Angles(x: number, y: number, z: number): CFrameMock {
+        return new CFrameMock();
+    }
+
+    mul(other: any): CFrameMock {
+        return new CFrameMock();
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// UDIM2 MOCK
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class UDim2Mock {
+    constructor(public xScale: number, public xOffset: number, public yScale: number, public yOffset: number) { }
+    static fromRGB(r: number, g: number, b: number) {
+        return { r, g, b };
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INSTANCE MOCK
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class InstanceMock {
+    Name: string = "";
+    private _parent?: InstanceMock;
+    private children: InstanceMock[] = [];
+    private attributes: Record<string, unknown> = {};
+
+    constructor(className: string, parent?: InstanceMock) {
+        this.Parent = parent;
+    }
+
+    get Parent(): InstanceMock | undefined {
+        return this._parent;
+    }
+
+    set Parent(newParent: InstanceMock | undefined) {
+        if (this._parent) {
+            const idx = this._parent.children.indexOf(this);
+            if (idx >= 0) {
+                this._parent.children.splice(idx, 1);
+            }
+        }
+        this._parent = newParent;
+        if (newParent) {
+            newParent.children.push(this);
+        }
+    }
+
+    static new(className: string, parent?: InstanceMock): any {
+        return new InstanceMock(className, parent);
+    }
+
+    IsA(className: string): boolean {
+        return true; // Simplified
+    }
+
+    FindFirstChild(name: string): any {
+        return this.children.find(c => c.Name === name);
+    }
+
+    GetChildren(): any[] {
+        return this.children;
+    }
+
+    GetDescendants(): any[] {
+        const descendants: any[] = [];
+        for (const child of this.children) {
+            descendants.push(child);
+            descendants.push(...child.GetDescendants());
+        }
+        return descendants;
+    }
+
+    SetAttribute(name: string, value: unknown): void {
+        this.attributes[name] = value;
+    }
+
+    GetAttribute(name: string): unknown {
+        return this.attributes[name];
+    }
+
+    Destroy(): void {
+        this.Parent = undefined;
+        this.children = [];
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // LUAU BUILT-IN FUNCTION MOCKS
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -363,6 +484,36 @@ if (!arrayProto.size) {
         return this.length;
     };
 }
+if (!arrayProto.remove) {
+    // eslint-disable-next-line no-extend-native
+    arrayProto.remove = function (this: unknown[], index: number) {
+        // Lua is 1-indexed, but roblox-ts .remove() might be 0-indexed or 1-indexed depending on version
+        // Actually in roblox-ts, it's usually 0-indexed for the method call, mapping to 1-indexed table.remove
+        return this.splice(index, 1)[0];
+    };
+}
+
+/**
+ * Mock for Luau's `pcall()` function
+ */
+const pcallMock = (fn: (...args: any[]) => any, ...args: any[]): [boolean, any] => {
+    try {
+        return [true, fn(...args)];
+    } catch (e) {
+        return [false, e];
+    }
+};
+
+/**
+ * Mock for Luau's `xpcall()` function
+ */
+const xpcallMock = (fn: (...args: any[]) => any, errFn: (err: any) => any, ...args: any[]): [boolean, any] => {
+    try {
+        return [true, fn(...args)];
+    } catch (e) {
+        return [false, errFn(e)];
+    }
+};
 
 // Type assertion to allow setting globals
 // Use globalThis for Node.js/Vitest compatibility
@@ -371,11 +522,37 @@ const g = globalThis as unknown as Record<string, unknown>;
 // Core Roblox types
 g.Vector3 = Vector3Mock;
 g.Color3 = Color3Mock;
+g.CFrame = CFrameMock;
+g.UDim2 = UDim2Mock;
 g.Enum = EnumMock;
+g.BrickColor = BrickColorMock;
+g.Instance = InstanceMock;
+
+// Global Roblox functions
+g.print = console.log;
+g.warn = console.warn;
+g.error = console.error;
+g.debug = console.debug;
+g.tick = () => Date.now() / 1000;
+g.delay = (seconds: number, callback: () => void) => setTimeout(callback, seconds * 1000);
+g.task = {
+    wait: (seconds: number) => new Promise(resolve => setTimeout(resolve, (seconds ?? 0) * 1000)),
+    spawn: (callback: (...args: any[]) => void, ...args: any[]) => {
+        setTimeout(() => callback(...args), 0);
+    },
+    defer: (callback: (...args: any[]) => void, ...args: any[]) => {
+        setTimeout(() => callback(...args), 0);
+    },
+    delay: (seconds: number, callback: (...args: any[]) => void, ...args: any[]) => {
+        setTimeout(() => callback(...args), seconds * 1000);
+    },
+};
 
 // Luau built-ins
 g.pairs = pairsMock;
 g.ipairs = ipairsMock;
+g.pcall = pcallMock;
+g.xpcall = xpcallMock;
 g.tonumber = tonumberMock;
 g.tostring = tostringMock;
 g.typeIs = typeIsMock;
@@ -384,6 +561,18 @@ g.table = tableMock;
 g.math = mathMock;
 g.string = stringMock;
 g.os = osMock;
+const runServiceMock = {
+    IsServer: () => true,
+    IsClient: () => false,
+};
+
+g.game = {
+    GetService: (name: string) => {
+        if (name === "RunService") return runServiceMock;
+        return InstanceMock.new(name);
+    },
+    Workspace: InstanceMock.new("Workspace"),
+};
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // EXPORTS (for direct usage if needed)
@@ -412,6 +601,10 @@ declare global {
     // eslint-disable-next-line no-var
     var Color3: typeof Color3Mock;
     // eslint-disable-next-line no-var
+    var CFrame: typeof CFrameMock;
+    // eslint-disable-next-line no-var
+    var UDim2: typeof UDim2Mock;
+    // eslint-disable-next-line no-var
     var Enum: typeof EnumMock;
     // eslint-disable-next-line no-var
     var pairs: typeof pairsMock;
@@ -433,4 +626,24 @@ declare global {
     var string: typeof stringMock;
     // eslint-disable-next-line no-var
     var os: typeof osMock;
+    interface Player {
+        UserId: number;
+        Name: string;
+        GetAttribute(name: string): unknown;
+        SetAttribute(name: string, value: unknown): void;
+    }
+    interface Instance {
+        Name: string;
+        Parent?: Instance;
+        FindFirstChild(name: string): Instance | undefined;
+        GetChildren(): Instance[];
+        IsA(className: string): boolean;
+        GetAttribute(name: string): unknown;
+        SetAttribute(name: string, value: unknown): void;
+    }
+    // eslint-disable-next-line no-var
+    var game: {
+        GetService(service: string): any;
+        Workspace: Instance;
+    };
 }

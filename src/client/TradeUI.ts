@@ -1,7 +1,7 @@
 // Client-side Trade UI for Port Trading System
 const Players = game.GetService("Players");
 const UserInputService = game.GetService("UserInputService");
-import Network from "shared/Network";
+import { ClientEvents } from "./ClientEvents";
 import ResourceTypes from "shared/ResourceTypes";
 import PortTypes, { DEFAULT_TRADE_RATIO } from "shared/PortTypes";
 import * as Logger from "shared/Logger";
@@ -140,7 +140,7 @@ const createTradeUI = () => {
 	tradeButton.Parent = tradeFrame;
 
 	tradeButton.MouseButton1Click.Connect(() => {
-		Network.FireServer("ExecuteTrade", currentGiveResource, currentReceiveResource, tradeAmount);
+		ClientEvents.ClientRequest.fire("ExecuteTrade", currentGiveResource, currentReceiveResource, tradeAmount);
 		Logger.Info("TradeUI", `Requesting trade: ${currentGiveResource} -> ${currentReceiveResource}`);
 	});
 
@@ -262,41 +262,24 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 	}
 });
 
-// Network events - delayed to allow server to create events first
-task.spawn(() => {
-	task.wait(2); // Wait for server to initialize events
-
-	const [success1] = pcall(() => {
-		Network.OnEvent("PortClaimed", (portType: unknown) => {
-			const portTypeName = portType as string;
-			if (!ownedPorts.includes(portTypeName)) {
-				ownedPorts.push(portTypeName);
-				Logger.Info("TradeUI", `Port claimed: ${portTypeName}`);
-			}
-		});
-	});
-	if (!success1) {
-		Logger.Debug("TradeUI", "PortClaimed event not available yet");
+// Network events
+ClientEvents.PortClaimed.connect((portType) => {
+	if (!ownedPorts.includes(portType)) {
+		ownedPorts.push(portType);
+		Logger.Info("TradeUI", `Port claimed: ${portType}`);
 	}
+});
 
-	const [success2] = pcall(() => {
-		Network.OnEvent("HarborMasterUpdate", (points: unknown) => {
-			harborMasterPoints = points as number;
-			Logger.Info("TradeUI", `Harbor Master points: ${harborMasterPoints}`);
-		});
-	});
-	if (!success2) {
-		Logger.Debug("TradeUI", "HarborMasterUpdate event not available yet");
-	}
+ClientEvents.HarborMasterUpdate.connect((points) => {
+	harborMasterPoints = points;
+	Logger.Info("TradeUI", `Harbor Master points: ${harborMasterPoints}`);
+});
 
-	const [success3] = pcall(() => {
-		Network.OnEvent("TradeCompleted", (giveResource: unknown, giveAmount: unknown, receiveResource: unknown, receiveAmount: unknown, ratio: unknown) => {
-			Logger.Info("TradeUI", `Trade completed: ${giveAmount} ${giveResource} -> ${receiveAmount} ${receiveResource} (${ratio}:1)`);
-		});
-	});
-	if (!success3) {
-		Logger.Debug("TradeUI", "TradeCompleted event not available yet");
-	}
+ClientEvents.TradeCompleted.connect((giveResource, giveAmount, receiveResource, receiveAmount, ratio) => {
+	Logger.Info(
+		"TradeUI",
+		`Trade completed: ${giveAmount} ${giveResource} -> ${receiveAmount} ${receiveResource} (${ratio}:1)`,
+	);
 });
 
 Logger.Info("TradeUI", "Trade UI initialized! Press T to open trade menu");

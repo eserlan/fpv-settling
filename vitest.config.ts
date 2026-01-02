@@ -1,6 +1,15 @@
+import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      shared: resolve(__dirname, './src/shared'),
+      client: resolve(__dirname, './src/client'),
+      server: resolve(__dirname, './src/server'),
+      "@flamework/networking": resolve(__dirname, './tests/mocks/networking.ts'),
+    },
+  },
   test: {
     coverage: {
       provider: 'v8',

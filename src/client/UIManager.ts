@@ -3,6 +3,7 @@ const ReplicatedStorage = game.GetService("ReplicatedStorage");
 const Players = game.GetService("Players");
 
 import * as Logger from "shared/Logger";
+import { ClientEvents } from "./ClientEvents";
 
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
@@ -74,8 +75,6 @@ helpText.Parent = helpFrame;
 
 // System message handler (for chat log)
 const StarterGui = game.GetService("StarterGui");
-const events = ReplicatedStorage.WaitForChild("Events");
-const SystemMessageEvent = events.WaitForChild("SystemMessageEvent") as RemoteEvent;
 
 // Wait for chat to be ready
 let chatReady = false;
@@ -116,7 +115,7 @@ const sendSystemMessage = (message: string) => {
 	return success;
 };
 
-SystemMessageEvent.OnClientEvent.Connect((message: string) => {
+ClientEvents.SystemMessageEvent.connect((message) => {
 	sendSystemMessage(message);
 });
 
