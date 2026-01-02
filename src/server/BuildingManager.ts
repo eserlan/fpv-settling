@@ -76,6 +76,12 @@ class BuildingManager {
 		if (buildingTypeData.IsSettlement) {
 			const [nearestVertex, dist] = MapGenerator.FindNearestVertex(position);
 			if (nearestVertex) {
+				// Rule: Must touch at least 2 tiles
+				const adjCount = (nearestVertex.GetAttribute("AdjacentTileCount") as number) ?? 0;
+				if (adjCount < 2) {
+					Logger.Warn("BuildingManager", `Vertex ${nearestVertex.Name} only touches ${adjCount} tiles. Need 2+`);
+					return $tuple(false, "Invalid settlement location (must touch 2+ tiles)");
+				}
 				finalPosition = nearestVertex.Position;
 				Logger.Debug("BuildingManager", `Snapped to vertex ${nearestVertex.Name} (dist: ${math.floor(dist)})`);
 			}
@@ -160,6 +166,19 @@ class BuildingManager {
 			Completed: false,
 			OwnerId: this.Player.UserId,
 		};
+
+		// Validation for settlements
+		if (foundation.IsSettlement) {
+			const [nearestVertex, dist] = MapGenerator.FindNearestVertex(position);
+			if (nearestVertex && dist < 15) {
+				const adjCount = (nearestVertex.GetAttribute("AdjacentTileCount") as number) ?? 0;
+				if (adjCount < 2) {
+					Logger.Warn("BuildingManager", `Invalid settlement placement: Vertex only touches ${adjCount} tiles`);
+					return $tuple(false, "Settlement must be placed where 2 or 3 tiles meet");
+				}
+				foundation.Position = nearestVertex.Position;
+			}
+		}
 
 		// Copy required resources from blueprint
 		for (const [resource, amount] of pairs(blueprint.Cost)) {

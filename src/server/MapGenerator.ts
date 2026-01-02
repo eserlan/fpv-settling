@@ -588,9 +588,25 @@ const MapGenerator = {
 			return;
 		}
 
+		const vertexFolder = game.Workspace.FindFirstChild("Vertices");
+		if (!vertexFolder) {
+			return;
+		}
+
 		const portFolder = (game.Workspace.FindFirstChild("Ports") as Folder) ?? new Instance("Folder", game.Workspace);
 		portFolder.Name = "Ports";
 		portFolder.ClearAllChildren();
+
+		// Pre-index vertices for faster lookup
+		const vertexMap = new Map<string, BasePart>();
+		for (const v of vertexFolder.GetChildren()) {
+			if (v.IsA("BasePart")) {
+				const key = v.GetAttribute("Key") as string;
+				if (key) {
+					vertexMap.set(key, v);
+				}
+			}
+		}
 
 		// Find coastal edges (edges with only 1 adjacent tile)
 		const coastalEdges: BasePart[] = [];
@@ -612,43 +628,48 @@ const MapGenerator = {
 		}
 
 		// Place ports from the standard configuration
-		const portCount = math.min(StandardPortConfiguration.size(), coastalEdges.size());
 		MapGenerator.PortLocations = [];
+		const forbiddenVertices = new Set<string>();
 
-		for (let i = 0; i < portCount; i += 1) {
-			const edge = coastalEdges[i];
-			const portType = StandardPortConfiguration[i];
+		for (const edge of coastalEdges) {
+			if (MapGenerator.PortLocations.size() >= StandardPortConfiguration.size()) {
+				break;
+			}
+
+			const v1Key = edge.GetAttribute("Vertex1") as string;
+			const v2Key = edge.GetAttribute("Vertex2") as string;
+
+			if (!v1Key || !v2Key) {
+				continue;
+			}
+
+			// Distance Rule: No vertex of this edge can be forbidden
+			// Forbidden means it's either a port vertex or adjacent to one
+			if (forbiddenVertices.has(v1Key) || forbiddenVertices.has(v2Key)) {
+				continue;
+			}
+
+			const v1Part = vertexMap.get(v1Key);
+			const v2Part = vertexMap.get(v2Key);
+
+			if (!v1Part || !v2Part) {
+				continue;
+			}
+
+			// Port rule: Settlement placement similar to elsewhere, must be placed where two (or three) meet.
+			// This means we should prioritize placing ports on edges where the vertices touch at least 2 tiles if possible,
+			// or at least realize that if a vertex only touches 1 tile, it won't be usable for a settlement.
+			// For ports to be useful, at least one of their vertices must be valid for a settlement.
+			const v1Adj = (v1Part.GetAttribute("AdjacentTileCount") as number) ?? 0;
+			const v2Adj = (v2Part.GetAttribute("AdjacentTileCount") as number) ?? 0;
+
+			if (v1Adj < 2 && v2Adj < 2) {
+				// Avoid placing ports where NO vertex can support a settlement
+				continue;
+			}
+
+			const portType = StandardPortConfiguration[MapGenerator.PortLocations.size()];
 			const portInfo = PortTypes[portType];
-
-			if (!portInfo) {
-				continue;
-			}
-
-			// Get the two vertices of this edge
-			const vertex1Key = edge.GetAttribute("Vertex1") as string;
-			const vertex2Key = edge.GetAttribute("Vertex2") as string;
-
-			const vertexFolder = game.Workspace.FindFirstChild("Vertices");
-			let v1Pos: Vector3 | undefined;
-			let v2Pos: Vector3 | undefined;
-
-			if (vertexFolder) {
-				for (const v of vertexFolder.GetChildren()) {
-					if (v.IsA("BasePart")) {
-						const key = v.GetAttribute("Key") as string;
-						if (key === vertex1Key) {
-							v1Pos = v.Position;
-						}
-						if (key === vertex2Key) {
-							v2Pos = v.Position;
-						}
-					}
-				}
-			}
-
-			if (!v1Pos || !v2Pos) {
-				continue;
-			}
 
 			// Create port marker at the edge center
 			const portMarker = new Instance("Part");
@@ -684,13 +705,32 @@ const MapGenerator = {
 			MapGenerator.PortLocations.push({
 				PortType: portType,
 				Position: edge.Position,
-				Vertices: [v1Pos, v2Pos] as [Vector3, Vector3],
+				Vertices: [v1Part.Position, v2Part.Position] as [Vector3, Vector3],
 			});
+
+			// Mark vertices and their neighbors as forbidden (ensures at least 2 lengths distance)
+			forbiddenVertices.add(v1Key);
+			forbiddenVertices.add(v2Key);
+
+			// Forbid neighbors of v1
+			for (let n = 1; n <= 3; n += 1) {
+				const neighbor = v1Part.GetAttribute(`Neighbor_${n}`) as string;
+				if (neighbor) {
+					forbiddenVertices.add(neighbor);
+				}
+			}
+			// Forbid neighbors of v2
+			for (let n = 1; n <= 3; n += 1) {
+				const neighbor = v2Part.GetAttribute(`Neighbor_${n}`) as string;
+				if (neighbor) {
+					forbiddenVertices.add(neighbor);
+				}
+			}
 
 			print(`[MapGenerator] Created port: ${portType} at ${edge.Position}`);
 		}
 
-		print(`[MapGenerator] Created ${portCount} ports`);
+		print(`[MapGenerator] Created ${MapGenerator.PortLocations.size()} ports`);
 	},
 
 	// Get port locations for PortManager
