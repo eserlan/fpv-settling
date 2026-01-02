@@ -17,6 +17,9 @@ import type { PlayerData } from "../PlayerData";
 import type { GameState } from "../GameState";
 import * as Logger from "shared/Logger";
 import { ServerEvents } from "../ServerEvents";
+import { AIPlayer } from "../AIPlayer";
+import type { GameEntity } from "shared/GameEntity";
+import { NetworkUtils } from "../NetworkUtils";
 
 @Service({})
 export class GameService implements OnStart, GameState {
@@ -24,6 +27,7 @@ export class GameService implements OnStart, GameState {
 	private isGameStarted = false;
 	private readyPlayers = new Set<number>();
 	private readonly MIN_PLAYERS_TO_START = 1;
+	private readonly AI_PLAYER_COUNT = 3; // Configurable AI count
 
 	constructor(
 		private mapGenerator: MapGenerator,
@@ -68,7 +72,7 @@ export class GameService implements OnStart, GameState {
 
 		const readyCount = this.readyPlayers.size();
 		const totalPlayers = Players.GetPlayers().size();
-		ServerEvents.LobbyUpdate.broadcast(readyCount, totalPlayers);
+		NetworkUtils.Broadcast(ServerEvents.LobbyUpdate, readyCount, totalPlayers);
 		Logger.Info("GameManager", `${player.Name} is ${this.readyPlayers.has(player.UserId) ? "Ready" : "Not Ready"}. (${readyCount}/${totalPlayers})`);
 
 		if (readyCount === totalPlayers && readyCount >= this.MIN_PLAYERS_TO_START) {
@@ -84,45 +88,59 @@ export class GameService implements OnStart, GameState {
 		// Generate the real map
 		this.mapGenerator.Generate();
 
-		// Teleport all players
-		for (const player of Players.GetPlayers()) {
-			const character = player.Character;
-			if (character) {
-				// Teleport to 0, 50, 0 for now - later could be specific spawns
-				character.PivotTo(new CFrame(0, 50, 0));
+		// Spawn AI Players
+		this.SpawnAIPlayers();
+
+		// Teleport all players (Real and AI)
+		for (const [userId, playerData] of pairs(this.PlayerData)) {
+			const entity = playerData.Player;
+
+			if ("IsAI" in entity && entity.IsAI) {
+				const ai = entity as AIPlayer;
+				// AI Spawn logic
+				ai.Spawn(new Vector3(math.random(-50, 50), 50, math.random(-50, 50)));
+			} else {
+				const player = entity as Player;
+				const character = player.Character;
+				if (character) {
+					character.PivotTo(new CFrame(0, 50, 0));
+				}
 			}
 
 			// Refresh port manager locations for everyone
-			const playerData = this.PlayerData[player.UserId];
-			if (playerData) {
-				playerData.PortManager.SetPortLocations(this.mapGenerator.GetPortLocations());
-			}
+			playerData.PortManager.SetPortLocations(this.mapGenerator.GetPortLocations());
 		}
 
-		ServerEvents.GameStart.broadcast();
+		NetworkUtils.Broadcast(ServerEvents.GameStart);
 		Logger.Info("GameManager", "Game Started!");
 	}
 
-	private handlePlayerAdded(player: Player) {
-		Logger.Info("GameManager", `Player joined: ${player.Name}`);
+	private SpawnAIPlayers() {
+		Logger.Info("GameManager", `Spawning ${this.AI_PLAYER_COUNT} AI players...`);
+		for (let i = 1; i <= this.AI_PLAYER_COUNT; i++) {
+			const aiId = -i; // Negative IDs for AI
+			const aiName = `AI_Bot_${i}`;
+			const aiPlayer = new AIPlayer(aiId, aiName);
+			this.initializePlayerData(aiPlayer);
+		}
+	}
 
-		this.collectionManager.InitPlayer(player);
+	private initializePlayerData(entity: GameEntity) {
+		const resourceManager = new ResourceManager(entity);
+		const buildingManager = new BuildingManager(entity, resourceManager, this.mapGenerator, this.tileOwnershipManager);
+		const npcManager = new NPCManager(entity, resourceManager);
+		const researchManager = new ResearchManager(entity, resourceManager);
+		const portManager = new PortManager(entity, resourceManager);
 
-		const resourceManager = new ResourceManager(player);
-		const buildingManager = new BuildingManager(player, resourceManager, this.mapGenerator, this.tileOwnershipManager);
-		const npcManager = new NPCManager(player, resourceManager);
-		const researchManager = new ResearchManager(player, resourceManager);
-		const portManager = new PortManager(player, resourceManager);
-
-		// If game already started, get ports immediately, otherwise wait for start
+		// If game already started, get ports immediately
 		if (this.isGameStarted) {
 			portManager.SetPortLocations(this.mapGenerator.GetPortLocations());
 		}
 
 		buildingManager.SetPortManager(portManager);
 
-		this.PlayerData[player.UserId] = {
-			Player: player,
+		this.PlayerData[entity.UserId] = {
+			Player: entity,
 			ResourceManager: resourceManager,
 			BuildingManager: buildingManager,
 			NPCManager: npcManager,
@@ -132,6 +150,13 @@ export class GameService implements OnStart, GameState {
 			Settlements: [],
 			NeedsFirstSettlement: true,
 		};
+	}
+
+	private handlePlayerAdded(player: Player) {
+		Logger.Info("GameManager", `Player joined: ${player.Name}`);
+
+		this.collectionManager.InitPlayer(player);
+		this.initializePlayerData(player);
 
 		player.CharacterAdded.Connect((character) => {
 			const humanoid = character.WaitForChild("Humanoid") as Humanoid;
@@ -153,9 +178,9 @@ export class GameService implements OnStart, GameState {
 
 		// Send initial lobby status to new player
 		if (!this.isGameStarted) {
-			ServerEvents.LobbyUpdate.fire(player, this.readyPlayers.size(), Players.GetPlayers().size());
+			NetworkUtils.FireClient(player, ServerEvents.LobbyUpdate, this.readyPlayers.size(), Players.GetPlayers().size());
 		} else {
-			ServerEvents.GameStart.fire(player);
+			NetworkUtils.FireClient(player, ServerEvents.GameStart);
 		}
 	}
 
@@ -169,7 +194,7 @@ export class GameService implements OnStart, GameState {
 			const readyCount = this.readyPlayers.size();
 			// Subtract 1 because Players.GetPlayers() still includes the leaving player
 			const totalPlayers = Players.GetPlayers().size() - 1;
-			ServerEvents.LobbyUpdate.broadcast(readyCount, totalPlayers);
+			NetworkUtils.Broadcast(ServerEvents.LobbyUpdate, readyCount, totalPlayers);
 
 			// Check if we should start (e.g. everyone else was ready)
 			if (readyCount > 0 && readyCount === totalPlayers && readyCount >= this.MIN_PLAYERS_TO_START) {
@@ -187,6 +212,12 @@ export class GameService implements OnStart, GameState {
 
 			if (playerData.GameTime % 60 < deltaTime) {
 				playerData.NPCManager.PayMaintenance(1);
+			}
+
+			// Update AI Logic
+			const entity = playerData.Player;
+			if ("IsAI" in entity && entity.IsAI) {
+				(entity as AIPlayer).Update(deltaTime, playerData, this.mapGenerator);
 			}
 		}
 	}

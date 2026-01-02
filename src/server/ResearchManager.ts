@@ -3,15 +3,17 @@ const ReplicatedStorage = game.GetService("ReplicatedStorage");
 import TechTree from "shared/TechTree";
 import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
+import type { GameEntity } from "shared/GameEntity";
+import { NetworkUtils } from "./NetworkUtils";
 
 class ResearchManager {
-	Player: Player;
+	Player: GameEntity;
 	ResourceManager: import("./ResourceManager");
 	ResearchedTechs: string[];
 	CurrentResearch?: string;
 	ResearchProgress: number;
 
-	constructor(player: Player, resourceManager: import("./ResourceManager")) {
+	constructor(player: GameEntity, resourceManager: import("./ResourceManager")) {
 		this.Player = player;
 		this.ResourceManager = resourceManager;
 		this.ResearchedTechs = [];
@@ -58,7 +60,7 @@ class ResearchManager {
 		this.CurrentResearch = techName;
 		this.ResearchProgress = 0;
 
-		ServerEvents.ResearchStarted.fire(this.Player, techName, tech.ResearchTime);
+		NetworkUtils.FireClient(this.Player, ServerEvents.ResearchStarted, techName, tech.ResearchTime);
 
 		return $tuple(true, techName);
 	}
@@ -90,7 +92,7 @@ class ResearchManager {
 		this.CurrentResearch = undefined;
 		this.ResearchProgress = 0;
 
-		ServerEvents.ResearchCompleted.fire(this.Player, techName);
+		NetworkUtils.FireClient(this.Player, ServerEvents.ResearchCompleted, techName);
 	}
 
 	// Apply technology effect

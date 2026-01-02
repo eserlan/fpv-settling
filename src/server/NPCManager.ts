@@ -3,6 +3,8 @@ const ReplicatedStorage = game.GetService("ReplicatedStorage");
 import NPCTypes from "shared/NPCTypes";
 import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
+import type { GameEntity } from "shared/GameEntity";
+import { NetworkUtils } from "./NetworkUtils";
 
 type NPCRecord = {
 	Id: number;
@@ -17,12 +19,12 @@ type NPCRecord = {
 };
 
 class NPCManager {
-	Player: Player;
+	Player: GameEntity;
 	ResourceManager: import("./ResourceManager");
 	NPCs: NPCRecord[];
 	NextNPCId: number;
 
-	constructor(player: Player, resourceManager: import("./ResourceManager")) {
+	constructor(player: GameEntity, resourceManager: import("./ResourceManager")) {
 		this.Player = player;
 		this.ResourceManager = resourceManager;
 		this.NPCs = [];
@@ -65,7 +67,7 @@ class NPCManager {
 		// Create physical NPC model
 		this.CreateNPCModel(npc);
 
-		ServerEvents.NPCHired.fire(this.Player, npc.Id, npcType, position ?? new Vector3(0, 5, 0));
+		NetworkUtils.FireClient(this.Player, ServerEvents.NPCHired, npc.Id, npcType, position ?? new Vector3(0, 5, 0));
 
 		return $tuple(true, npc.Id);
 	}

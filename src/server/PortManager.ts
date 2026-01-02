@@ -6,17 +6,19 @@ import ResourceTypes from "shared/ResourceTypes";
 import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
 import ResourceManager = require("./ResourceManager");
+import type { GameEntity } from "shared/GameEntity";
+import { NetworkUtils } from "./NetworkUtils";
 
 // Events handled by Flamework automatically
 
 
 class PortManager {
-	Player: Player;
+	Player: GameEntity;
 	ResourceManager: ResourceManager;
 	PortLocations: PortLocation[];
 	OwnedPorts: string[]; // List of port types owned by this player
 
-	constructor(player: Player, resourceManager: ResourceManager) {
+	constructor(player: GameEntity, resourceManager: ResourceManager) {
 		this.Player = player;
 		this.ResourceManager = resourceManager;
 		this.PortLocations = [];
@@ -93,11 +95,8 @@ class PortManager {
 		);
 
 		// Notify client of successful trade
-		ServerEvents.TradeCompleted.fire(this.Player, giveResourceType, totalCost, receiveResourceType, amount, tradeRatio);
-		ServerEvents.SystemMessageEvent.fire(
-			this.Player,
-			`📦 Trade Success: ${totalCost} ${giveResourceType} -> ${amount} ${receiveResourceType}`,
-		);
+		NetworkUtils.FireClient(this.Player, ServerEvents.TradeCompleted, giveResourceType, totalCost, receiveResourceType, amount, tradeRatio);
+		NetworkUtils.FireClient(this.Player, ServerEvents.SystemMessageEvent, `📦 Trade Success: ${totalCost} ${giveResourceType} -> ${amount} ${receiveResourceType}`);
 
 		return $tuple(true, "Trade successful");
 	}
@@ -121,7 +120,7 @@ class PortManager {
 						);
 
 						// Notify client about port ownership
-						ServerEvents.PortClaimed.fire(this.Player, portLocation.PortType);
+						NetworkUtils.FireClient(this.Player, ServerEvents.PortClaimed, portLocation.PortType);
 
 						// Check for Harbor Master bonus
 						this.CheckHarborMaster();
@@ -142,7 +141,7 @@ class PortManager {
 		const points = this.GetHarborMasterPoints();
 		if (points >= 3) {
 			Logger.Info("PortManager", `${this.Player.Name} has ${points} ports - Harbor Master candidate!`);
-			ServerEvents.HarborMasterUpdate.fire(this.Player, points);
+			NetworkUtils.FireClient(this.Player, ServerEvents.HarborMasterUpdate, points);
 		}
 	}
 
