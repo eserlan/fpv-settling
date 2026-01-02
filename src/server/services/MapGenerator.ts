@@ -650,4 +650,32 @@ export class MapGenerator implements OnStart {
 
 		return [closestVertex, closestDist];
 	}
+
+	public GetRandomVertex(): BasePart | undefined {
+		const vertexFolder = game.Workspace.FindFirstChild("Vertices");
+		if (!vertexFolder) return undefined;
+
+		const children = vertexFolder.GetChildren();
+		if (children.size() === 0) return undefined;
+
+		const randomIdx = math.random(1, children.size()) - 1;
+		return children[randomIdx] as BasePart;
+	}
+
+	public GetRandomEdge(): BasePart | undefined {
+		const edgeFolder = game.Workspace.FindFirstChild("Edges");
+		if (!edgeFolder) return undefined;
+
+		const children = edgeFolder.GetChildren();
+		if (children.size() === 0) return undefined;
+
+		const randomIdx = math.random(1, children.size()) - 1;
+		return children[randomIdx] as BasePart;
+	}
+
+	public FindVertexById(id: string): BasePart | undefined {
+		const vertexFolder = game.Workspace.FindFirstChild("Vertices");
+		if (!vertexFolder) return undefined;
+		return vertexFolder.FindFirstChild(id) as BasePart;
+	}
 }

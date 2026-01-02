@@ -7,6 +7,7 @@ import * as Logger from "shared/Logger";
 import * as TileKey from "shared/TileKey";
 import { TileOwnershipManager } from "./TileOwnershipManager";
 import type { GameState } from "../GameState";
+import { NetworkUtils } from "../NetworkUtils";
 
 type RobberState = {
 	currentQ: number;
@@ -137,7 +138,7 @@ export class RobberManager implements OnStart {
 	public ResetToDesert() {
 		Logger.Info("RobberManager", "Robber returning to desert (Reset)");
 		this.MoveRobber(this.DesertLocation.Q, this.DesertLocation.R);
-		ServerEvents.SystemMessageEvent.broadcast("🕊️ The Robber has returned to the Desert.");
+		NetworkUtils.Broadcast(ServerEvents.SystemMessageEvent, "🕊️ The Robber has returned to the Desert.");
 	}
 
 	public SetDesertLocation(q: number, r: number, position: Vector3) {
@@ -157,7 +158,7 @@ export class RobberManager implements OnStart {
 			if (total > 7) {
 				const toRemove = math.floor(total / 2);
 				playerData.ResourceManager.RemoveRandomResources(toRemove);
-				ServerEvents.SystemMessageEvent.fire(playerData.Player, `🏴‍☠️ Robber Penalty! You lost ${toRemove} resources.`);
+				NetworkUtils.FireClient(playerData.Player, ServerEvents.SystemMessageEvent, `🏴‍☠️ Robber Penalty! You lost ${toRemove} resources.`);
 			}
 		}
 
@@ -207,7 +208,7 @@ export class RobberManager implements OnStart {
 
 		if (bestTile) {
 			this.MoveRobber(bestTile.q, bestTile.r);
-			ServerEvents.SystemMessageEvent.broadcast(`🏴‍☠️ The Robber blocked ${leader.Player.Name}'s tile!`);
+			NetworkUtils.Broadcast(ServerEvents.SystemMessageEvent, `🏴‍☠️ The Robber blocked ${leader.Player.Name}'s tile!`);
 			leader.ResourceManager.RemoveRandomResources(1);
 		}
 	}

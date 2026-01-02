@@ -6,6 +6,8 @@ import BuildingTypes from "shared/BuildingTypes";
 import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
 import Blueprints from "shared/Blueprints";
+import type { GameEntity } from "shared/GameEntity";
+import { NetworkUtils } from "./NetworkUtils";
 
 type BuildingRecord = {
 	Id: number;
@@ -27,7 +29,7 @@ type BuildingRecord = {
 };
 
 class BuildingManager {
-	Player: Player;
+	Player: GameEntity;
 	ResourceManager: import("./ResourceManager");
 	PortManager?: import("./PortManager");
 	Buildings: BuildingRecord[];
@@ -37,7 +39,7 @@ class BuildingManager {
 	FoundationsById?: Record<number, BuildingRecord>;
 
 	constructor(
-		player: Player,
+		player: GameEntity,
 		resourceManager: import("./ResourceManager"),
 		private mapGenerator: MapGenerator,
 		private tileOwnershipManager: TileOwnershipManager,
@@ -92,7 +94,7 @@ class BuildingManager {
 			this.OnBuildingComplete(building);
 		} else {
 			this.BuildingInProgress.push(building);
-			ServerEvents.ConstructionStarted.fire(this.Player, buildingId, buildingType, finalPosition);
+			NetworkUtils.FireClient(this.Player, ServerEvents.ConstructionStarted, buildingId, buildingType, finalPosition);
 		}
 
 		if (buildingTypeData.IsSettlement && !this.HasPlacedFirstSettlement) this.HasPlacedFirstSettlement = true;
@@ -139,7 +141,7 @@ class BuildingManager {
 		this.FoundationsById[foundationId] = foundation;
 
 		if (blueprintName === "Settlement" && !this.HasPlacedFirstSettlement) this.HasPlacedFirstSettlement = true;
-		ServerEvents.FoundationPlaced.fire(this.Player, foundationId, blueprintName, position, foundation.RequiredResources ?? {});
+		NetworkUtils.FireClient(this.Player, ServerEvents.FoundationPlaced, foundationId, blueprintName, position, foundation.RequiredResources ?? {});
 		return $tuple(true, foundationId);
 	}
 
@@ -168,7 +170,7 @@ class BuildingManager {
 			this.OnBuildingComplete(foundation);
 		}
 
-		ServerEvents.ResourceDeposited.fire(this.Player, foundationId, resourceType, foundation.Progress);
+		NetworkUtils.FireClient(this.Player, ServerEvents.ResourceDeposited, foundationId, resourceType, foundation.Progress);
 		return $tuple(true, "");
 	}
 
@@ -317,7 +319,7 @@ class BuildingManager {
 			this.Settlements.push(building);
 			if (this.PortManager) this.PortManager.ClaimPort(building.Position, settlementId);
 		}
-		ServerEvents.ConstructionCompleted.fire(this.Player, building.Id, building.Type);
+		NetworkUtils.FireClient(this.Player, ServerEvents.ConstructionCompleted, building.Id, building.Type);
 	}
 
 	CreateBuildingModel(building: BuildingRecord) {

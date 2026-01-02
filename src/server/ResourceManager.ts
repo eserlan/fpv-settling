@@ -3,12 +3,14 @@ const ReplicatedStorage = game.GetService("ReplicatedStorage");
 import ResourceTypes from "shared/ResourceTypes";
 import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
+import type { GameEntity } from "shared/GameEntity";
+import { NetworkUtils } from "./NetworkUtils";
 
 class ResourceManager {
-	Player: Player;
+	Player: GameEntity;
 	Resources: Record<string, number>;
 
-	constructor(player: Player) {
+	constructor(player: GameEntity) {
 		this.Player = player;
 		this.Resources = {};
 
@@ -47,7 +49,7 @@ class ResourceManager {
 		}
 
 		this.Resources[resourceType] = currentAmount + amount;
-		ServerEvents.ResourceUpdate.fire(this.Player, this.Resources);
+		NetworkUtils.FireClient(this.Player, ServerEvents.ResourceUpdate, this.Resources);
 		return amount;
 	}
 
@@ -61,7 +63,7 @@ class ResourceManager {
 
 		if ((this.Resources[resourceType] ?? 0) >= amount) {
 			this.Resources[resourceType] = (this.Resources[resourceType] ?? 0) - amount;
-			ServerEvents.ResourceUpdate.fire(this.Player, this.Resources);
+			NetworkUtils.FireClient(this.Player, ServerEvents.ResourceUpdate, this.Resources);
 			return true;
 		}
 
@@ -128,7 +130,7 @@ class ResourceManager {
 		}
 
 		if (removedCount > 0) {
-			ServerEvents.ResourceUpdate.fire(this.Player, this.Resources);
+			NetworkUtils.FireClient(this.Player, ServerEvents.ResourceUpdate, this.Resources);
 		}
 
 		return resourcesToRemove;

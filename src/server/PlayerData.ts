@@ -1,5 +1,7 @@
+import type { GameEntity } from "shared/GameEntity";
+
 export interface PlayerData {
-	Player: Player;
+	Player: GameEntity;
 	ResourceManager: import("./ResourceManager");
 	BuildingManager: import("./BuildingManager");
 	NPCManager: import("./NPCManager");

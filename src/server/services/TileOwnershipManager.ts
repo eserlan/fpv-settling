@@ -1,6 +1,7 @@
 import { Service, OnStart } from "@flamework/core";
 import * as Logger from "shared/Logger";
 import * as TileKey from "shared/TileKey";
+import type { GameEntity } from "shared/GameEntity";
 
 type TileOwnershipRecord = {
 	playerUserId: number;
@@ -17,13 +18,13 @@ export class TileOwnershipManager implements OnStart {
 		Logger.Info("TileOwnershipManager", "Initialized");
 	}
 
-	public PlayerOwnsTile(player: Player, tileQ: number, tileR: number) {
+	public PlayerOwnsTile(player: GameEntity, tileQ: number, tileR: number) {
 		const key = TileKey.makeTileKey(tileQ, tileR);
 		const ownership = this.tileOwnership[key];
 		return ownership ? ownership.playerUserId === player.UserId : false;
 	}
 
-	public ClaimTile(player: Player, tileQ: number, tileR: number, settlementId: string) {
+	public ClaimTile(player: GameEntity, tileQ: number, tileR: number, settlementId: string) {
 		const key = TileKey.makeTileKey(tileQ, tileR);
 		if (this.tileOwnership[key] && this.tileOwnership[key]!.playerUserId !== player.UserId) {
 			Logger.Warn("TileOwnership", `Tile ${key} already owned by another player`);
@@ -46,7 +47,7 @@ export class TileOwnershipManager implements OnStart {
 		Logger.Info("TileOwnership", `Tile ${key} released`);
 	}
 
-	public GetPlayerTiles(player: Player) {
+	public GetPlayerTiles(player: GameEntity) {
 		const tiles = new Array<string>();
 		for (const [key, ownership] of pairs(this.tileOwnership)) {
 			if (ownership && ownership.playerUserId === player.UserId) tiles.push(key);
@@ -54,7 +55,7 @@ export class TileOwnershipManager implements OnStart {
 		return tiles;
 	}
 
-	public ClaimTilesNearSettlement(player: Player, settlementPosition: Vector3, settlementId: string) {
+	public ClaimTilesNearSettlement(player: GameEntity, settlementPosition: Vector3, settlementId: string) {
 		const claimedTiles = new Array<{ Q: number; R: number }>();
 		const vertexFolder = game.Workspace.FindFirstChild("Vertices");
 		if (!vertexFolder) return claimedTiles;
