@@ -8,6 +8,7 @@ import TileTypes from "shared/TileTypes";
 import ResourceTypes from "shared/ResourceTypes";
 import * as Logger from "shared/Logger";
 import RobberManager = require("./RobberManager");
+import type { GameState } from "./GameState";
 
 // Configuration
 const PULSE_INTERVAL = 60; // Seconds between pulses
@@ -23,7 +24,7 @@ let isRolling = false;
 let waitTimer = 0;
 const tileNumbers: Record<string, number> = {}; // Maps tile coordinates to numbers
 let gameStarted = false; // Pulse doesn't start until all players place settlements
-let GameManagerRef: { PlayerData: Record<number, { BuildingManager: { HasPlacedFirstSettlement: boolean } }> } | undefined;
+let GameManagerRef: GameState | undefined;
 let pulsesSinceLastSeven = 0;
 
 // Events
@@ -291,8 +292,8 @@ const PulseManager = {
 		}
 	},
 
-	// Set reference to GameManager (called from GameManager)
-	SetGameManager(gm: { PlayerData: Record<number, { BuildingManager: { HasPlacedFirstSettlement: boolean } }> }) {
+	// Set reference to GameService (called from GameService)
+	SetGameManager(gm: GameState) {
 		GameManagerRef = gm;
 	},
 

@@ -6,10 +6,10 @@ import Network from "shared/Network";
 import * as Logger from "shared/Logger";
 import CollectionManager = require("./CollectionManager");
 
-type PlayerData = import("./PlayerData").PlayerData;
+import type { GameState } from "./GameState";
 
 const NetworkHandler = {
-	Init(gameManager: { PlayerData: Record<number, PlayerData> }) {
+	Init(gameManager: GameState) {
 		Network.OnEvent("ClientRequest", (player, actionType, ...args) => {
 			const playerData = gameManager.PlayerData[(player as Player).UserId];
 			if (!playerData) {
