@@ -21,6 +21,7 @@ let buildingPreview: Part | undefined;
 let currentVertex: BasePart | undefined;
 let isValidPlacement = false;
 let lastValidPlacement: boolean | undefined; // Track to log only on change
+let lastLoggedKey: string | undefined; // Track location to log change
 let lastBlueprintSelectionTime = 0;
 
 // Wait for BlueprintBookUI to be available
@@ -220,17 +221,13 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 	if (blueprint.PlacementType === "3-way") {
 		const myKey = marker.GetAttribute("Key") as string | undefined;
 
-		// DISTANCE RULE: Is there a building here or at ANY neighbor?
 		if (isVertexOccupied(myKey)) {
-			Logger.Info("Placement", `REJECTED: Vertex ${myKey} is already occupied.`);
 			return false;
 		}
 
-		// Check all neighbors for settlements
 		for (let i = 1; i <= 6; i += 1) {
 			const neighborKey = marker.GetAttribute(`Neighbor_${i}`) as string | undefined;
 			if (neighborKey && isVertexOccupied(neighborKey)) {
-				Logger.Info("Placement", `REJECTED: Neighbor vertex ${neighborKey} is occupied (Distance Rule).`);
 				return false;
 			}
 		}
@@ -255,7 +252,6 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 		const hasAnyBuildings = checkOwnedBuildings("Settlements") || checkOwnedBuildings("Buildings");
 
 		if (!hasAnyBuildings) {
-			Logger.Debug("Placement", `VALID: First settlement placement (free) at ${myKey}`);
 			return true;
 		}
 
@@ -280,11 +276,9 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 		}
 
 		if (ownedRoadFound) {
-			Logger.Info("Placement", `VALID: Settlement connected to owned road at ${myKey}`);
 			return true;
 		}
 
-		Logger.Info("Placement", `REJECTED: Settlement at ${myKey} is NOT connected to your road network.`);
 		return false;
 	} else if (blueprint.PlacementType === "edge") {
 		// Roads MUST connect to a settlement or road you own
@@ -400,15 +394,17 @@ const updatePlacementPreview = () => {
 
 	const blueprint = Blueprints.Buildings[selectedBlueprint];
 	const newValidState = isSnapPointValidForBlueprint(snapPoint, selectedBlueprint);
+	const currentKey = snapPoint.GetAttribute("Key") as string | undefined;
 
-	// Only log when validity state changes
-	if (newValidState !== lastValidPlacement) {
+	// Only log when validity state changes OR we moved to a new key
+	if (newValidState !== lastValidPlacement || currentKey !== lastLoggedKey) {
 		if (newValidState) {
-			Logger.Debug("Placement", `Valid placement location found`);
-		} else if (blueprint.PlacementType === "edge") {
-			Logger.Info("Placement", "REJECTED: Road must connect to your existing settlement or road.");
+			Logger.Debug("Placement", `VALID placement at ${currentKey ?? "unknown"}`);
+		} else {
+			Logger.Info("Placement", `REJECTED placement at ${currentKey ?? "unknown"}`);
 		}
 		lastValidPlacement = newValidState;
+		lastLoggedKey = currentKey;
 	}
 	isValidPlacement = newValidState;
 
@@ -446,7 +442,8 @@ const updatePlacementPreview = () => {
 const exitPlacementMode = () => {
 	placementMode = false;
 	selectedBlueprint = undefined;
-	lastValidPlacement = undefined; // Reset for next placement session
+	lastValidPlacement = undefined;
+	lastLoggedKey = undefined;
 	if (buildingPreview) {
 		buildingPreview.Destroy();
 		buildingPreview = undefined;

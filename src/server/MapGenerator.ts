@@ -742,11 +742,7 @@ const MapGenerator = {
 			label.Font = Enum.Font.GothamBold;
 			label.Text = `${portInfo.Icon}\n${portInfo.TradeRatio}:1`;
 			label.Parent = billboard;
-
-			print(`[MapGenerator] Created port: ${portType} at ${edge.Position}`);
 		}
-
-		print(`[MapGenerator] Created ${MapGenerator.PortLocations.size()} ports total`);
 	},
 
 	// Get port locations for PortManager
