@@ -98,20 +98,16 @@ export class LLMService {
 			if (response.Success) {
 				const data = HttpService.JSONDecode(response.Body) as GeminiResponse;
 				if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
-					let text: string = data.candidates[0].content.parts[0].text;
+					const rawText: string = data.candidates[0].content.parts[0].text;
 
-					// Clean up markdown code blocks if present
-					const [cleanedJson] = text.gsub("```json", "");
-					text = cleanedJson;
-					const [cleanedBackticks] = text.gsub("```", "");
-					text = cleanedBackticks;
-					const [trimmedLeft] = text.gsub("^%s+", "");
-					text = trimmedLeft;
-					const [trimmedRight] = text.gsub("%s+$", "");
-					text = trimmedRight;
+					// Clean up markdown code blocks and whitespace
+					const [cleanedJson] = rawText.gsub("```json", "");
+					const [cleanedBackticks] = cleanedJson.gsub("```", "");
+					const [trimmedLeft] = cleanedBackticks.gsub("^%s+", "");
+					const [cleanedText] = trimmedLeft.gsub("%s+$", "");
 
 					// Parse the JSON response
-					return HttpService.JSONDecode(text) as AIAction;
+					return HttpService.JSONDecode(cleanedText) as AIAction;
 				}
 			} else {
 				Logger.Warn("LLMService", `API Error: ${response.StatusCode} - ${response.StatusMessage}`);
