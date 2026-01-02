@@ -23,6 +23,7 @@ import HexMath, {
     HEX_SIZE,
     SQRT_3,
     HEX_DIRECTIONS,
+    HEX_STRETCH,
 } from "../../src/shared/HexMath";
 
 describe("HexMath", () => {
@@ -237,7 +238,7 @@ describe("HexMath", () => {
             it("should have vertices equidistant from center", () => {
                 const vertices = getHexVertices(0, 0);
                 const distances = vertices.map(v => Math.sqrt(v.x ** 2 + v.z ** 2));
-                const expectedRadius = HEX_SIZE * 1.15;
+                const expectedRadius = HEX_SIZE * HEX_STRETCH;
 
                 for (const dist of distances) {
                     expect(dist).toBeCloseTo(expectedRadius, 5);
