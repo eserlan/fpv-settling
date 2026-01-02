@@ -20,6 +20,7 @@ import { ServerEvents } from "../ServerEvents";
 import { AIPlayer } from "../AIPlayer";
 import type { GameEntity } from "shared/GameEntity";
 import { NetworkUtils } from "../NetworkUtils";
+import { SkillLevel } from "../AIPrompts";
 
 @Service({})
 export class GameService implements OnStart, GameState {
@@ -119,11 +120,17 @@ export class GameService implements OnStart, GameState {
 
 	private SpawnAIPlayers(count: number) {
 		Logger.Info("GameManager", `Spawning ${count} AI players...`);
+		const skills: SkillLevel[] = ["Beginner", "Intermediate", "Expert"];
+
 		for (let i = 1; i <= count; i++) {
 			const aiId = -i; // Negative IDs for AI
-			const aiName = `AI_Bot_${i}`;
-			const aiPlayer = new AIPlayer(aiId, aiName);
+			const skill = skills[math.random(0, skills.size() - 1)]; // Random skill
+			const aiName = `AI_${skill}_${i}`;
+
+			const aiPlayer = new AIPlayer(aiId, aiName, skill);
 			this.initializePlayerData(aiPlayer);
+
+			Logger.Info("GameManager", `Spawned AI: ${aiName} (${skill})`);
 		}
 	}
 

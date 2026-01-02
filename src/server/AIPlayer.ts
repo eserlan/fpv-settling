@@ -1,7 +1,7 @@
 import type { AIPlayerInterface } from "shared/GameEntity";
 import type { PlayerData } from "./PlayerData";
 import { LLMService, AIAction } from "./services/LLMService";
-import { SYSTEM_PROMPT } from "./AIPrompts";
+import { PROMPTS, SkillLevel } from "./AIPrompts";
 import * as Logger from "shared/Logger";
 import type { MapGenerator } from "./services/MapGenerator";
 
@@ -10,6 +10,7 @@ export class AIPlayer implements AIPlayerInterface {
 	public Name: string;
 	public Character?: Model;
 	public IsAI = true;
+	public Skill: SkillLevel;
 
 	// AI Logic State
 	public NextActionTime: number = 0;
@@ -17,9 +18,10 @@ export class AIPlayer implements AIPlayerInterface {
 
 	private llmService: LLMService;
 
-	constructor(id: number, name: string) {
+	constructor(id: number, name: string, skill: SkillLevel = "Intermediate") {
 		this.UserId = id;
 		this.Name = name;
+		this.Skill = skill;
 		this.llmService = new LLMService();
 	}
 
@@ -40,7 +42,16 @@ export class AIPlayer implements AIPlayerInterface {
 		const torso = new Instance("Part");
 		torso.Name = "Torso";
 		torso.Size = new Vector3(2, 2, 1);
-		torso.Color = Color3.fromRGB(100, 100, 255); // Blue-ish for AI
+
+		// Color based on skill level
+		if (this.Skill === "Beginner") {
+			torso.Color = Color3.fromRGB(100, 255, 100); // Green
+		} else if (this.Skill === "Intermediate") {
+			torso.Color = Color3.fromRGB(100, 100, 255); // Blue
+		} else {
+			torso.Color = Color3.fromRGB(255, 100, 100); // Red (Expert)
+		}
+
 		torso.Anchored = false;
 		torso.Position = position;
 		torso.Parent = model;
@@ -59,7 +70,7 @@ export class AIPlayer implements AIPlayerInterface {
 		weld.Parent = torso;
 
 		const humanoid = new Instance("Humanoid");
-		humanoid.DisplayName = `[AI] ${this.Name}`;
+		humanoid.DisplayName = `[${this.Skill}] ${this.Name}`;
 		humanoid.Parent = model;
 
 		model.PrimaryPart = torso;
@@ -71,13 +82,17 @@ export class AIPlayer implements AIPlayerInterface {
 		// Only run logic periodically to avoid spamming API
 		if (playerData.GameTime < this.NextActionTime) return;
 
-		// Set next check time (e.g. 5 seconds)
-		// If we are thinking, we check more often to see if result is ready
+		// Set next check time
+		// Beginners think slower, Experts think faster (simulated)
+		let thinkDelay = 5;
+		if (this.Skill === "Beginner") thinkDelay = 8;
+		else if (this.Skill === "Expert") thinkDelay = 3;
+
 		if (this.State === "Thinking") {
 			this.NextActionTime = playerData.GameTime + 0.5;
 			return;
 		} else {
-			this.NextActionTime = playerData.GameTime + 5;
+			this.NextActionTime = playerData.GameTime + thinkDelay;
 		}
 
 		if (this.State === "Idle") {
@@ -88,10 +103,11 @@ export class AIPlayer implements AIPlayerInterface {
 
 	private async Think(playerData: PlayerData, mapGenerator: MapGenerator) {
 		const context = this.GatherContext(playerData, mapGenerator);
+		const prompt = PROMPTS[this.Skill];
 
 		// Call LLM
 		try {
-			const decision = await this.llmService.GetDecision(SYSTEM_PROMPT, context);
+			const decision = await this.llmService.GetDecision(prompt, context);
 			if (decision) {
 				this.ExecuteAction(decision, playerData, mapGenerator);
 			}
@@ -107,6 +123,7 @@ export class AIPlayer implements AIPlayerInterface {
 		const settlements = playerData.BuildingManager.Settlements.size();
 
 		let context = `My Name: ${this.Name}\n`;
+		context += `Skill Level: ${this.Skill}\n`;
 		context += `Resources: Wood=${resources.Wood}, Brick=${resources.Brick}, Wheat=${resources.Wheat}, Wool=${resources.Wool}, Ore=${resources.Ore}\n`;
 		context += `Victory Points (Estimated): ${settlements}\n`;
 
@@ -136,7 +153,7 @@ export class AIPlayer implements AIPlayerInterface {
 	}
 
 	private ExecuteAction(decision: AIAction, playerData: PlayerData, mapGenerator: MapGenerator) {
-		Logger.Info("AIPlayer", `${this.Name} Decided: ${decision.action} because "${decision.reason}"`);
+		Logger.Info("AIPlayer", `${this.Name} (${this.Skill}) Decided: ${decision.action} because "${decision.reason}"`);
 
 		switch (decision.action) {
 			case "BUILD_SETTLEMENT": {
