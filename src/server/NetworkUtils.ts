@@ -2,8 +2,8 @@ import type { GameEntity } from "shared/GameEntity";
 
 export namespace NetworkUtils {
 	export function FireClient(entity: GameEntity, event: { fire: (player: Player, ...args: any[]) => void }, ...args: any[]) {
-		if ("IsAI" in entity && entity.IsAI) {
-			// Don't fire network events to AI
+		if (!typeIs(entity, "Instance")) {
+			// Don't fire network events to AI (which are simple objects, not Instances)
 			return;
 		}
 		// It's a real player

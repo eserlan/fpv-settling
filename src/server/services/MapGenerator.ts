@@ -672,4 +672,10 @@ export class MapGenerator implements OnStart {
 		const randomIdx = math.random(1, children.size()) - 1;
 		return children[randomIdx] as BasePart;
 	}
+
+	public FindVertexById(id: string): BasePart | undefined {
+		const vertexFolder = game.Workspace.FindFirstChild("Vertices");
+		if (!vertexFolder) return undefined;
+		return vertexFolder.FindFirstChild(id) as BasePart;
+	}
 }

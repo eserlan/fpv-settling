@@ -27,7 +27,7 @@ export class GameService implements OnStart, GameState {
 	private isGameStarted = false;
 	private readyPlayers = new Set<number>();
 	private readonly MIN_PLAYERS_TO_START = 1;
-	private readonly AI_PLAYER_COUNT = 3; // Configurable AI count
+	private readonly TARGET_PLAYER_COUNT = 4; // Fill up to 4 players
 
 	constructor(
 		private mapGenerator: MapGenerator,
@@ -88,14 +88,16 @@ export class GameService implements OnStart, GameState {
 		// Generate the real map
 		this.mapGenerator.Generate();
 
-		// Spawn AI Players
-		this.SpawnAIPlayers();
+		// Spawn AI Players to fill lobby
+		const humanCount = Players.GetPlayers().size();
+		const aiNeeded = math.max(0, this.TARGET_PLAYER_COUNT - humanCount);
+		this.SpawnAIPlayers(aiNeeded);
 
 		// Teleport all players (Real and AI)
 		for (const [userId, playerData] of pairs(this.PlayerData)) {
 			const entity = playerData.Player;
 
-			if ("IsAI" in entity && entity.IsAI) {
+			if (!typeIs(entity, "Instance")) { // Is AI
 				const ai = entity as AIPlayer;
 				// AI Spawn logic
 				ai.Spawn(new Vector3(math.random(-50, 50), 50, math.random(-50, 50)));
@@ -115,9 +117,9 @@ export class GameService implements OnStart, GameState {
 		Logger.Info("GameManager", "Game Started!");
 	}
 
-	private SpawnAIPlayers() {
-		Logger.Info("GameManager", `Spawning ${this.AI_PLAYER_COUNT} AI players...`);
-		for (let i = 1; i <= this.AI_PLAYER_COUNT; i++) {
+	private SpawnAIPlayers(count: number) {
+		Logger.Info("GameManager", `Spawning ${count} AI players...`);
+		for (let i = 1; i <= count; i++) {
 			const aiId = -i; // Negative IDs for AI
 			const aiName = `AI_Bot_${i}`;
 			const aiPlayer = new AIPlayer(aiId, aiName);
@@ -216,7 +218,7 @@ export class GameService implements OnStart, GameState {
 
 			// Update AI Logic
 			const entity = playerData.Player;
-			if ("IsAI" in entity && entity.IsAI) {
+			if (!typeIs(entity, "Instance")) { // Is AI
 				(entity as AIPlayer).Update(deltaTime, playerData, this.mapGenerator);
 			}
 		}

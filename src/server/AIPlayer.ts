@@ -1,5 +1,9 @@
 import type { AIPlayerInterface } from "shared/GameEntity";
 import type { PlayerData } from "./PlayerData";
+import { LLMService, AIAction } from "./services/LLMService";
+import { SYSTEM_PROMPT } from "./AIPrompts";
+import * as Logger from "shared/Logger";
+import type { MapGenerator } from "./services/MapGenerator";
 
 export class AIPlayer implements AIPlayerInterface {
 	public UserId: number;
@@ -9,11 +13,14 @@ export class AIPlayer implements AIPlayerInterface {
 
 	// AI Logic State
 	public NextActionTime: number = 0;
-	public State: "Idle" | "Thinking" | "Acting" = "Idle";
+	public State: "Idle" | "Thinking" | "Executing" = "Idle";
+
+	private llmService: LLMService;
 
 	constructor(id: number, name: string) {
 		this.UserId = id;
 		this.Name = name;
+		this.llmService = new LLMService();
 	}
 
 	public Kick(message?: string) {
@@ -60,41 +67,129 @@ export class AIPlayer implements AIPlayerInterface {
 		this.Character = model;
 	}
 
-	public Update(deltaTime: number, playerData: PlayerData, mapGenerator: any) {
+	public Update(deltaTime: number, playerData: PlayerData, mapGenerator: MapGenerator) {
+		// Only run logic periodically to avoid spamming API
 		if (playerData.GameTime < this.NextActionTime) return;
 
-		// Set next think time (random 2-5 seconds)
-		this.NextActionTime = playerData.GameTime + math.random(2, 5);
+		// Set next check time (e.g. 5 seconds)
+		// If we are thinking, we check more often to see if result is ready
+		if (this.State === "Thinking") {
+			this.NextActionTime = playerData.GameTime + 0.5;
+			return;
+		} else {
+			this.NextActionTime = playerData.GameTime + 5;
+		}
 
-		// Simple behavior: If has resources for settlement, try to build one
-		const buildingManager = playerData.BuildingManager;
-		const resourceManager = playerData.ResourceManager;
+		if (this.State === "Idle") {
+			this.State = "Thinking";
+			this.Think(playerData, mapGenerator);
+		}
+	}
+
+	private async Think(playerData: PlayerData, mapGenerator: MapGenerator) {
+		const context = this.GatherContext(playerData, mapGenerator);
+
+		// Call LLM
+		try {
+			const decision = await this.llmService.GetDecision(SYSTEM_PROMPT, context);
+			if (decision) {
+				this.ExecuteAction(decision, playerData, mapGenerator);
+			}
+		} catch (e) {
+			Logger.Warn("AIPlayer", `Thinking failed: ${e}`);
+		} finally {
+			this.State = "Idle";
+		}
+	}
+
+	private GatherContext(playerData: PlayerData, mapGenerator: MapGenerator): string {
+		const resources = playerData.ResourceManager.Resources;
+		const settlements = playerData.BuildingManager.Settlements.size();
+
+		let context = `My Name: ${this.Name}\n`;
+		context += `Resources: Wood=${resources.Wood}, Brick=${resources.Brick}, Wheat=${resources.Wheat}, Wool=${resources.Wool}, Ore=${resources.Ore}\n`;
+		context += `Victory Points (Estimated): ${settlements}\n`;
 
 		if (playerData.NeedsFirstSettlement) {
-			// Try to find a random valid spot
-			const randomVertex = mapGenerator.GetRandomVertex();
-			if (randomVertex) {
-				const [success] = buildingManager.StartBuilding("Settlement", randomVertex.Position);
-				if (success) {
-					print(`[AI] ${this.Name} built initial settlement at ${randomVertex.Position}`);
-					playerData.NeedsFirstSettlement = false;
-				}
+			context += `STATUS: Must build INITIAL SETTLEMENT.\n`;
+			// Provide some random valid vertices as options
+			// In a real implementation, we'd list all valid available spots
+			const validOptions = [];
+			for(let i=0; i<3; i++) {
+				const v = mapGenerator.GetRandomVertex();
+				if (v) validOptions.push(v.Name); // Assuming Name is Vertex_ID
 			}
+			context += `Available Settlement Spots: ${validOptions.join(", ")}\n`;
 		} else {
-			// Normal gameplay logic
-			// 1. Check if can build road
-			if (resourceManager.HasResources({ Wood: 1, Brick: 1 })) {
-				// Simplified: Just build at current location (needs better pathfinding)
-				// For now, maybe just gather resources passively or trade
+			context += `STATUS: Normal Play.\n`;
+			const validOptions = [];
+			// Simplified: Suggest building near existing settlements (expansion) or just random spots
+			// Ideally we would traverse the graph from our existing settlements
+			for(let i=0; i<3; i++) {
+				const v = mapGenerator.GetRandomVertex();
+				if (v) validOptions.push(v.Name);
 			}
+			context += `Potential Expansion Spots (Simplified): ${validOptions.join(", ")}\n`;
+		}
 
-			// 2. Check if can build settlement
-			if (resourceManager.HasResources({ Wood: 1, Brick: 1, Wheat: 1, Wool: 1 })) {
-				const randomVertex = mapGenerator.GetRandomVertex();
-				if (randomVertex) {
-					buildingManager.StartBuilding("Settlement", randomVertex.Position);
+		return context;
+	}
+
+	private ExecuteAction(decision: AIAction, playerData: PlayerData, mapGenerator: MapGenerator) {
+		Logger.Info("AIPlayer", `${this.Name} Decided: ${decision.action} because "${decision.reason}"`);
+
+		switch (decision.action) {
+			case "BUILD_SETTLEMENT": {
+				if (decision.target) {
+					// We need to find the position from the target ID
+					const vertex = mapGenerator.FindVertexById(decision.target);
+					if (vertex) {
+						playerData.BuildingManager.StartBuilding("Settlement", vertex.Position);
+						if (playerData.NeedsFirstSettlement) playerData.NeedsFirstSettlement = false;
+					}
+				} else {
+					// Fallback if LLM didn't give target
+					const v = mapGenerator.GetRandomVertex();
+					if (v) {
+						playerData.BuildingManager.StartBuilding("Settlement", v.Position);
+						playerData.NeedsFirstSettlement = false;
+					}
 				}
+				break;
 			}
+			case "BUILD_ROAD": {
+				// Road building requires finding a random edge (simplified)
+				// In a real game, this would need graph traversal to find connected edges
+				const edge = mapGenerator.GetRandomEdge();
+				if (edge) {
+					// Road building is just calling StartBuilding with "Road"
+					// We assume the game logic handles connectivity checks or we just try
+					playerData.BuildingManager.StartBuilding("Road", edge.Position);
+				}
+				break;
+			}
+			case "BUILD_CITY": {
+				// Cities replace settlements. We need to find a settlement we own.
+				const settlements = playerData.BuildingManager.Settlements;
+				if (settlements.size() > 0) {
+					// Try to upgrade the first one
+					const s = settlements[0];
+					if (s && s.Type === "Settlement") {
+						playerData.BuildingManager.StartBuilding("City", s.Position);
+					}
+				}
+				break;
+			}
+			case "TRADE": {
+				if (decision.resource_give && decision.resource_receive) {
+					// Try to trade with the PortManager (Bank/Ports)
+					playerData.PortManager.ExecuteTrade(decision.resource_give, decision.resource_receive);
+				}
+				break;
+			}
+			case "WAIT":
+				// Do nothing
+				break;
 		}
 	}
 }
