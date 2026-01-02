@@ -10,6 +10,22 @@ export interface AIAction {
 	reason?: string; // Thought process
 }
 
+interface GeminiPart {
+	text?: string;
+}
+
+interface GeminiContent {
+	parts?: GeminiPart[];
+}
+
+interface GeminiCandidate {
+	content?: GeminiContent;
+}
+
+interface GeminiResponse {
+	candidates?: GeminiCandidate[];
+}
+
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 // Note: In a real production environment, the API key should be stored in ScriptService or environment variables.
 // For this prototype, we assume it's set in an environment variable or config.
@@ -79,18 +95,21 @@ export class LLMService {
 			});
 
 			if (response.Success) {
-				const data = HttpService.JSONDecode(response.Body) as any;
-				if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
-					let text = data.candidates[0].content.parts[0].text;
+				const data = HttpService.JSONDecode(response.Body) as unknown as GeminiResponse;
+				if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
+					const textValue = data.candidates[0].content.parts[0].text;
+					if (typeIs(textValue, "string")) {
+						let text = textValue;
 
-					// Clean up markdown code blocks if present
-					text = text.gsub("```json", "")[0]; // Remove start
-					text = text.gsub("```", "")[0];     // Remove end
-					text = text.gsub("^%s+", "")[0];    // Trim left
-					text = text.gsub("%s+$", "")[0];    // Trim right
+						// Clean up markdown code blocks if present
+						text = text.gsub("```json", "")[0]; // Remove start
+						text = text.gsub("```", "")[0];     // Remove end
+						text = text.gsub("^%s+", "")[0];    // Trim left
+						text = text.gsub("%s+$", "")[0];    // Trim right
 
-					// Parse the JSON response
-					return HttpService.JSONDecode(text) as AIAction;
+						// Parse the JSON response
+						return HttpService.JSONDecode(text) as AIAction;
+					}
 				}
 			} else {
 				Logger.Warn("LLMService", `API Error: ${response.StatusCode} - ${response.StatusMessage}`);
