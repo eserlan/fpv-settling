@@ -73,13 +73,21 @@ const refreshBuildingList = () => {
 		for (const building of folder.GetChildren()) {
 			if (building.IsA("Model")) {
 				const ownerId = building.GetAttribute("OwnerId") as number | undefined;
-				if (ownerId === undefined) continue;
 
 				const icon = folderName === "Settlements" ? "🏠" : "🛤️";
 				const btn = new Instance("TextButton");
 				btn.Name = building.Name;
 				btn.Size = new UDim2(1, -5, 0, 30);
-				btn.BackgroundColor3 = ownerId === player.UserId ? Color3.fromRGB(60, 100, 60) : Color3.fromRGB(100, 60, 60);
+
+				// Color based on ownership
+				if (ownerId === player.UserId) {
+					btn.BackgroundColor3 = Color3.fromRGB(60, 100, 60); // Green = yours
+				} else if (ownerId !== undefined) {
+					btn.BackgroundColor3 = Color3.fromRGB(100, 60, 60); // Red = other player
+				} else {
+					btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80); // Grey = unknown owner
+				}
+
 				btn.Text = `${icon} ${building.Name}`;
 				btn.TextColor3 = new Color3(1, 1, 1);
 				btn.Font = Enum.Font.GothamBold;
@@ -102,6 +110,8 @@ const refreshBuildingList = () => {
 		}
 	}
 
+	// Update title with count
+	buildingTitle.Text = `Buildings (${itemCount})`;
 	buildingList.CanvasSize = new UDim2(0, 0, 0, itemCount * 35);
 };
 
