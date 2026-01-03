@@ -5,6 +5,8 @@ import { PROMPTS, SkillLevel } from "./AIPrompts";
 import * as Logger from "shared/Logger";
 import type { MapGenerator } from "./services/MapGenerator";
 
+const PathfindingService = game.GetService("PathfindingService");
+
 export class AIPlayer implements AIPlayerInterface {
 	public UserId: number;
 	public Name: string;
@@ -18,6 +20,10 @@ export class AIPlayer implements AIPlayerInterface {
 	private pendingAction?: { type: string, position: Vector3, actionData?: AIAction };
 	private pendingResource?: BasePart;
 	private lastActedPulse: number = -1;
+
+	// Pathfinding
+	private currentPath?: Path;
+	private currentWaypointIndex: number = 0;
 
 	private llmService: LLMService;
 
@@ -168,16 +174,64 @@ export class AIPlayer implements AIPlayerInterface {
 			}
 		}
 
-		// 1. Handle Movement
+		// 1. Handle Movement with Pathfinding
 		if (this.State === "Moving" && this.pendingAction) {
 			const humanoid = this.Character.FindFirstChildOfClass("Humanoid");
 			if (humanoid) {
-				humanoid.MoveTo(this.pendingAction.position);
+				// If we don't have a path yet, create one
+				if (!this.currentPath) {
+					this.currentPath = PathfindingService.CreatePath({
+						AgentRadius: 2,
+						AgentHeight: 5,
+						AgentCanJump: true,
+						AgentCanClimb: false,
+					});
 
-				// Check distance to target
+					const startPos = this.Character.PrimaryPart.Position;
+					const [success] = pcall(() => {
+						this.currentPath!.ComputeAsync(startPos, this.pendingAction!.position);
+					});
+
+					if (!success || this.currentPath.Status !== Enum.PathStatus.Success) {
+						// Fallback to direct movement
+						Logger.Warn("AIPlayer", `${this.Name} pathfinding failed, using direct movement`);
+						humanoid.MoveTo(this.pendingAction.position);
+						this.currentPath = undefined;
+					} else {
+						this.currentWaypointIndex = 0;
+					}
+				}
+
+				// Follow waypoints
+				if (this.currentPath && this.currentPath.Status === Enum.PathStatus.Success) {
+					const waypoints = this.currentPath.GetWaypoints();
+					if (this.currentWaypointIndex < waypoints.size()) {
+						const waypoint = waypoints[this.currentWaypointIndex];
+						humanoid.MoveTo(waypoint.Position);
+
+						const distToWaypoint = this.Character.PrimaryPart.Position.sub(waypoint.Position).Magnitude;
+						if (distToWaypoint < 3) {
+							this.currentWaypointIndex++;
+							if (waypoint.Action === Enum.PathWaypointAction.Jump) {
+								humanoid.Jump = true;
+							}
+						}
+					} else {
+						// Reached end of path
+						this.currentPath = undefined;
+						this.currentWaypointIndex = 0;
+					}
+				} else {
+					// Direct movement fallback
+					humanoid.MoveTo(this.pendingAction.position);
+				}
+
+				// Check distance to final target
 				const dist = this.Character.PrimaryPart.Position.sub(this.pendingAction.position).Magnitude;
-				if (dist < 8) { // Increased tolerance for simple MoveTo
+				if (dist < 8) {
 					this.State = "Executing";
+					this.currentPath = undefined;
+					this.currentWaypointIndex = 0;
 					Logger.Info("AIPlayer", `${this.Name} reached destination, starting construction...`);
 				}
 			}
