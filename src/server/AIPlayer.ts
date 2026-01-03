@@ -527,7 +527,6 @@ export class AIPlayer implements AIPlayerInterface {
 		const target = decision.target as string | undefined;
 
 		Logger.Info("AIPlayer", `${this.Name} (${this.Skill}) Decided: ${action} because "${reason}"`);
-		ServerEvents.SystemMessageEvent.broadcast(`🤖 [${this.Name}] Thinking: "${reason}"`);
 
 		if (action === "WAIT" || action === "END_TURN") {
 			this.State = "Idle";
