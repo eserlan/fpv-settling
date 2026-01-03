@@ -158,13 +158,11 @@ export class AIPlayer implements AIPlayerInterface {
 		}
 
 		if (this.State === "Idle") {
-			// Priority 1: Collect nearby resources autonomously (High Priority)
-			const resource = this.FindNearestOwnedResource(playerData);
-			if (resource) {
-				this.pendingResource = resource;
-				this.State = "MovingToResource";
-				this.currentPath = undefined;
-				Logger.Info("AIPlayer", `${this.Name} → high-priority collection of ${resource.GetAttribute("ResourceType")}`);
+			// Priority 1: Strategic Thinking (Pulse synchronized or Initial)
+			if (this.thoughtPending || (playerData.NeedsFirstSettlement && this.taskQueue.size() === 0)) {
+				this.thoughtPending = false;
+				this.State = "Thinking";
+				this.Think(playerData, mapGenerator);
 				return;
 			}
 
@@ -177,11 +175,13 @@ export class AIPlayer implements AIPlayerInterface {
 				return;
 			}
 
-			// Priority 3: Strategic Thinking (Pulse synchronized or Initial)
-			if (this.thoughtPending || (playerData.NeedsFirstSettlement && this.taskQueue.size() === 0)) {
-				this.thoughtPending = false;
-				this.State = "Thinking";
-				this.Think(playerData, mapGenerator);
+			// Priority 3: Collect nearby resources autonomously
+			const resource = this.FindNearestOwnedResource(playerData);
+			if (resource) {
+				this.pendingResource = resource;
+				this.State = "MovingToResource";
+				this.currentPath = undefined;
+				Logger.Info("AIPlayer", `${this.Name} → high-priority autonomous collection of ${resource.GetAttribute("ResourceType")}`);
 				return;
 			}
 		}
@@ -557,7 +557,6 @@ export class AIPlayer implements AIPlayerInterface {
 				if (res) {
 					this.taskQueue.push({ type: "COLLECT", part: res, position: res.Position });
 					Logger.Info("AIPlayer", `${this.Name} queued collection of ${res.GetAttribute("ResourceType")}`);
-					return; // Done
 				}
 				break;
 			}
