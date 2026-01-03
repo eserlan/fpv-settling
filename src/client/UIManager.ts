@@ -65,10 +65,16 @@ const refreshBuildingList = () => {
 
 	const foldersToCheck = ["Settlements", "Buildings"];
 	let itemCount = 0;
+	let debugInfo = "";
 
 	for (const folderName of foldersToCheck) {
 		const folder = game.Workspace.FindFirstChild(folderName);
-		if (!folder) continue;
+		if (!folder) {
+			debugInfo += `${folderName}: NOT FOUND, `;
+			continue;
+		}
+		const childCount = folder.GetChildren().size();
+		debugInfo += `${folderName}: ${childCount} children, `;
 
 		for (const building of folder.GetChildren()) {
 			if (building.IsA("Model")) {
@@ -114,19 +120,19 @@ const refreshBuildingList = () => {
 	if (itemCount === 0) {
 		const placeholder = new Instance("TextLabel");
 		placeholder.Name = "Placeholder";
-		placeholder.Size = new UDim2(1, -10, 0, 60);
+		placeholder.Size = new UDim2(1, -10, 0, 80);
 		placeholder.BackgroundTransparency = 1;
-		placeholder.Text = "No buildings yet.\nBuild a settlement first!";
+		placeholder.Text = `No buildings yet.\n${debugInfo}\nBuild a settlement first!`;
 		placeholder.TextColor3 = Color3.fromRGB(150, 150, 150);
 		placeholder.Font = Enum.Font.Gotham;
-		placeholder.TextSize = 14;
+		placeholder.TextSize = 12;
 		placeholder.TextWrapped = true;
 		placeholder.Parent = buildingList;
 	}
 
 	// Update title with count
 	buildingTitle.Text = `Buildings (${itemCount})`;
-	buildingList.CanvasSize = new UDim2(0, 0, 0, math.max(itemCount * 35, 60));
+	buildingList.CanvasSize = new UDim2(0, 0, 0, math.max(itemCount * 35, 80));
 };
 
 const resetCamBtn = new Instance("TextButton");
@@ -157,9 +163,22 @@ resetCamBtn.MouseButton1Click.Connect(() => {
 task.spawn(() => {
 	while (true) {
 		refreshBuildingList();
-		task.wait(5); // Refresh every 5s
+		task.wait(3); // Refresh every 3s
 	}
 });
+
+// Also refresh when buildings are added/removed
+const setupFolderListeners = (folderName: string) => {
+	const folder = game.Workspace.WaitForChild(folderName, 30);
+	if (folder) {
+		folder.ChildAdded.Connect(() => refreshBuildingList());
+		folder.ChildRemoved.Connect(() => refreshBuildingList());
+		Logger.Info("UIManager", `Listening for changes in ${folderName} folder`);
+	}
+};
+
+task.spawn(() => setupFolderListeners("Settlements"));
+task.spawn(() => setupFolderListeners("Buildings"));
 
 // Help text
 const helpFrame = new Instance("Frame");
