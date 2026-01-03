@@ -53,15 +53,15 @@ buildingList.CanvasSize = new UDim2(0, 0, 0, 0); // Automatic
 buildingList.ScrollBarThickness = 4;
 buildingList.Parent = buildingFrame;
 
-const listLayout = new Instance("UIListLayout");
-listLayout.Padding = new UDim(0, 5);
-listLayout.SortOrder = Enum.SortOrder.LayoutOrder;
-listLayout.Parent = buildingList;
-
 // Function to refresh the building list
 const refreshBuildingList = () => {
 	buildingList.ClearAllChildren();
-	listLayout.Parent = buildingList; // Re-add layout
+
+	// Create fresh layout each time
+	const listLayout = new Instance("UIListLayout");
+	listLayout.Padding = new UDim(0, 5);
+	listLayout.SortOrder = Enum.SortOrder.LayoutOrder;
+	listLayout.Parent = buildingList;
 
 	const foldersToCheck = ["Settlements", "Buildings"];
 	let itemCount = 0;
