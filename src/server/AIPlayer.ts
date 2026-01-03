@@ -140,18 +140,20 @@ export class AIPlayer implements AIPlayerInterface {
 	public Update(deltaTime: number, playerData: PlayerData, mapGenerator: MapGenerator) {
 		if (!this.Character || !this.Character.PrimaryPart) return;
 
-		// 0. Resource Gathering Check (High Priority)
-		if (this.State === "Idle" || this.State === "Thinking") {
+		// Priority 1: Collect nearby resources on owned tiles
+		if (this.State === "Idle") {
 			const resource = this.FindNearestOwnedResource(playerData);
 			if (resource) {
 				this.pendingResource = resource;
 				this.State = "MovingToResource";
-				Logger.Info("AIPlayer", `${this.Name} moving to collect ${resource.GetAttribute("ResourceType")}...`);
+				Logger.Info("AIPlayer", `${this.Name} → collecting ${resource.GetAttribute("ResourceType")}`);
 			}
 		}
 
+		// Handle resource collection movement
 		if (this.State === "MovingToResource" && this.pendingResource) {
 			if (!this.pendingResource.Parent) {
+				// Resource was collected or disappeared
 				this.pendingResource = undefined;
 				this.State = "Idle";
 				return;
@@ -162,119 +164,53 @@ export class AIPlayer implements AIPlayerInterface {
 				humanoid.MoveTo(this.pendingResource.Position);
 				const dist = this.Character.PrimaryPart.Position.sub(this.pendingResource.Position).Magnitude;
 				if (dist < 8) {
-					// CollectionManager should handle it if proximity is right
-					// We'll call it ourselves via the Service if we want to be explicit,
-					// but let's assume the CollectionManager onTick handles it too.
-					// Actually, CollectionManager onTick only checks real players.
-					// So let's rely on a more explicit call if we can get it, but for now 
-					// we just wait 1s and hope it works if we reach it.
-					// INSTEAD: Let's let the manager handle it by updating it too.
+					// CollectionManager will pick it up
+					this.pendingResource = undefined;
 					this.State = "Idle";
-					this.NextActionTime = playerData.GameTime + 1;
 				}
 			}
+			return; // Focus on collecting
 		}
 
-		// 1. Handle Movement with Pathfinding
+		// Handle build movement
 		if (this.State === "Moving" && this.pendingAction) {
 			const humanoid = this.Character.FindFirstChildOfClass("Humanoid");
 			if (humanoid) {
-				// If we don't have a path yet, create one
-				if (!this.currentPath) {
-					this.currentPath = PathfindingService.CreatePath({
-						AgentRadius: 2,
-						AgentHeight: 5,
-						AgentCanJump: true,
-						AgentCanClimb: false,
-					});
-
-					const startPos = this.Character.PrimaryPart.Position;
-					const [success] = pcall(() => {
-						this.currentPath!.ComputeAsync(startPos, this.pendingAction!.position);
-					});
-
-					if (!success || this.currentPath.Status !== Enum.PathStatus.Success) {
-						// Fallback to direct movement
-						Logger.Warn("AIPlayer", `${this.Name} pathfinding failed, using direct movement`);
-						humanoid.MoveTo(this.pendingAction.position);
-						this.currentPath = undefined;
-					} else {
-						this.currentWaypointIndex = 0;
-					}
-				}
-
-				// Follow waypoints
-				if (this.currentPath && this.currentPath.Status === Enum.PathStatus.Success) {
-					const waypoints = this.currentPath.GetWaypoints();
-					if (this.currentWaypointIndex < waypoints.size()) {
-						const waypoint = waypoints[this.currentWaypointIndex];
-						humanoid.MoveTo(waypoint.Position);
-
-						const distToWaypoint = this.Character.PrimaryPart.Position.sub(waypoint.Position).Magnitude;
-						if (distToWaypoint < 3) {
-							this.currentWaypointIndex++;
-							if (waypoint.Action === Enum.PathWaypointAction.Jump) {
-								humanoid.Jump = true;
-							}
-						}
-					} else {
-						// Reached end of path
-						this.currentPath = undefined;
-						this.currentWaypointIndex = 0;
-					}
-				} else {
-					// Direct movement fallback
-					humanoid.MoveTo(this.pendingAction.position);
-				}
-
-				// Check distance to final target
+				humanoid.MoveTo(this.pendingAction.position);
 				const dist = this.Character.PrimaryPart.Position.sub(this.pendingAction.position).Magnitude;
-				if (dist < 8) {
+				if (dist < 10) {
 					this.State = "Executing";
-					this.currentPath = undefined;
-					this.currentWaypointIndex = 0;
-					Logger.Info("AIPlayer", `${this.Name} reached destination, starting construction...`);
+					Logger.Info("AIPlayer", `${this.Name} arrived, building...`);
 				}
 			}
+			return; // Focus on moving
 		}
 
-		// 2. Handle Action Execution
+		// Handle action execution
 		if (this.State === "Executing" && this.pendingAction) {
 			const { type: actionType, position } = this.pendingAction;
-			playerData.BuildingManager.StartBuilding(actionType, position);
-			if (playerData.NeedsFirstSettlement && actionType === "Settlement") {
-				playerData.NeedsFirstSettlement = false;
+			const [success, result] = playerData.BuildingManager.StartBuilding(actionType, position);
+
+			if (success) {
+				Logger.Info("AIPlayer", `${this.Name} built ${actionType}!`);
+				if (playerData.NeedsFirstSettlement && actionType === "Settlement") {
+					playerData.NeedsFirstSettlement = false;
+				}
+			} else {
+				Logger.Warn("AIPlayer", `${this.Name} failed to build ${actionType}: ${result}`);
 			}
 
 			this.pendingAction = undefined;
 			this.State = "Idle";
-			this.actionsThisPulse++;
-			this.NextActionTime = playerData.GameTime + 2; // Pause after building
+			this.NextActionTime = playerData.GameTime + 5; // Short pause after building
 			return;
 		}
 
-		// 3. Pulse Synchronization Check
-		// AI can act up to 2 times per pulse (60s chunks)
-		const currentPulse = math.floor(playerData.GameTime / 60);
-		if (currentPulse !== this.lastActedPulse) {
-			// New pulse started, reset counter
-			this.lastActedPulse = currentPulse;
-			this.actionsThisPulse = 0;
-		}
-
-		if (this.actionsThisPulse >= 2) return; // Max 2 actions per pulse
-
-		// 4. Thinking Logic
-		if (playerData.GameTime < this.NextActionTime) return;
-
-		if (this.State === "Thinking") {
-			this.NextActionTime = playerData.GameTime + 0.5;
-			return;
-		}
-
-		if (this.State === "Idle") {
+		// Thinking: Every 30 seconds when Idle
+		if (this.State === "Idle" && playerData.GameTime >= this.NextActionTime) {
 			this.State = "Thinking";
 			this.Think(playerData, mapGenerator);
+			this.NextActionTime = playerData.GameTime + 30; // Think every 30s
 		}
 	}
 
