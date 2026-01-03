@@ -157,20 +157,20 @@ export class AIPlayer implements AIPlayerInterface {
 		}
 
 		if (this.State === "Idle") {
-			// Priority 1: Strategic Thinking (Pulse synchronized)
-			if (this.thoughtPending || playerData.NeedsFirstSettlement) {
-				this.thoughtPending = false;
-				this.State = "Thinking";
-				this.Think(playerData, mapGenerator);
+			// Priority 1: Process Task Queue (Strategic decisions from Think)
+			if (this.taskQueue.size() > 0) {
+				const task = this.taskQueue.shift()!;
+				this.pendingAction = { type: task.buildingType ?? "", position: task.position, actionData: undefined };
+				this.pendingResource = task.part;
+				this.State = task.type === "BUILD" ? "Moving" : "MovingToResource";
 				return;
 			}
 
-			// Priority 2: Process Task Queue (Strategic decisions from Think)
-			if (this.taskQueue.size() > 0) {
-				const task = this.taskQueue.shift()!;
-				this.pendingAction = { type: task.buildingType ?? "", position: task.position };
-				this.pendingResource = task.part;
-				this.State = task.type === "BUILD" ? "Moving" : "MovingToResource";
+			// Priority 2: Strategic Thinking (Pulse synchronized or Initial)
+			if (this.thoughtPending || (playerData.NeedsFirstSettlement && this.taskQueue.size() === 0)) {
+				this.thoughtPending = false;
+				this.State = "Thinking";
+				this.Think(playerData, mapGenerator);
 				return;
 			}
 
