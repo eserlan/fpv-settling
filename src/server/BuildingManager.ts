@@ -144,7 +144,6 @@ class BuildingManager {
 
 		if (buildingTypeData.IsSettlement && !this.HasPlacedFirstSettlement) {
 			this.HasPlacedFirstSettlement = true;
-			Logger.Info("BuildingManager", `${this.Player.Name} used free settlement, next will cost resources`);
 		}
 		return $tuple(true, buildingId);
 	}
