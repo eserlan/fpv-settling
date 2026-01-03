@@ -1,4 +1,5 @@
 import { Networking } from "@flamework/networking";
+import type { RoomState } from "./RoomTypes";
 
 interface ServerEvents {
     // Typed action events (replacing generic ClientRequest)
@@ -24,7 +25,7 @@ interface ServerEvents {
 
 interface ClientEvents {
     // Game lifecycle events
-    RoomUpdate(roomId: number, data: string): void; // JSON string of room state
+    RoomUpdate(roomId: number, room: RoomState): void;
     GameStart(): void;
     PlayerJoined(userId: number, name: string, isAI: boolean): void;
     PlayerLeft(userId: number, name: string): void;
