@@ -54,60 +54,117 @@ export class AIPlayer implements AIPlayerInterface {
 			this.Character.Destroy();
 		}
 
+		// Skill-based colors
+		let bodyColor: Color3;
+		if (this.Skill === "Beginner") {
+			bodyColor = Color3.fromRGB(100, 255, 100); // Green
+		} else if (this.Skill === "Intermediate") {
+			bodyColor = Color3.fromRGB(100, 150, 255); // Blue
+		} else {
+			bodyColor = Color3.fromRGB(255, 80, 80); // Red (Expert)
+		}
+
+		const SCALE = 1.3; // Make AI slightly larger than normal players
 		const model = new Instance("Model");
 		model.Name = this.Name;
 
-		// Simple avatar for AI
+		// HumanoidRootPart (invisible root)
+		const root = new Instance("Part");
+		root.Name = "HumanoidRootPart";
+		root.Size = new Vector3(2 * SCALE, 2 * SCALE, 1 * SCALE);
+		root.Position = position.add(new Vector3(0, 3 * SCALE, 0));
+		root.Transparency = 1;
+		root.CanCollide = false;
+		root.Anchored = false;
+		root.Parent = model;
+
+		// Torso
 		const torso = new Instance("Part");
 		torso.Name = "Torso";
-		torso.Size = new Vector3(2, 2, 1);
-		torso.Position = position.add(new Vector3(0, 3, 0));
+		torso.Size = new Vector3(2 * SCALE, 2 * SCALE, 1 * SCALE);
+		torso.Position = root.Position;
+		torso.Color = bodyColor;
 		torso.CanCollide = true;
 		torso.Anchored = false;
 		torso.Parent = model;
 
-		const root = new Instance("Part");
-		root.Name = "HumanoidRootPart";
-		root.Size = new Vector3(2, 2, 1);
-		root.Position = torso.Position;
-		root.Transparency = 1;
-		root.CanCollide = false;
-		root.Parent = model;
-
+		// Head
 		const head = new Instance("Part");
 		head.Name = "Head";
-		head.Size = new Vector3(1, 1, 1);
-		head.Shape = Enum.PartType.Ball;
-		head.Color = Color3.fromRGB(200, 200, 200);
-		head.Position = torso.Position.add(new Vector3(0, 1.5, 0));
+		head.Size = new Vector3(1.2 * SCALE, 1.2 * SCALE, 1.2 * SCALE);
+		head.Position = torso.Position.add(new Vector3(0, 1.6 * SCALE, 0));
+		head.Color = Color3.fromRGB(245, 205, 170); // Skin tone
+		head.CanCollide = false;
 		head.Parent = model;
 
-		const weld = new Instance("WeldConstraint");
-		weld.Part0 = torso;
-		weld.Part1 = head;
-		weld.Parent = torso;
+		// Face decal on head
+		const face = new Instance("Decal");
+		face.Name = "face";
+		face.Texture = "rbxasset://textures/face.png";
+		face.Face = Enum.NormalId.Front;
+		face.Parent = head;
 
-		const weld2 = new Instance("WeldConstraint");
-		weld2.Part0 = torso;
-		weld2.Part1 = root;
-		weld2.Parent = torso;
+		// Left Arm
+		const leftArm = new Instance("Part");
+		leftArm.Name = "Left Arm";
+		leftArm.Size = new Vector3(1 * SCALE, 2 * SCALE, 1 * SCALE);
+		leftArm.Position = torso.Position.add(new Vector3(-1.5 * SCALE, 0, 0));
+		leftArm.Color = bodyColor;
+		leftArm.CanCollide = false;
+		leftArm.Parent = model;
 
+		// Right Arm
+		const rightArm = new Instance("Part");
+		rightArm.Name = "Right Arm";
+		rightArm.Size = new Vector3(1 * SCALE, 2 * SCALE, 1 * SCALE);
+		rightArm.Position = torso.Position.add(new Vector3(1.5 * SCALE, 0, 0));
+		rightArm.Color = bodyColor;
+		rightArm.CanCollide = false;
+		rightArm.Parent = model;
+
+		// Left Leg
+		const leftLeg = new Instance("Part");
+		leftLeg.Name = "Left Leg";
+		leftLeg.Size = new Vector3(1 * SCALE, 2 * SCALE, 1 * SCALE);
+		leftLeg.Position = torso.Position.add(new Vector3(-0.5 * SCALE, -2 * SCALE, 0));
+		leftLeg.Color = Color3.fromRGB(50, 50, 150); // Dark blue pants
+		leftLeg.CanCollide = false;
+		leftLeg.Parent = model;
+
+		// Right Leg
+		const rightLeg = new Instance("Part");
+		rightLeg.Name = "Right Leg";
+		rightLeg.Size = new Vector3(1 * SCALE, 2 * SCALE, 1 * SCALE);
+		rightLeg.Position = torso.Position.add(new Vector3(0.5 * SCALE, -2 * SCALE, 0));
+		rightLeg.Color = Color3.fromRGB(50, 50, 150); // Dark blue pants
+		rightLeg.CanCollide = false;
+		rightLeg.Parent = model;
+
+		// Weld all parts to torso
+		const weldTo = (part: BasePart) => {
+			const weld = new Instance("WeldConstraint");
+			weld.Part0 = torso;
+			weld.Part1 = part;
+			weld.Parent = torso;
+		};
+		weldTo(root);
+		weldTo(head);
+		weldTo(leftArm);
+		weldTo(rightArm);
+		weldTo(leftLeg);
+		weldTo(rightLeg);
+
+		// Humanoid
 		const humanoid = new Instance("Humanoid");
 		humanoid.DisplayName = `[${this.Skill}] ${this.Name}`;
+		humanoid.WalkSpeed = 16 * SCALE;
 		humanoid.Parent = model;
 
-		model.PrimaryPart = torso;
+		model.PrimaryPart = root;
 		model.Parent = game.Workspace;
 		this.Character = model;
 
-		// Color based on skill level
-		if (this.Skill === "Beginner") {
-			torso.Color = Color3.fromRGB(100, 255, 100); // Green
-		} else if (this.Skill === "Intermediate") {
-			torso.Color = Color3.fromRGB(100, 100, 255); // Blue
-		} else {
-			torso.Color = Color3.fromRGB(255, 100, 100); // Red (Expert)
-		}
+		Logger.Info("AIPlayer", `Spawned ${this.Name} (${this.Skill}) at ${position}`);
 	}
 
 	private FindNearestOwnedResource(playerData: PlayerData): BasePart | undefined {

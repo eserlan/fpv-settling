@@ -224,7 +224,26 @@ export class MapGenerator implements OnStart {
 			if (asset && (asset.IsA("Model") || asset.IsA("BasePart"))) {
 				const clone = asset.Clone();
 
-				// Scale and position first (before parenting)
+				// IMMEDIATELY anchor all parts after cloning - before physics can ever touch them
+				// This is critical: physics evaluates on the next frame after parenting,
+				// so we must anchor before ANY other operations
+				const anchorAllParts = (obj: Instance) => {
+					if (obj.IsA("BasePart")) {
+						obj.Anchored = true;
+						obj.CanCollide = false;
+					}
+					for (const child of obj.GetDescendants()) {
+						if (child.IsA("BasePart")) {
+							(child as BasePart).Anchored = true;
+							(child as BasePart).CanCollide = false;
+						}
+					}
+				};
+
+				// Anchor immediately after clone
+				anchorAllParts(clone);
+
+				// Now scale and position (parts are already anchored, so no physics issues)
 				if (clone.IsA("Model")) {
 					if ("ScaleTo" in clone) {
 						(clone as unknown as { ScaleTo(scale: number): void }).ScaleTo(scale);
@@ -262,20 +281,11 @@ export class MapGenerator implements OnStart {
 					clone.CFrame = new CFrame(position.X, position.Y + yOffset, position.Z).mul(rotation);
 				}
 
-				// Parent first, then anchor AFTER parenting to prevent physics issues
+				// Parent to workspace (already anchored, so safe)
 				clone.Parent = parent;
 
-				// Final anchoring pass - anchor ALL parts and disable collision for decorative objects
-				if (clone.IsA("BasePart")) {
-					clone.Anchored = true;
-					clone.CanCollide = false; // Decorative, no collision needed
-				}
-				for (const part of clone.GetDescendants()) {
-					if (part.IsA("BasePart")) {
-						(part as BasePart).Anchored = true;
-						(part as BasePart).CanCollide = false; // Decorative, no collision needed
-					}
-				}
+				// Final safety pass - re-anchor everything just in case ScaleTo or other operations reset anything
+				anchorAllParts(clone);
 
 				return clone;
 			} else {

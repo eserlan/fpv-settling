@@ -126,8 +126,6 @@ export class CollectionManager implements OnStart, OnTick {
 
 			if (typeIs(entity, "Instance")) {
 				ServerEvents.CollectEvent.fire(entity as Player, "Collected", resourceType, amount);
-				const data = ResourceTypes.Get(resourceType);
-				ServerEvents.SystemMessageEvent.fire(entity as Player, `📦 [${entity.Name}] Collected ${amount}x ${data?.Icon ?? ""} ${resourceType}`);
 			}
 
 			resource.Destroy();
