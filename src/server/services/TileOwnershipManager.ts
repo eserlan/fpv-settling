@@ -2,6 +2,7 @@ import { Service, OnStart } from "@flamework/core";
 import * as Logger from "shared/Logger";
 import * as TileKey from "shared/TileKey";
 import type { GameEntity } from "shared/GameEntity";
+import { ServerEvents } from "../ServerEvents";
 
 type TileOwnershipRecord = {
 	playerUserId: number;
@@ -51,6 +52,10 @@ export class TileOwnershipManager implements OnStart {
 		});
 
 		Logger.Info("TileOwnership", `${player.Name} (Settlement: ${settlementId}) claimed part of tile ${key}. Total owners: ${records.size()}`);
+
+		// Notify clients about the tile ownership change
+		ServerEvents.TileOwnershipChanged.broadcast(tileQ, tileR, player.UserId, player.Name);
+
 		return true;
 	}
 

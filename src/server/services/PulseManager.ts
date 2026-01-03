@@ -272,8 +272,11 @@ export class PulseManager implements OnStart, OnTick {
 		resource.CanCollide = true;
 		resource.SetAttribute("ResourceType", resourceKey);
 		resource.SetAttribute("Amount", 1);
-		resource.SetAttribute("TileQ", tile.PrimaryPart!.GetAttribute("Q"));
-		resource.SetAttribute("TileR", tile.PrimaryPart!.GetAttribute("R"));
+
+		const tileQ = tile.PrimaryPart!.GetAttribute("Q") as number;
+		const tileR = tile.PrimaryPart!.GetAttribute("R") as number;
+		resource.SetAttribute("TileQ", tileQ);
+		resource.SetAttribute("TileR", tileR);
 		resource.SetAttribute("SpawnTime", os.time());
 
 		const light = new Instance("PointLight");
@@ -285,6 +288,9 @@ export class PulseManager implements OnStart, OnTick {
 		const resourcesFolder = (game.Workspace.FindFirstChild("Resources") as Folder) ?? new Instance("Folder", game.Workspace);
 		resourcesFolder.Name = "Resources";
 		resource.Parent = resourcesFolder;
+
+		// Notify clients about the new resource
+		ServerEvents.ResourceSpawned.broadcast(resourceKey, spawnPos, tileQ, tileR);
 	}
 
 	private allPlayersReady() {

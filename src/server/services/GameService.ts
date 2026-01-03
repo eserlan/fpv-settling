@@ -204,6 +204,9 @@ export class GameService implements OnStart, GameState {
 			this.collectionManager.InitPlayer(player, playerData.ResourceManager);
 		}
 
+		// Notify all clients about the new player
+		NetworkUtils.Broadcast(ServerEvents.PlayerJoined, player.UserId, player.Name, false);
+
 		player.CharacterAdded.Connect((character) => {
 			const humanoid = character.WaitForChild("Humanoid") as Humanoid;
 			humanoid.WalkSpeed = 16;
@@ -230,6 +233,10 @@ export class GameService implements OnStart, GameState {
 
 	private handlePlayerRemoving(player: Player) {
 		Logger.Info("GameManager", `Player leaving: ${player.Name}`);
+
+		// Notify all clients about the player leaving
+		NetworkUtils.Broadcast(ServerEvents.PlayerLeft, player.UserId, player.Name);
+
 		this.collectionManager.RemovePlayer(player);
 		delete this.PlayerData[player.UserId];
 
