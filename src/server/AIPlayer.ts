@@ -158,7 +158,17 @@ export class AIPlayer implements AIPlayerInterface {
 		}
 
 		if (this.State === "Idle") {
-			// Priority 1: Process Task Queue (Strategic decisions from Think)
+			// Priority 1: Collect nearby resources autonomously (High Priority)
+			const resource = this.FindNearestOwnedResource(playerData);
+			if (resource) {
+				this.pendingResource = resource;
+				this.State = "MovingToResource";
+				this.currentPath = undefined;
+				Logger.Info("AIPlayer", `${this.Name} → high-priority collection of ${resource.GetAttribute("ResourceType")}`);
+				return;
+			}
+
+			// Priority 2: Process Task Queue (Strategic decisions from Think)
 			if (this.taskQueue.size() > 0) {
 				const task = this.taskQueue.shift()!;
 				this.pendingAction = { type: task.buildingType ?? "", position: task.position, actionData: undefined };
@@ -167,21 +177,11 @@ export class AIPlayer implements AIPlayerInterface {
 				return;
 			}
 
-			// Priority 2: Strategic Thinking (Pulse synchronized or Initial)
+			// Priority 3: Strategic Thinking (Pulse synchronized or Initial)
 			if (this.thoughtPending || (playerData.NeedsFirstSettlement && this.taskQueue.size() === 0)) {
 				this.thoughtPending = false;
 				this.State = "Thinking";
 				this.Think(playerData, mapGenerator);
-				return;
-			}
-
-			// Priority 3: Collect nearby resources autonomously
-			const resource = this.FindNearestOwnedResource(playerData);
-			if (resource) {
-				this.pendingResource = resource;
-				this.State = "MovingToResource";
-				this.currentPath = undefined;
-				Logger.Info("AIPlayer", `${this.Name} → collecting ${resource.GetAttribute("ResourceType")}`);
 				return;
 			}
 		}
@@ -388,7 +388,36 @@ export class AIPlayer implements AIPlayerInterface {
 
 		let context = `My Name: ${this.Name}\n`;
 		context += `Skill Level: ${this.Skill}\n`;
-		context += `Resources: Wood=${resources.Wood}, Brick=${resources.Brick}, Wheat=${resources.Wheat}, Wool=${resources.Wool}, Ore=${resources.Ore}\n`;
+		context += `Resources in Backpack: Wood=${resources.Wood}, Brick=${resources.Brick}, Wheat=${resources.Wheat}, Wool=${resources.Wool}, Ore=${resources.Ore}\n`;
+
+		// Resources on ground
+		const groundResources: Record<string, number> = {};
+		const resFolder = game.Workspace.FindFirstChild("Resources");
+		if (resFolder) {
+			for (const res of resFolder.GetChildren()) {
+				if (res.IsA("BasePart")) {
+					// Check if is on owned tile
+					let owns = false;
+					for (const s of settlements) {
+						if (res.Position.sub(s.Position).Magnitude < 45) {
+							owns = true;
+							break;
+						}
+					}
+
+					if (owns) {
+						const resType = (res.GetAttribute("ResourceType") as string) ?? "Unknown";
+						groundResources[resType] = (groundResources[resType] ?? 0) + 1;
+					}
+				}
+			}
+		}
+
+		const groundList = [];
+		for (const [rt, count] of pairs(groundResources)) {
+			groundList.push(`${rt}=${count}`);
+		}
+		context += `Resources Grounded (Owned Tiles): ${groundList.size() > 0 ? groundList.join(", ") : "None"}\n`;
 		context += `Settlements: ${settlements.size()}\n`;
 
 		if (playerData.NeedsFirstSettlement) {

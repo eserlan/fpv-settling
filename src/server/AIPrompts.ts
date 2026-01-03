@@ -12,6 +12,10 @@ Action Costs:
 - Settlement: 1 Wood, 1 Brick, 1 Wheat, 1 Wool (must be connected by roads after first)
 - City: 3 Ore, 2 Wheat (upgrades an existing Settlement)
 
+Note on Resources:
+- 'Resources in Backpack' are what you have right now.
+- 'Resources Grounded' are items on the ground near your settlements that your worker is currently moving to pick up. Factor these into your planning!
+
 Strategy Tips:
 - Build roads to expand your network and reach new settlement locations.
 - After your first settlement, new settlements REQUIRE a road connection.

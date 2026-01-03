@@ -96,7 +96,7 @@ class PortManager {
 
 		// Notify client of successful trade
 		NetworkUtils.FireClient(this.Player, ServerEvents.TradeCompleted, giveResourceType, totalCost, receiveResourceType, amount, tradeRatio);
-		NetworkUtils.FireClient(this.Player, ServerEvents.SystemMessageEvent, `📦 Trade Success: ${totalCost} ${giveResourceType} -> ${amount} ${receiveResourceType}`);
+		NetworkUtils.FireClient(this.Player, ServerEvents.SystemMessageEvent, `📦 [${this.Player.Name}] Trade Success: ${totalCost} ${giveResourceType} -> ${amount} ${receiveResourceType}`);
 
 		return $tuple(true, "Trade successful");
 	}

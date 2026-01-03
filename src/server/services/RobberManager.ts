@@ -158,7 +158,7 @@ export class RobberManager implements OnStart {
 			if (total > 7) {
 				const toRemove = math.floor(total / 2);
 				playerData.ResourceManager.RemoveRandomResources(toRemove);
-				NetworkUtils.FireClient(playerData.Player, ServerEvents.SystemMessageEvent, `🏴‍☠️ Robber Penalty! You lost ${toRemove} resources.`);
+				NetworkUtils.FireClient(playerData.Player, ServerEvents.SystemMessageEvent, `🏴‍☠️ [${playerData.Player.Name}] Robber Penalty! You lost ${toRemove} resources.`);
 			}
 		}
 
