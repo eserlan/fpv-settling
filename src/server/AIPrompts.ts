@@ -42,10 +42,11 @@ ${BASE_RULES}
 Instructions:
 1. Analyze the Game State provided below.
 2. Determine the best next move.
-3. Priority order: Build Settlements/Cities > Build Roads > Trade > Wait
-4. If you have 1+ Wood and 1+ Brick but not enough for Settlement, BUILD_ROAD.
-5. Roads are essential for expanding to new settlement spots.
-6. Respond with the required JSON format.
+3. Priority order: Collect Resources > Build Settlements/Cities > Build Roads > Trade > Wait
+4. Use 'COLLECT_RESOURCE' if you see grounded resources that you need for your next build.
+5. If you have 1+ Wood and 1+ Brick but not enough for Settlement, BUILD_ROAD.
+6. Roads are essential for expanding to new settlement spots.
+7. Respond with the required JSON format.
 `,
   Expert: `
 You are a WORLD CHAMPION player of a Catan-like hex grid resource management game.
@@ -70,7 +71,7 @@ export const RESPONSE_SCHEMA = `
   "properties": {
     "action": {
       "type": "string",
-      "enum": ["BUILD_SETTLEMENT", "BUILD_ROAD", "BUILD_CITY", "END_TURN", "TRADE", "WAIT"]
+      "enum": ["BUILD_SETTLEMENT", "BUILD_ROAD", "BUILD_CITY", "END_TURN", "TRADE", "WAIT", "COLLECT_RESOURCE"]
     },
     "target": {
       "type": "string",

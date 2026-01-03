@@ -552,12 +552,21 @@ export class AIPlayer implements AIPlayerInterface {
 				}
 				break;
 			}
+			case "COLLECT_RESOURCE": {
+				const res = this.FindNearestOwnedResource(playerData);
+				if (res) {
+					this.taskQueue.push({ type: "COLLECT", part: res, position: res.Position });
+					Logger.Info("AIPlayer", `${this.Name} queued collection of ${res.GetAttribute("ResourceType")}`);
+					return; // Done
+				}
+				break;
+			}
 		}
 
 		if (targetPos && buildingType) {
 			this.taskQueue.push({ type: "BUILD", buildingType, position: targetPos });
 			Logger.Info("AIPlayer", `${this.Name} queued ${buildingType} at ${targetPos}`);
-		} else {
+		} else if (action !== "COLLECT_RESOURCE") {
 			Logger.Warn("AIPlayer", `${this.Name} couldn't find a valid target for ${action}`);
 		}
 
