@@ -205,19 +205,15 @@ export class PulseManager implements OnStart, OnTick {
 				if (!tileType) continue;
 				const [resourceKey, resourceData] = ResourceTypes.GetByTileType(tileType);
 				if (resourceKey && resourceData) {
-					// Spawn one resource for EVERY unique owner
+					// Spawn one resource for EVERY settlement/city adjacent to this tile
 					const owners = this.tileOwnershipManager.GetTileOwners(tileQ, tileR);
-					const uniqueOwners = new Set<number>();
 
 					for (const owner of owners) {
-						if (!uniqueOwners.has(owner.playerUserId)) {
-							uniqueOwners.add(owner.playerUserId);
-							this.SpawnResource(tile, resourceKey, resourceData);
-							spawnedResources[resourceKey] = (spawnedResources[resourceKey] ?? 0) + 1;
+						this.SpawnResource(tile, resourceKey, resourceData);
+						spawnedResources[resourceKey] = (spawnedResources[resourceKey] ?? 0) + 1;
 
-							if (!playerDrops[owner.playerUserId]) playerDrops[owner.playerUserId] = {};
-							playerDrops[owner.playerUserId][resourceKey] = (playerDrops[owner.playerUserId][resourceKey] ?? 0) + 1;
-						}
+						if (!playerDrops[owner.playerUserId]) playerDrops[owner.playerUserId] = {};
+						playerDrops[owner.playerUserId][resourceKey] = (playerDrops[owner.playerUserId][resourceKey] ?? 0) + 1;
 					}
 				}
 			}
