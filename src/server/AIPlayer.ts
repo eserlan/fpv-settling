@@ -204,7 +204,14 @@ export class AIPlayer implements AIPlayerInterface {
 			const targetPos = this.State === "MovingToResource" ? this.pendingResource?.Position : this.pendingAction?.position;
 
 			if (!targetPos || (this.State === "MovingToResource" && !this.pendingResource?.Parent)) {
-				this.CancelCurrentAction("Target lost or missing");
+				// Resource was collected (destroyed) or lost - we're done!
+				if (this.State === "MovingToResource") {
+					Logger.Debug("AIPlayer", `${this.Name} resource collected or lost, going Idle`);
+					this.pendingResource = undefined;
+					this.State = "Idle";
+				} else {
+					this.CancelCurrentAction("Target lost or missing");
+				}
 				return;
 			}
 
@@ -213,18 +220,23 @@ export class AIPlayer implements AIPlayerInterface {
 				this.FollowPath(humanoid, targetPos, playerData.GameTime);
 
 				const dist = this.Character.PrimaryPart.Position.sub(targetPos).Magnitude;
-				const arrivalThreshold = 12;
+				// Use different thresholds: closer for resources (need to touch), farther for builds
+				const arrivalThreshold = this.State === "MovingToResource" ? 5 : 12;
 
 				if (dist < arrivalThreshold) {
 					this.consecutiveStuckCount = 0;
 					if (this.State === "MovingToResource") {
-						this.pendingResource = undefined;
-						this.State = "Idle";
+						// Don't immediately go Idle - wait for the resource to be collected (destroyed)
+						// The touch-based collection should trigger soon
+						// Just stop moving and let physics handle the pickup
+						this.currentPath = undefined;
+						// Keep checking - if resource is still here next frame, we'll keep waiting
+						// The check at line 206 will catch when it's finally collected
 					} else {
 						this.State = "Executing";
 						Logger.Info("AIPlayer", `${this.Name} arrived at build site.`);
+						this.currentPath = undefined;
 					}
-					this.currentPath = undefined;
 				}
 			}
 			return;

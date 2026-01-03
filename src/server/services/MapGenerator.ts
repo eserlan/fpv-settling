@@ -224,12 +224,7 @@ export class MapGenerator implements OnStart {
 			if (asset && (asset.IsA("Model") || asset.IsA("BasePart"))) {
 				const clone = asset.Clone();
 
-				// Ensure initial anchoring
-				if (clone.IsA("BasePart")) (clone as BasePart).Anchored = true;
-				for (const part of clone.GetDescendants()) {
-					if (part.IsA("BasePart")) (part as BasePart).Anchored = true;
-				}
-
+				// Scale and position first (before parenting)
 				if (clone.IsA("Model")) {
 					if ("ScaleTo" in clone) {
 						(clone as unknown as { ScaleTo(scale: number): void }).ScaleTo(scale);
@@ -267,24 +262,18 @@ export class MapGenerator implements OnStart {
 					clone.CFrame = new CFrame(position.X, position.Y + yOffset, position.Z).mul(rotation);
 				}
 
-				// Final anchoring and welding pass
-				if (clone.IsA("BasePart")) clone.Anchored = true;
-				for (const part of clone.GetDescendants()) {
-					if (part.IsA("BasePart")) (part as BasePart).Anchored = true;
-				}
-
+				// Parent first, then anchor AFTER parenting to prevent physics issues
 				clone.Parent = parent;
 
-				// Create a WeldConstraint to the hex tile for maximum stability
-				const parentPart = parent.IsA("BasePart") ? parent : (parent.IsA("Model") ? parent.PrimaryPart : undefined);
-				if (parentPart) {
-					const mainPart = clone.IsA("BasePart") ? clone : (clone.PrimaryPart ?? clone.FindFirstChildWhichIsA("BasePart") as BasePart | undefined);
-					if (mainPart) {
-						const weld = new Instance("WeldConstraint");
-						weld.Name = "TileAnchorWeld";
-						weld.Part0 = parentPart;
-						weld.Part1 = mainPart;
-						weld.Parent = mainPart;
+				// Final anchoring pass - anchor ALL parts and disable collision for decorative objects
+				if (clone.IsA("BasePart")) {
+					clone.Anchored = true;
+					clone.CanCollide = false; // Decorative, no collision needed
+				}
+				for (const part of clone.GetDescendants()) {
+					if (part.IsA("BasePart")) {
+						(part as BasePart).Anchored = true;
+						(part as BasePart).CanCollide = false; // Decorative, no collision needed
 					}
 				}
 
