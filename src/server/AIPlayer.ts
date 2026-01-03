@@ -179,19 +179,20 @@ export class AIPlayer implements AIPlayerInterface {
 			if (humanoid) {
 				// Compute path if we don't have one
 				if (!this.currentPath) {
-					this.currentPath = PathfindingService.CreatePath({
+					const newPath = PathfindingService.CreatePath({
 						AgentRadius: 2,
 						AgentHeight: 5,
 						AgentCanJump: true,
 					});
 					const [success] = pcall(() => {
-						this.currentPath!.ComputeAsync(this.Character!.PrimaryPart!.Position, this.pendingAction!.position);
+						newPath.ComputeAsync(this.Character!.PrimaryPart!.Position, this.pendingAction!.position);
 					});
-					if (!success || this.currentPath.Status !== Enum.PathStatus.Success) {
+					if (success && newPath.Status === Enum.PathStatus.Success) {
+						this.currentPath = newPath;
+						this.currentWaypointIndex = 0;
+					} else {
 						Logger.Warn("AIPlayer", `${this.Name} pathfinding failed, using direct`);
 						this.currentPath = undefined;
-					} else {
-						this.currentWaypointIndex = 0;
 					}
 					this.lastMoveTime = playerData.GameTime;
 				}
