@@ -4,6 +4,7 @@ import { LLMService, AIAction } from "./services/LLMService";
 import { PROMPTS, SkillLevel } from "./AIPrompts";
 import * as Logger from "shared/Logger";
 import type { MapGenerator } from "./services/MapGenerator";
+import { ServerEvents } from "./ServerEvents";
 
 const PathfindingService = game.GetService("PathfindingService");
 
@@ -111,30 +112,27 @@ export class AIPlayer implements AIPlayerInterface {
 		if (!resourcesFolder) return undefined;
 
 		let nearest: BasePart | undefined;
-		let minDist = 150; // Max search distance for AI
+		let minDist = 200; // Max search distance for AI
+
+		// Get the list of tiles this player owns
+		const ownedTileKeys = playerData.TileOwnershipManager.GetPlayerTiles(playerData.Player);
+		const ownedSet = new Set<string>(ownedTileKeys);
 
 		for (const res of resourcesFolder.GetChildren()) {
 			if (res.IsA("BasePart")) {
-				const q = res.GetAttribute("TileQ") as number;
-				const r = res.GetAttribute("TileR") as number;
+				const q = res.GetAttribute("TileQ") as number | undefined;
+				const r = res.GetAttribute("TileR") as number | undefined;
 
-				// Check if AI owns this tile (via its settlements)
-				let owns = false;
-				for (const s of playerData.BuildingManager.Settlements) {
-					// This is a bit expensive but accurate
-					const dist = res.Position.sub(s.Position).Magnitude;
-					if (dist < 45) { // Settlement claim radius
-						owns = true;
-						break;
-					}
-				}
+				if (q === undefined || r === undefined) continue;
 
-				if (owns) {
-					const dist = this.Character!.PrimaryPart!.Position.sub(res.Position).Magnitude;
-					if (dist < minDist) {
-						minDist = dist;
-						nearest = res;
-					}
+				// Check if AI owns this tile using the proper key format
+				const tileKey = `${q}_${r}`;
+				if (!ownedSet.has(tileKey)) continue;
+
+				const dist = this.Character!.PrimaryPart!.Position.sub(res.Position).Magnitude;
+				if (dist < minDist) {
+					minDist = dist;
+					nearest = res;
 				}
 			}
 		}
@@ -235,6 +233,10 @@ export class AIPlayer implements AIPlayerInterface {
 			this.State = "Idle";
 			return;
 		}
+	}
+
+	public GetTaskQueueSize() {
+		return this.taskQueue.size();
 	}
 
 	private CancelCurrentAction(reason: string) {
@@ -394,18 +396,18 @@ export class AIPlayer implements AIPlayerInterface {
 		const groundResources: Record<string, number> = {};
 		const resFolder = game.Workspace.FindFirstChild("Resources");
 		if (resFolder) {
+			// Get owned tiles using the proper system
+			const ownedTileKeys = playerData.TileOwnershipManager.GetPlayerTiles(playerData.Player);
+			const ownedSet = new Set<string>(ownedTileKeys);
+
 			for (const res of resFolder.GetChildren()) {
 				if (res.IsA("BasePart")) {
-					// Check if is on owned tile
-					let owns = false;
-					for (const s of settlements) {
-						if (res.Position.sub(s.Position).Magnitude < 45) {
-							owns = true;
-							break;
-						}
-					}
+					const q = res.GetAttribute("TileQ") as number | undefined;
+					const r = res.GetAttribute("TileR") as number | undefined;
+					if (q === undefined || r === undefined) continue;
 
-					if (owns) {
+					const tileKey = `${q}_${r}`;
+					if (ownedSet.has(tileKey)) {
 						const resType = (res.GetAttribute("ResourceType") as string) ?? "Unknown";
 						groundResources[resType] = (groundResources[resType] ?? 0) + 1;
 					}
@@ -480,6 +482,7 @@ export class AIPlayer implements AIPlayerInterface {
 		const target = decision.target as string | undefined;
 
 		Logger.Info("AIPlayer", `${this.Name} (${this.Skill}) Decided: ${action} because "${reason}"`);
+		ServerEvents.SystemMessageEvent.broadcast(`🤖 [${this.Name}] Thinking: "${reason}"`);
 
 		if (action === "WAIT" || action === "END_TURN") {
 			this.State = "Idle";

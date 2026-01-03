@@ -183,6 +183,7 @@ export class GameService implements OnStart, GameState {
 			NPCManager: npcManager,
 			ResearchManager: researchManager,
 			PortManager: portManager,
+			TileOwnershipManager: this.tileOwnershipManager,
 			GameTime: 0,
 			PulseTimer: 0,
 			Settlements: [],

@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import datetime
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -45,19 +46,24 @@ def get_ai_decision(prompt, model_id, api_key=None):
     """
     if not api_key:
         api_key = os.environ.get("GEMINI_API_KEY")
-        print(f"{Colors.DEBUG}[AI-Gateway] No API Key in request, using key from .env: {'Found' if api_key else 'NOT FOUND'}{Colors.RESET}")
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        print(f"{Colors.BOLD}[{timestamp}]{Colors.RESET} {Colors.DEBUG}[AI-Gateway] No API Key in request, using key from .env: {'Found' if api_key else 'NOT FOUND'}{Colors.RESET}")
     else:
-        print(f"{Colors.DEBUG}[AI-Gateway] Using API Key provided in request (length: {len(api_key)}){Colors.RESET}")
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        print(f"{Colors.BOLD}[{timestamp}]{Colors.RESET} {Colors.DEBUG}[AI-Gateway] Using API Key provided in request (length: {len(api_key)}){Colors.RESET}")
 
     if not api_key:
-        print(f"{Colors.ERROR}[AI-Gateway] ERROR: No Gemini API Key configured!{Colors.RESET}")
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        print(f"{Colors.BOLD}[{timestamp}]{Colors.RESET} {Colors.ERROR}[AI-Gateway] ERROR: No Gemini API Key configured!{Colors.RESET}")
         raise ValueError("No Gemini API Key configured. Please add GEMINI_API_KEY to your .env file or Roblox Secrets.")
 
     try:
-        print(f"{Colors.INFO}[AI-Gateway] Initializing Gemini Client...{Colors.RESET}")
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        print(f"{Colors.BOLD}[{timestamp}]{Colors.RESET} {Colors.INFO}[AI-Gateway] Initializing Gemini Client...{Colors.RESET}")
         client = genai.Client(api_key=api_key)
         
-        print(f"{Colors.INFO}[AI-Gateway] Sending request to {model_id}...{Colors.RESET}")
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        print(f"{Colors.BOLD}[{timestamp}]{Colors.RESET} {Colors.INFO}[AI-Gateway] Sending request to {model_id}...{Colors.RESET}")
         
         # We explicitly request JSON and provide the schema for Gemini 3
         response = client.models.generate_content(
@@ -71,7 +77,8 @@ def get_ai_decision(prompt, model_id, api_key=None):
         )
 
         if not response or not response.text:
-            print(f"{Colors.WARN}[AI-Gateway] Received empty response from Gemini.{Colors.RESET}")
+            timestamp = datetime.now().strftime("%H:%M:%S")
+            print(f"{Colors.BOLD}[{timestamp}]{Colors.RESET} {Colors.WARN}[AI-Gateway] Received empty response from Gemini.{Colors.RESET}")
             return None
 
         # Sometimes Gemini wraps JSON in markdown for some reason even with response_mime_type
@@ -81,9 +88,11 @@ def get_ai_decision(prompt, model_id, api_key=None):
         elif clean_text.startswith("```"):
             clean_text = clean_text[3:-3].strip()
 
-        print(f"{Colors.INFO}[AI-Gateway] Success! Decision received.{Colors.RESET}")
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        print(f"{Colors.BOLD}[{timestamp}]{Colors.RESET} {Colors.INFO}[AI-Gateway] Success! Decision received.{Colors.RESET}")
         return clean_text
 
     except Exception as e:
-        print(f"{Colors.ERROR}[AI-Gateway] SDK Exception: {e}{Colors.RESET}")
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        print(f"{Colors.BOLD}[{timestamp}]{Colors.RESET} {Colors.ERROR}[AI-Gateway] SDK Exception: {e}{Colors.RESET}")
         raise e

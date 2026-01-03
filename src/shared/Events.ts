@@ -4,6 +4,7 @@ interface ServerEvents {
     ClientRequest(actionType: string, ...args: unknown[]): void;
     DevEvent(action: string): void;
     CollectEvent(action: "GetInventory"): void;
+    ReadyForPulse(): void;
 
     // Lobby Room Events
     JoinRoom(roomId: number): void;
@@ -31,6 +32,7 @@ interface ClientEvents {
     ResearchStarted(techName: string, researchTime: number): void;
     ResearchCompleted(techName: string): void;
     TimerEvent(time: number): void;
+    PulseVotesUpdate(readyCount: number, totalCount: number): void;
     PortClaimed(portType: string): void;
     HarborMasterUpdate(points: number): void;
     TradeCompleted(

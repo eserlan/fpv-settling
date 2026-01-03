@@ -73,7 +73,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"OK")
         except Exception as e:
-            print(f"{Colors.ERROR}Error processing log: {e}{Colors.RESET}")
+            timestamp = datetime.now().strftime("%H:%M:%S")
+            print(f"{Colors.BOLD}[{timestamp}]{Colors.RESET} {Colors.ERROR}Error processing log: {e}{Colors.RESET}")
             self.send_response(400)
             self.end_headers()
 
@@ -88,7 +89,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             model = data.get("model", "gemini-3-flash-preview")
             api_key = data.get("apiKey")
 
-            print(f"{Colors.BOLD}[Server]{Colors.RESET} AI Decision Request for {model}")
+            timestamp = datetime.now().strftime("%H:%M:%S")
+            print(f"{Colors.BOLD}[{timestamp}]{Colors.RESET} {Colors.INFO}[Server]{Colors.RESET} AI Decision Request for {model}")
             
             result_text = ai_gateway.get_ai_decision(prompt, model, api_key)
             
@@ -103,7 +105,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         except ValueError as ve:
             self.send_error_response(401, str(ve))
         except Exception as e:
-            print(f"{Colors.ERROR}AI Decision Handler Error: {e}{Colors.RESET}")
+            timestamp = datetime.now().strftime("%H:%M:%S")
+            print(f"{Colors.BOLD}[{timestamp}]{Colors.RESET} {Colors.ERROR}AI Decision Handler Error: {e}{Colors.RESET}")
             self.send_error_response(500, str(e))
 
     def send_error_response(self, code, message):

@@ -23,6 +23,7 @@ export class PulseManager implements OnStart, OnTick {
 	private gameStarted = false;
 	private GameManagerRef: GameState | undefined;
 	private pulsesSinceLastSeven = 0;
+	private readyPlayers = new Set<number>();
 
 	private rng = new Random();
 
@@ -52,12 +53,79 @@ export class PulseManager implements OnStart, OnTick {
 			this.pulseTimer -= deltaTime;
 			if (math.floor(this.pulseTimer) < math.floor(this.pulseTimer + deltaTime)) {
 				ServerEvents.TimerEvent.broadcast(math.floor(this.pulseTimer));
+				this.BroadcastReadyStatus();
+			}
+
+			// Check if all players are ready to skip wait
+			if (this.pulseTimer > 5 && this.allPlayersVotedReady()) {
+				Logger.Info("PulseManager", "All players ready for next pulse! Skipping wait...");
+				this.pulseTimer = 0;
 			}
 		}
 
 		if (this.pulseTimer <= 0) {
 			this.ExecutePulse();
 		}
+	}
+
+	private allPlayersVotedReady(): boolean {
+		if (!this.GameManagerRef) return false;
+
+		const playerDataMap = this.GameManagerRef.PlayerData;
+		let totalPlayers = 0;
+		let readyCount = 0;
+
+		for (const [userId, playerData] of pairs(playerDataMap)) {
+			totalPlayers++;
+			const entity = playerData.Player;
+
+			if (!typeIs(entity, "Instance")) {
+				// AI is ready if Idle and no tasks
+				const ai = entity as import("../AIPlayer").AIPlayer;
+				if (ai.State === "Idle" && ai.GetTaskQueueSize() === 0) {
+					readyCount++;
+				}
+			} else {
+				// Humans must explicitly vote
+				if (this.readyPlayers.has(userId as number)) {
+					readyCount++;
+				}
+			}
+		}
+
+		return totalPlayers > 0 && readyCount === totalPlayers;
+	}
+
+	public SetPlayerReady(userId: number, ready: boolean) {
+		if (ready) {
+			this.readyPlayers.add(userId);
+		} else {
+			this.readyPlayers.delete(userId);
+		}
+		this.BroadcastReadyStatus();
+	}
+
+	private BroadcastReadyStatus() {
+		if (!this.GameManagerRef) return;
+
+		const playerDataMap = this.GameManagerRef.PlayerData;
+		let totalPlayers = 0;
+		let readyCount = 0;
+
+		for (const [userId, playerData] of pairs(playerDataMap)) {
+			totalPlayers++;
+			const entity = playerData.Player;
+			if (!typeIs(entity, "Instance")) {
+				const ai = entity as import("../AIPlayer").AIPlayer;
+				if (ai.State === "Idle" && ai.GetTaskQueueSize() === 0) {
+					readyCount++;
+				}
+			} else if (this.readyPlayers.has(userId as number)) {
+				readyCount++;
+			}
+		}
+
+		ServerEvents.PulseVotesUpdate.broadcast(readyCount, totalPlayers);
 	}
 
 	public AssignTileNumbers() {
@@ -125,6 +193,7 @@ export class PulseManager implements OnStart, OnTick {
 
 			const matchingTiles = this.GetMatchingTiles(total);
 			const spawnedResources: Record<string, number> = {};
+			const playerDrops: Record<number, Record<string, number>> = {};
 			const robberPos = this.robberManager.GetRobberPosition();
 
 			for (const tile of matchingTiles) {
@@ -145,18 +214,25 @@ export class PulseManager implements OnStart, OnTick {
 							uniqueOwners.add(owner.playerUserId);
 							this.SpawnResource(tile, resourceKey, resourceData);
 							spawnedResources[resourceKey] = (spawnedResources[resourceKey] ?? 0) + 1;
+
+							if (!playerDrops[owner.playerUserId]) playerDrops[owner.playerUserId] = {};
+							playerDrops[owner.playerUserId][resourceKey] = (playerDrops[owner.playerUserId][resourceKey] ?? 0) + 1;
 						}
 					}
 				}
 			}
 
 			if (matchingTiles.size() > 0) {
-				const resourceList = new Array<string>();
-				for (const [resource, count] of pairs(spawnedResources)) {
-					const data = ResourceTypes.Get(resource);
-					resourceList.push(`${count}x ${data?.Icon ?? ""} ${resource}`);
+				ServerEvents.SystemMessageEvent.broadcast(`🎲 [ROLL: ${total}] Resources dropped!`);
+				for (const [userId, drops] of pairs(playerDrops)) {
+					const playerName = this.GameManagerRef?.PlayerData[userId as number]?.Player.Name ?? `Player ${userId}`;
+					const dropList = new Array<string>();
+					for (const [res, count] of pairs(drops)) {
+						const data = ResourceTypes.Get(res);
+						dropList.push(`${count}x ${data?.Icon ?? ""} ${res}`);
+					}
+					ServerEvents.SystemMessageEvent.broadcast(`  👤 ${playerName}: ${dropList.join(", ")}`);
 				}
-				ServerEvents.SystemMessageEvent.broadcast(`🎲 [ROLL: ${total}] Resources dropped: ${resourceList.join(", ")}`);
 			} else {
 				ServerEvents.SystemMessageEvent.broadcast(`🎲 [ROLL: ${total}] No matching tiles.`);
 			}
@@ -165,6 +241,8 @@ export class PulseManager implements OnStart, OnTick {
 
 		this.isRolling = false;
 		this.pulseTimer = PULSE_INTERVAL;
+		this.readyPlayers.clear();
+		this.BroadcastReadyStatus();
 		this.GameManagerRef?.UpdateScores();
 	}
 

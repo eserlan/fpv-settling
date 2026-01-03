@@ -7,6 +7,7 @@ export interface PlayerData {
 	NPCManager: import("./NPCManager");
 	ResearchManager: import("./ResearchManager");
 	PortManager: import("./PortManager");
+	TileOwnershipManager: import("./services/TileOwnershipManager").TileOwnershipManager;
 	GameTime: number;
 	PulseTimer: number;
 	Settlements: unknown[];

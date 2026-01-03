@@ -57,6 +57,51 @@ countdownLabel.Font = Enum.Font.GothamBold;
 countdownLabel.Text = "60";
 countdownLabel.Parent = timerFrame;
 
+// Ready button and status
+const readyButton = new Instance("TextButton");
+readyButton.Name = "ReadyButton";
+readyButton.Size = new UDim2(0, 120, 0, 40);
+readyButton.Position = new UDim2(0.5, -60, 0, 110);
+readyButton.BackgroundColor3 = Color3.fromRGB(60, 180, 60);
+readyButton.TextColor3 = new Color3(1, 1, 1);
+readyButton.Text = "READY";
+readyButton.Font = Enum.Font.GothamBold;
+readyButton.TextSize = 18;
+readyButton.Visible = false;
+readyButton.Parent = screenGui;
+
+const readyCorner = new Instance("UICorner");
+readyCorner.CornerRadius = new UDim(0, 8);
+readyCorner.Parent = readyButton;
+
+const readyStatusLabel = new Instance("TextLabel");
+readyStatusLabel.Name = "ReadyStatusLabel";
+readyStatusLabel.Size = new UDim2(0, 200, 0, 30);
+readyStatusLabel.Position = new UDim2(0.5, -100, 0, 155);
+readyStatusLabel.BackgroundTransparency = 1;
+readyStatusLabel.TextColor3 = new Color3(1, 1, 1);
+readyStatusLabel.TextStrokeTransparency = 0.5;
+readyStatusLabel.Text = "";
+readyStatusLabel.Font = Enum.Font.Gotham;
+readyStatusLabel.TextSize = 14;
+readyStatusLabel.Visible = false;
+readyStatusLabel.Parent = screenGui;
+
+let isReady = false;
+
+readyButton.MouseButton1Click.Connect(() => {
+	if (isReady) return;
+	isReady = true;
+	readyButton.Text = "WAITING...";
+	readyButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100);
+	ClientEvents.ReadyForPulse.fire();
+});
+
+ClientEvents.PulseVotesUpdate.connect((ready, total) => {
+	readyStatusLabel.Text = `READY: ${ready} / ${total}`;
+	readyStatusLabel.Visible = total > 1 || ready > 0;
+});
+
 // Dice result display (center, appears during roll)
 const diceFrame = new Instance("Frame");
 diceFrame.Name = "DiceFrame";
@@ -112,9 +157,11 @@ ClientEvents.TimerEvent.connect((seconds) => {
 		countdownLabel.Text = "Place Settlement!";
 		countdownLabel.TextColor3 = Color3.fromRGB(255, 255, 100);
 		timerLabel.Text = "🏠 Build First";
+		readyButton.Visible = false;
 	} else {
 		timerLabel.Text = "⏱️ Next Pulse";
 		countdownLabel.Text = tostring(seconds);
+		readyButton.Visible = true;
 
 		// Flash when low
 		if (seconds <= 5) {
@@ -144,6 +191,11 @@ ClientEvents.PulseEvent.connect((eventType, ...args) => {
 
 		// Show final result
 		diceDisplay.Text = `🎲 ${die1} + ${die2} = ${total} 🎲`;
+
+		// Reset ready state for next pulse
+		isReady = false;
+		readyButton.Text = "READY";
+		readyButton.BackgroundColor3 = Color3.fromRGB(60, 180, 60);
 	} else if (eventType === "RollComplete") {
 		const [die1, die2, total, matchingCount] = args as [number, number, number, number];
 		if (matchingCount > 0) {

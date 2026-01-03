@@ -93,6 +93,10 @@ export class NetworkService implements OnStart {
             }
         });
 
+        this.serverEvents.ReadyForPulse.connect((player: Player) => {
+            this.pulseManager.SetPlayerReady(player.UserId, true);
+        });
+
         this.serverEvents.DevEvent.connect((player: Player, action: string) => {
             if (action === "ForcePulse") {
                 Logger.Info("NetworkService", `Force pulse triggered by ${player.Name}`);
