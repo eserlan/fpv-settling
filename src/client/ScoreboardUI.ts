@@ -75,7 +75,7 @@ const updateScores = (scores: { userId: number; name: string; score: number }[])
     layout.Parent = playerList;
 
     // Sort scores descending
-    scores.sort((a, b) => b.score > a.score);
+    scores.sort((a, b) => a.score > b.score);
 
     for (let i = 0; i < scores.size(); i++) {
         const data = scores[i];

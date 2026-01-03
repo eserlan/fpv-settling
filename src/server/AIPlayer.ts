@@ -20,6 +20,7 @@ export class AIPlayer implements AIPlayerInterface {
 	private pendingResource?: BasePart;
 	private actionsThisPulse: number = 0;
 	private lastPulsePhase: number = 1; // 0 for [60-30], 1 for [30-0]
+	private thoughtPending: boolean = false;
 
 	// Pathfinding
 	private currentPath?: Path;
@@ -142,7 +143,29 @@ export class AIPlayer implements AIPlayerInterface {
 	public Update(deltaTime: number, playerData: PlayerData, mapGenerator: MapGenerator) {
 		if (!this.Character || !this.Character.PrimaryPart) return;
 
-		// Priority 1: Collect nearby resources on owned tiles
+		// 0. Detect Pulse Phase Transitions (must happen regardless of state)
+		const pulseTimer = playerData.PulseTimer;
+		if (pulseTimer !== -1) {
+			const currentPhase = pulseTimer > 30 ? 0 : 1;
+			if (currentPhase !== this.lastPulsePhase) {
+				this.lastPulsePhase = currentPhase;
+				this.thoughtPending = true;
+				const phaseName = currentPhase === 0 ? "Pulse Reset" : "Mid-Pulse";
+				Logger.Info("AIPlayer", `${this.Name} phase transition: ${phaseName} (pending thought)`);
+			}
+		}
+
+		// Priority 1: Strategic Thinking (Pulse synchronized)
+		if (this.State === "Idle") {
+			if (this.thoughtPending || playerData.NeedsFirstSettlement) {
+				this.thoughtPending = false;
+				this.State = "Thinking";
+				this.Think(playerData, mapGenerator);
+				return;
+			}
+		}
+
+		// Priority 2: Collect nearby resources on owned tiles
 		if (this.State === "Idle") {
 			const resource = this.FindNearestOwnedResource(playerData);
 			if (resource) {
@@ -204,31 +227,7 @@ export class AIPlayer implements AIPlayerInterface {
 			return;
 		}
 
-		// Thinking: Synchronized with Pulse (60s and 30s)
-		if (this.State === "Idle") {
-			const pulseTimer = playerData.PulseTimer;
-			let shouldThink = false;
-
-			// Special case: Initial settlement placement (before pulse starts)
-			if (playerData.NeedsFirstSettlement) {
-				shouldThink = true;
-			} else if (pulseTimer > 30 && this.lastPulsePhase === 1) {
-				// Pulse just happened (reset to 60)
-				this.lastPulsePhase = 0;
-				shouldThink = true;
-				Logger.Info("AIPlayer", `${this.Name} pulse reset detected, thinking...`);
-			} else if (pulseTimer <= 30 && this.lastPulsePhase === 0) {
-				// 30 seconds passed
-				this.lastPulsePhase = 1;
-				shouldThink = true;
-				Logger.Info("AIPlayer", `${this.Name} mid-pulse detected, thinking...`);
-			}
-
-			if (shouldThink) {
-				this.State = "Thinking";
-				this.Think(playerData, mapGenerator);
-			}
-		}
+		// Thinking block removed (now handled at top)
 	}
 
 	private FollowPath(humanoid: Humanoid, targetPos: Vector3, gameTime: number) {
