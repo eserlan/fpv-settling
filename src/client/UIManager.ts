@@ -110,9 +110,23 @@ const refreshBuildingList = () => {
 		}
 	}
 
+	// Show placeholder if no buildings
+	if (itemCount === 0) {
+		const placeholder = new Instance("TextLabel");
+		placeholder.Name = "Placeholder";
+		placeholder.Size = new UDim2(1, -10, 0, 60);
+		placeholder.BackgroundTransparency = 1;
+		placeholder.Text = "No buildings yet.\nBuild a settlement first!";
+		placeholder.TextColor3 = Color3.fromRGB(150, 150, 150);
+		placeholder.Font = Enum.Font.Gotham;
+		placeholder.TextSize = 14;
+		placeholder.TextWrapped = true;
+		placeholder.Parent = buildingList;
+	}
+
 	// Update title with count
 	buildingTitle.Text = `Buildings (${itemCount})`;
-	buildingList.CanvasSize = new UDim2(0, 0, 0, itemCount * 35);
+	buildingList.CanvasSize = new UDim2(0, 0, 0, math.max(itemCount * 35, 60));
 };
 
 const resetCamBtn = new Instance("TextButton");
