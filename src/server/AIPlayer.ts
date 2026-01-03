@@ -301,6 +301,37 @@ export class AIPlayer implements AIPlayerInterface {
 		}
 	}
 
+	private CalculateSpotScore(vertex: BasePart): number {
+		let totalScore = 0;
+		const mapFolder = game.Workspace.FindFirstChild("Map");
+		if (!mapFolder) return 0;
+
+		// Settlement spots (vertices) touch up to 3 tiles
+		for (let i = 1; i <= 3; i++) {
+			const q = vertex.GetAttribute(`Tile${i}Q`) as number | undefined;
+			const r = vertex.GetAttribute(`Tile${i}R`) as number | undefined;
+			if (q === undefined) continue;
+
+			// Find tile with these coordinates
+			for (const tile of mapFolder.GetChildren()) {
+				if (tile.IsA("Model") && tile.PrimaryPart) {
+					if (tile.PrimaryPart.GetAttribute("Q") === q && tile.PrimaryPart.GetAttribute("R") === r) {
+						const diceNum = tile.PrimaryPart.GetAttribute("DiceNumber") as number | undefined;
+						const tileType = tile.PrimaryPart.GetAttribute("TileType") as string | undefined;
+
+						if (diceNum && tileType !== "Desert") {
+							// Probability score: 6 and 8 are best (5 dots), 2 and 12 are worst (1 dot)
+							const score = 6 - math.abs(7 - diceNum);
+							totalScore += score;
+						}
+						break;
+					}
+				}
+			}
+		}
+		return totalScore;
+	}
+
 	private GatherContext(playerData: PlayerData, mapGenerator: MapGenerator): string {
 		const resources = playerData.ResourceManager.Resources;
 		const settlements = playerData.BuildingManager.Settlements;
@@ -313,31 +344,49 @@ export class AIPlayer implements AIPlayerInterface {
 
 		if (playerData.NeedsFirstSettlement) {
 			context += `STATUS: Must build INITIAL SETTLEMENT.\n`;
-			const validOptions = [];
-			for (let i = 0; i < 8; i++) {
+			const spots: { name: string; score: number }[] = [];
+			for (let i = 0; i < 15; i++) {
 				const v = mapGenerator.GetRandomVertex();
 				if (v && (v.GetAttribute("AdjacentTileCount") as number ?? 0) >= 2) {
-					validOptions.push(v.Name);
+					const score = this.CalculateSpotScore(v);
+					spots.push({ name: v.Name, score: score });
 				}
 			}
-			context += `Suggested Start Locations: ${validOptions.join(", ")}\n`;
+			// Sort by score (descending) and take top 5
+			spots.sort((a, b) => a.score > b.score);
+
+			const suggestions: string[] = [];
+			for (let i = 0; i < math.min(5, spots.size()); i++) {
+				const s = spots[i];
+				suggestions.push(`${s.name} (Score: ${s.score})`);
+			}
+			context += `Best Available Start Locations: ${suggestions.join(", ")}\n`;
+			context += `(Score represents combined dice probability of adjacent tiles. Higher is better.)\n`;
 		} else {
 			context += `STATUS: Expanding.\n`;
 
-			// Find nearby expansion vertices (connected to roads)
-			const validSpots = [];
-			for (let i = 0; i < 5; i++) {
+			// Find potential expansion spots with scores
+			const spots: { name: string; score: number }[] = [];
+			for (let i = 0; i < 10; i++) {
 				const v = mapGenerator.GetRandomVertex();
-				if (v) validSpots.push(v.Name);
+				if (v) {
+					const score = this.CalculateSpotScore(v);
+					spots.push({ name: v.Name, score: score });
+				}
 			}
-			context += `Potential Expansion Spots (Vertices): ${validSpots.join(", ")}\n`;
+			spots.sort((a, b) => a.score > b.score);
 
-			// Find connected edges for roads
+			const suggestions: string[] = [];
+			for (let i = 0; i < math.min(5, spots.size()); i++) {
+				const s = spots[i];
+				suggestions.push(`${s.name} (Score: ${s.score})`);
+			}
+			context += `Potential Expansion Spots & Scores: ${suggestions.join(", ")}\n`;
+
 			const suggestedEdges = [];
 			if (settlements.size() > 0) {
 				const s = settlements[math.random(0, settlements.size() - 1)];
 				if (s && s.Position) {
-					// We could find specific adjacent edges here, but for now just hint at expanding from this settlement
 					suggestedEdges.push(`Edge near ${s.Id}`);
 				}
 			}

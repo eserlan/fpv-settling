@@ -14,8 +14,9 @@ Action Costs:
 
 Strategy Tips:
 - Build roads to expand your network and reach new settlement locations.
-- After your first free settlement, new settlements REQUIRE a road connection.
-- If you can't afford a settlement, build roads to prepare for expansion.
+- After your first settlement, new settlements REQUIRE a road connection.
+- Use 'Scores' provided in the game state to find the best spots. Higher scores means more resources.
+- A score of 8-12 is excellent, 4-7 is okay, <4 is poor.
 `;
 
 export const PROMPTS: Record<SkillLevel, string> = {
