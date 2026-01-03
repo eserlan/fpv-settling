@@ -298,7 +298,7 @@ export class MapGenerator implements OnStart {
 				}
 
 				if (tileData.Name === "Forest") {
-					for (let i = 1; i <= this.rng.NextInteger(6, 12); i += 1) {
+					for (let i = 1; i <= this.rng.NextInteger(2, 3); i += 1) {
 						const angle = math.rad(this.rng.NextNumber(0, 360));
 						const dist = this.rng.NextNumber(8, 25);
 						const pos = worldPos.add(new Vector3(math.cos(angle) * dist, baseY, math.sin(angle) * dist));

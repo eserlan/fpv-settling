@@ -12,7 +12,7 @@ const TileTypes: Record<string, TileInfo> = {
 		Name: "Forest",
 		Resource: "Wood",
 		Color: Color3.fromHex("#1B4D3E"), // Deep Forest Green
-		Frequency: 4,
+		Frequency: 2,
 	},
 	Fields: {
 		Name: "Fields",
