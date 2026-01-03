@@ -81,6 +81,20 @@ class BuildingManager {
 							return $tuple(false, "Settlement already exists here");
 						}
 					}
+
+					// DISTANCE RULE: Settlements must be at least 2 edges apart from ALL other settlements
+					// In our hex grid, that's approximately 50 studs minimum distance
+					const MIN_SETTLEMENT_DISTANCE = 50;
+					for (const s of folder.GetChildren()) {
+						if (s.IsA("Model") && s.PrimaryPart) {
+							const dist = nearestVertex.Position.sub(s.PrimaryPart.Position).Magnitude;
+							if (dist < MIN_SETTLEMENT_DISTANCE) {
+								const ownerName = s.GetAttribute("OwnerName") as string ?? "another player";
+								Logger.Warn("BuildingManager", `${this.Player.Name} tried to build too close to ${ownerName}'s settlement (${math.floor(dist)} studs)`);
+								return $tuple(false, `Too close to existing settlement (must be 2+ edges apart)`);
+							}
+						}
+					}
 				}
 
 				finalPosition = nearestVertex.Position;
