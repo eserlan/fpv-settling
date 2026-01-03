@@ -29,6 +29,7 @@ export class AIPlayer implements AIPlayerInterface {
 	private lastMoveTime: number = 0;
 	private lastCheckedPosition?: Vector3;
 	private lastPositionTime: number = 0;
+	private consecutiveStuckCount: number = 0;
 
 	private llmService: LLMService;
 
@@ -199,9 +200,10 @@ export class AIPlayer implements AIPlayerInterface {
 				this.FollowPath(humanoid, targetPos, playerData.GameTime);
 
 				const dist = this.Character.PrimaryPart.Position.sub(targetPos).Magnitude;
-				const arrivalThreshold = this.State === "MovingToResource" ? 8 : 12;
+				const arrivalThreshold = 12;
 
 				if (dist < arrivalThreshold) {
+					this.consecutiveStuckCount = 0;
 					if (this.State === "MovingToResource") {
 						this.pendingResource = undefined;
 						this.State = "Idle";
@@ -240,6 +242,7 @@ export class AIPlayer implements AIPlayerInterface {
 		this.pendingAction = undefined;
 		this.pendingResource = undefined;
 		this.currentPath = undefined;
+		this.consecutiveStuckCount = 0;
 		this.State = "Idle";
 		// Clear queue if we are totally stuck, so we can re-evaluate on next pulse
 		if (reason === "Stuck" || reason === "Timeout") {
@@ -278,13 +281,29 @@ export class AIPlayer implements AIPlayerInterface {
 		if (gameTime - this.lastPositionTime > 3) {
 			const travelled = this.lastCheckedPosition ? myPos.sub(this.lastCheckedPosition).Magnitude : 10;
 			if (travelled < 2) {
-				Logger.Warn("AIPlayer", `${this.Name} hasn't progressed much, recomputing path...`);
+				this.consecutiveStuckCount++;
+				Logger.Warn("AIPlayer", `${this.Name} hasn't progressed much (${this.consecutiveStuckCount}/6), recomputing path...`);
+
+				if (this.consecutiveStuckCount >= 6) {
+					this.CancelCurrentAction("Stuck");
+					this.consecutiveStuckCount = 0;
+					return;
+				}
+
 				this.currentPath = undefined; // Force recalculate
 				humanoid.Jump = true; // Try jumping out of it
+
+				// Nudge if really stuck
+				if (this.consecutiveStuckCount > 3) {
+					const nudge = new Vector3(math.random(-10, 10), 0, math.random(-10, 10));
+					humanoid.MoveTo(myPos.add(nudge));
+				}
+
 				this.lastPositionTime = gameTime;
 				this.lastCheckedPosition = myPos;
 				return;
 			}
+			// Don't reset stuck count here, only on successful arrival or state change
 			this.lastPositionTime = gameTime;
 			this.lastCheckedPosition = myPos;
 		}
