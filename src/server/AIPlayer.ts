@@ -38,7 +38,7 @@ export class AIPlayer implements AIPlayerInterface {
 
 	public Kick(message?: string) {
 		// No-op for AI
-		print(`AI Player ${this.Name} kicked: ${message}`);
+		Logger.Info("AIPlayer", `${this.Name} kicked: ${message}`);
 	}
 
 	public Spawn(position: Vector3) {
@@ -267,43 +267,59 @@ export class AIPlayer implements AIPlayerInterface {
 
 		// Call LLM
 		try {
-			const decision = await this.llmService.GetDecision(prompt, context);
+			const decision = await this.llmService.GetDecision(this.Name, prompt, context);
 			if (decision) {
 				this.ExecuteAction(decision, playerData, mapGenerator);
 			} else {
 				this.State = "Idle";
 			}
 		} catch (e) {
-			Logger.Warn("AIPlayer", `Thinking failed: ${e}`);
+			Logger.Warn("AIPlayer", `[${this.Name}] Thinking failed: ${e}`);
 			this.State = "Idle";
 		}
 	}
 
 	private GatherContext(playerData: PlayerData, mapGenerator: MapGenerator): string {
 		const resources = playerData.ResourceManager.Resources;
-		const settlements = playerData.BuildingManager.Settlements.size();
+		const settlements = playerData.BuildingManager.Settlements;
+		const buildings = playerData.BuildingManager.Buildings;
 
 		let context = `My Name: ${this.Name}\n`;
 		context += `Skill Level: ${this.Skill}\n`;
 		context += `Resources: Wood=${resources.Wood}, Brick=${resources.Brick}, Wheat=${resources.Wheat}, Wool=${resources.Wool}, Ore=${resources.Ore}\n`;
-		context += `Victory Points (Estimated): ${settlements}\n`;
+		context += `Settlements: ${settlements.size()}\n`;
 
 		if (playerData.NeedsFirstSettlement) {
 			context += `STATUS: Must build INITIAL SETTLEMENT.\n`;
 			const validOptions = [];
-			for (let i = 0; i < 5; i++) {
+			for (let i = 0; i < 8; i++) {
 				const v = mapGenerator.GetRandomVertex();
-				if (v) validOptions.push(v.Name);
+				if (v && (v.GetAttribute("AdjacentTileCount") as number ?? 0) >= 2) {
+					validOptions.push(v.Name);
+				}
 			}
-			context += `Available Settlement Spots: ${validOptions.join(", ")}\n`;
+			context += `Suggested Start Locations: ${validOptions.join(", ")}\n`;
 		} else {
-			context += `STATUS: Normal Play.\n`;
-			const validOptions = [];
+			context += `STATUS: Expanding.\n`;
+
+			// Find nearby expansion vertices (connected to roads)
+			const validSpots = [];
 			for (let i = 0; i < 5; i++) {
 				const v = mapGenerator.GetRandomVertex();
-				if (v) validOptions.push(v.Name);
+				if (v) validSpots.push(v.Name);
 			}
-			context += `Potential Expansion Spots: ${validOptions.join(", ")}\n`;
+			context += `Potential Expansion Spots (Vertices): ${validSpots.join(", ")}\n`;
+
+			// Find connected edges for roads
+			const suggestedEdges = [];
+			if (settlements.size() > 0) {
+				const s = settlements[math.random(0, settlements.size() - 1)];
+				if (s && s.Position) {
+					// We could find specific adjacent edges here, but for now just hint at expanding from this settlement
+					suggestedEdges.push(`Edge near ${s.Id}`);
+				}
+			}
+			context += `Expansion Directions: ${suggestedEdges.join(", ")}\n`;
 		}
 
 		return context;
@@ -312,7 +328,7 @@ export class AIPlayer implements AIPlayerInterface {
 	private ExecuteAction(decision: AIAction, playerData: PlayerData, mapGenerator: MapGenerator) {
 		const action = decision.action ? (decision.action as string).upper() : "WAIT";
 		const reason = decision.reason ?? "No reason provided";
-		const target = decision.target ? (decision.target as string).upper() : undefined;
+		const target = decision.target ? (decision.target as string) : undefined;
 
 		const resources = playerData.ResourceManager.Resources;
 
@@ -329,10 +345,9 @@ export class AIPlayer implements AIPlayerInterface {
 
 		switch (action) {
 			case "BUILD_SETTLEMENT": {
-				// Check resources (first settlement is free)
-				const isFree = playerData.NeedsFirstSettlement;
-				if (!isFree && (resources.Wood < 1 || resources.Brick < 1 || resources.Wheat < 1 || resources.Wool < 1)) {
-					Logger.Warn("AIPlayer", `${this.Name} can't afford Settlement`);
+				// Check resources - settlements always cost resources
+				if (resources.Wood < 1 || resources.Brick < 1 || resources.Wheat < 1 || resources.Wool < 1) {
+					Logger.Warn("AIPlayer", `${this.Name} can't afford Settlement (need 1 each of Wood, Brick, Wheat, Wool)`);
 					this.State = "Idle";
 					return;
 				}
@@ -356,7 +371,7 @@ export class AIPlayer implements AIPlayerInterface {
 					return;
 				}
 
-				// Roads must connect to existing settlements
+				// Roads must connect to existing settlements or roads
 				const settlements = playerData.BuildingManager.Settlements;
 				if (settlements.size() === 0) {
 					Logger.Warn("AIPlayer", `${this.Name} can't build Road (no settlements)`);
@@ -364,19 +379,43 @@ export class AIPlayer implements AIPlayerInterface {
 					return;
 				}
 
-				// Find an edge near one of our settlements
+				// Scan for vacant edges near settlements
 				buildingType = "Road";
-				const settlement = settlements[math.random(0, settlements.size() - 1)];
-				if (settlement && settlement.Position) {
-					// Find nearest edge to settlement
-					const [nearestEdge] = mapGenerator.FindNearestEdge(settlement.Position);
-					if (nearestEdge) {
-						targetPos = nearestEdge.Position;
+				for (const s of settlements) {
+					const edgesFolder = game.Workspace.FindFirstChild("Edges");
+					if (!edgesFolder) break;
+
+					// Find an edge that touches this settlement but has no road
+					for (const edge of edgesFolder.GetChildren()) {
+						if (edge.IsA("BasePart")) {
+							const dist = edge.Position.sub(s.Position).Magnitude;
+							if (dist < 45) { // Searching radius
+								const key = edge.GetAttribute("Key") as string;
+
+								// Check if already has a road
+								const buildingsFolder = game.Workspace.FindFirstChild("Buildings");
+								let occupied = false;
+								if (buildingsFolder) {
+									for (const b of buildingsFolder.GetChildren()) {
+										if (b.GetAttribute("Key") === key) {
+											occupied = true;
+											break;
+										}
+									}
+								}
+
+								if (!occupied) {
+									targetPos = edge.Position;
+									break;
+								}
+							}
+						}
 					}
+					if (targetPos) break;
 				}
 
 				if (!targetPos) {
-					Logger.Warn("AIPlayer", `${this.Name} couldn't find edge near settlement`);
+					Logger.Warn("AIPlayer", `${this.Name} couldn't find vacant expansion edge`);
 					this.State = "Idle";
 					return;
 				}

@@ -35,7 +35,7 @@ class NPCManager {
 	HireNPC(npcType: string, position?: Vector3) {
 		const npcInfo = NPCTypes[npcType];
 		if (!npcInfo) {
-			Logger.Warn("NPCManager", `Invalid NPC type: ${npcType}`);
+			Logger.Warn("NPCManager", `[${this.Player.Name}] Invalid NPC type: ${npcType}`);
 			return $tuple(false, "Invalid NPC type");
 		}
 
@@ -166,7 +166,7 @@ class NPCManager {
 		}
 
 		// Not enough food - NPCs might leave or become unhappy
-		Logger.Warn("NPCManager", "Not enough food to maintain NPCs!");
+		Logger.Warn("NPCManager", `[${this.Player.Name}] Not enough food to maintain NPCs!`);
 		return false;
 	}
 

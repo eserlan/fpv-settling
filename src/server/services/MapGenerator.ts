@@ -647,6 +647,14 @@ export class MapGenerator implements OnStart {
 	public FindVertexById(id: string): BasePart | undefined {
 		const vertexFolder = game.Workspace.FindFirstChild("Vertices");
 		if (!vertexFolder) return undefined;
+
+		// Case-insensitive search
+		for (const child of vertexFolder.GetChildren()) {
+			if (child.Name.lower() === id.lower()) {
+				return child as BasePart;
+			}
+		}
+
 		return vertexFolder.FindFirstChild(id) as BasePart;
 	}
 }

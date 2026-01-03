@@ -35,9 +35,11 @@ class ResourceManager {
 	AddResource(resourceType: string, amount: number) {
 		const resourceInfo = ResourceTypes.Get(resourceType);
 		if (!resourceInfo) {
-			Logger.Warn("ResourceManager", `Invalid resource type: ${resourceType}`);
+			Logger.Warn("ResourceManager", `[${this.Player.Name}] Invalid resource type: ${resourceType}`);
 			return false;
 		}
+
+		Logger.Info("ResourceManager", `[${this.Player.Name}] Adding ${amount} ${resourceType}`);
 
 		const maxStack = resourceInfo.MaxStack;
 		const currentAmount = this.Resources[resourceType] ?? 0;
@@ -60,16 +62,25 @@ class ResourceManager {
 	RemoveResource(resourceType: string, amount: number) {
 		const resourceInfo = ResourceTypes.Get(resourceType);
 		if (!resourceInfo) {
-			Logger.Warn("ResourceManager", `Invalid resource type: ${resourceType}`);
+			Logger.Warn("ResourceManager", `[${this.Player.Name}] Invalid resource type: ${resourceType}`);
 			return false;
 		}
 
-		if ((this.Resources[resourceType] ?? 0) >= amount) {
-			this.Resources[resourceType] = (this.Resources[resourceType] ?? 0) - amount;
+		const current = this.Resources[resourceType] ?? 0;
+		if (current >= amount) {
+			Logger.Info("ResourceManager", `[${this.Player.Name}] Removing ${amount} ${resourceType}. (Before: ${current})`);
+			this.Resources[resourceType] = current - amount;
+
+			// Log current state
+			let state = "";
+			for (const [k, v] of pairs(this.Resources)) state += `${k}=${v} `;
+			Logger.Debug("ResourceManager", `[${this.Player.Name}] New State: ${state}`);
+
 			NetworkUtils.FireClient(this.Player, ServerEvents.ResourceUpdate, this.Resources);
 			return true;
 		}
 
+		Logger.Warn("ResourceManager", `[${this.Player.Name}] Failed to remove ${amount} ${resourceType} (only had ${current})`);
 		return false;
 	}
 
@@ -133,6 +144,7 @@ class ResourceManager {
 		}
 
 		if (removedCount > 0) {
+			Logger.Info("ResourceManager", `[${this.Player.Name}] Randomly removed ${removedCount} resources: ${resourcesToRemove.join(", ")}`);
 			NetworkUtils.FireClient(this.Player, ServerEvents.ResourceUpdate, this.Resources);
 		}
 

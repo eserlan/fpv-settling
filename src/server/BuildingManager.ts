@@ -2,6 +2,7 @@ import { MapGenerator } from "./services/MapGenerator";
 import { TileOwnershipManager } from "./services/TileOwnershipManager";
 
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
+const HttpService = game.GetService("HttpService");
 import BuildingTypes from "shared/BuildingTypes";
 import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
@@ -62,27 +63,59 @@ class BuildingManager {
 
 		let finalPosition = position;
 		let finalRotation: Vector3 | undefined;
+		let snapKey: string | undefined;
 
 		if (buildingTypeData.IsSettlement) {
 			const [nearestVertex, dist] = this.mapGenerator.FindNearestVertex(position);
-			if (nearestVertex) {
+			if (nearestVertex && dist < 15) {
 				const adjCount = (nearestVertex.GetAttribute("AdjacentTileCount") as number) ?? 0;
-				if (adjCount < 2) return $tuple(false, "Invalid settlement location (must touch 2+ tiles)");
+				if (adjCount < 2) return $tuple(false, "Invalid settlement location (must touch 2+ hexes)");
+
+				snapKey = nearestVertex.GetAttribute("Key") as string;
+
+				// Check if occupied
+				const folder = game.Workspace.FindFirstChild("Settlements");
+				if (folder) {
+					for (const s of folder.GetChildren()) {
+						if (s.IsA("Model") && s.GetAttribute("Key") === snapKey) {
+							return $tuple(false, "Settlement already exists here");
+						}
+					}
+				}
+
 				finalPosition = nearestVertex.Position;
 			}
 		} else if (buildingTypeData.IsRoad) {
 			const [nearestEdge, dist] = this.mapGenerator.FindNearestEdge(position);
-			if (nearestEdge && dist < 30) {
+			if (nearestEdge && dist < 20) {
+				snapKey = nearestEdge.GetAttribute("Key") as string;
+
+				// Check if occupied
+				const folder = game.Workspace.FindFirstChild("Buildings");
+				if (folder) {
+					for (const b of folder.GetChildren()) {
+						if (b.IsA("Model") && b.GetAttribute("Key") === snapKey) {
+							return $tuple(false, "Road already exists here");
+						}
+					}
+				}
+
 				finalPosition = nearestEdge.Position;
 				const [rx, ry, rz] = nearestEdge.CFrame.ToEulerAnglesXYZ();
 				finalRotation = new Vector3(math.deg(rx), math.deg(ry), math.deg(rz));
+			} else {
+				return $tuple(false, "Could not find valid edge for road");
 			}
 		}
 
-		const isFreeFirstSettlement = buildingTypeData.IsSettlement && !this.HasPlacedFirstSettlement;
-		if (!isFreeFirstSettlement) {
-			if (!this.ResourceManager.HasResources(buildingTypeData.Cost)) return $tuple(false, "Not enough resources");
-			for (const [resourceType, amount] of pairs(buildingTypeData.Cost)) this.ResourceManager.RemoveResource(resourceType, amount);
+		// Always check and deduct resources
+		if (!this.ResourceManager.HasResources(buildingTypeData.Cost)) {
+			Logger.Warn("BuildingManager", `${this.Player.Name} doesn't have resources for ${buildingType}`);
+			return $tuple(false, "Not enough resources");
+		}
+		Logger.Info("BuildingManager", `${this.Player.Name} paying for ${buildingType}: ${HttpService.JSONEncode(buildingTypeData.Cost)}`);
+		for (const [resourceType, amount] of pairs(buildingTypeData.Cost)) {
+			this.ResourceManager.RemoveResource(resourceType, amount);
 		}
 
 		const buildingId = this.Buildings.size() + 1;
@@ -97,6 +130,7 @@ class BuildingManager {
 			Data: buildingTypeData,
 			IsSettlement: buildingTypeData.IsSettlement,
 			OwnerId: this.Player.UserId,
+			SnapKey: snapKey,
 		};
 
 		if (buildingTypeData.BuildTime === 0) {
@@ -108,7 +142,10 @@ class BuildingManager {
 			NetworkUtils.FireClient(this.Player, ServerEvents.ConstructionStarted, buildingId, buildingType, finalPosition);
 		}
 
-		if (buildingTypeData.IsSettlement && !this.HasPlacedFirstSettlement) this.HasPlacedFirstSettlement = true;
+		if (buildingTypeData.IsSettlement && !this.HasPlacedFirstSettlement) {
+			this.HasPlacedFirstSettlement = true;
+			Logger.Info("BuildingManager", `${this.Player.Name} used free settlement, next will cost resources`);
+		}
 		return $tuple(true, buildingId);
 	}
 
@@ -323,6 +360,7 @@ class BuildingManager {
 			building.Model.Destroy();
 			building.Model = undefined;
 		}
+		Logger.Info("BuildingManager", `[${this.Player.Name}] Completed building ${building.Type} (ID: ${building.Id})`);
 		this.CreateBuildingModel(building);
 		if (building.IsSettlement) {
 			const settlementId = `${this.Player.UserId}_${building.Id}`;

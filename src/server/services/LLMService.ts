@@ -16,12 +16,13 @@ const GATEWAY_URL = "http://localhost:8765/v1/decide";
 
 @Service({})
 export class LLMService {
-	private requestQueue: { prompt: string; callback: (response: AIAction | undefined) => void }[] = [];
+	private requestQueue: { playerName: string; prompt: string; callback: (response: AIAction | undefined) => void }[] = [];
 	private isProcessing = false;
 
-	public async GetDecision(systemPrompt: string, gameStatePrompt: string): Promise<AIAction | undefined> {
+	public async GetDecision(playerName: string, systemPrompt: string, gameStatePrompt: string): Promise<AIAction | undefined> {
 		return new Promise((resolve) => {
 			this.requestQueue.push({
+				playerName: playerName,
 				prompt: `${systemPrompt}\n\nCurrent Game State:\n${gameStatePrompt}`,
 				callback: resolve,
 			});
@@ -40,14 +41,14 @@ export class LLMService {
 		}
 
 		task.spawn(() => {
-			const result = this.CallGateway(request.prompt, DEFAULT_MODEL);
+			const result = this.CallGateway(request.playerName, request.prompt, DEFAULT_MODEL);
 			request.callback(result);
 			this.isProcessing = false;
 			this.ProcessQueue();
 		});
 	}
 
-	private CallGateway(prompt: string, model: string): AIAction | undefined {
+	private CallGateway(playerName: string, prompt: string, model: string): AIAction | undefined {
 		try {
 			const response = HttpService.RequestAsync({
 				Url: GATEWAY_URL,
@@ -64,27 +65,27 @@ export class LLMService {
 				const result = HttpService.JSONDecode(response.Body) as AIAction;
 				return result;
 			} else {
-				Logger.Warn("LLMService", `Gateway Error: ${response.StatusCode} - ${response.StatusMessage}`);
-				return this.MockDecision();
+				Logger.Warn("LLMService", `[${playerName}] Gateway Error: ${response.StatusCode} - ${response.StatusMessage}`);
+				return this.MockDecision(playerName);
 			}
 		} catch (e) {
-			Logger.Warn("LLMService", `Gateway Connection Failed: ${e}. Is log_server.py running?`);
-			return this.MockDecision();
+			Logger.Warn("LLMService", `[${playerName}] Gateway Connection Failed: ${e}. Is log_server.py running?`);
+			return this.MockDecision(playerName);
 		}
 	}
 
-	private MockDecision(): AIAction {
+	private MockDecision(playerName: string): AIAction {
 		// Much more aggressive when gateway isn't available
 		const roll = math.random();
 		if (roll < 0.7) {
-			Logger.Info("LLMService", "Mock: Building settlement");
+			Logger.Info("LLMService", `[${playerName}] Mock: Building settlement`);
 			return { action: "BUILD_SETTLEMENT", reason: "Mock: Building settlement (gateway offline)" };
 		}
 		if (roll < 0.9) {
-			Logger.Info("LLMService", "Mock: Building road");
+			Logger.Info("LLMService", `[${playerName}] Mock: Building road`);
 			return { action: "BUILD_ROAD", reason: "Mock: Building road (gateway offline)" };
 		}
-		Logger.Info("LLMService", "Mock: Waiting");
+		Logger.Info("LLMService", `[${playerName}] Mock: Waiting`);
 		return { action: "WAIT", reason: "Mock: Waiting briefly" };
 	}
 }

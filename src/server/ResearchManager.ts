@@ -25,7 +25,7 @@ class ResearchManager {
 	StartResearch(techName: string) {
 		const tech = TechTree[techName];
 		if (!tech) {
-			Logger.Warn("ResearchManager", `Invalid technology: ${techName}`);
+			Logger.Warn("ResearchManager", `[${this.Player.Name}] Invalid technology: ${techName}`);
 			return $tuple(false, "Invalid technology");
 		}
 
@@ -102,7 +102,7 @@ class ResearchManager {
 		// This method could trigger events or update player stats
 		Logger.Debug(
 			"ResearchManager",
-			`Applied tech effect: ${tech.Effect} with modifier: ${tech.Modifier ?? "N/A"}`,
+			`[${this.Player.Name}] Applied tech effect: ${tech.Effect} with modifier: ${tech.Modifier ?? "N/A"}`,
 		);
 	}
 
