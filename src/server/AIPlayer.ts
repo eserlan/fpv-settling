@@ -15,12 +15,11 @@ export class AIPlayer implements AIPlayerInterface {
 	public Skill: SkillLevel;
 
 	// AI Logic State
-	public NextActionTime: number = 0;
 	public State: "Idle" | "Thinking" | "Moving" | "Executing" | "MovingToResource" = "Idle";
 	private pendingAction?: { type: string, position: Vector3, actionData?: AIAction };
 	private pendingResource?: BasePart;
-	private lastActedPulse: number = -1;
 	private actionsThisPulse: number = 0;
+	private lastPulsePhase: number = 1; // 0 for [60-30], 1 for [30-0]
 
 	// Pathfinding
 	private currentPath?: Path;
@@ -202,15 +201,30 @@ export class AIPlayer implements AIPlayerInterface {
 
 			this.pendingAction = undefined;
 			this.State = "Idle";
-			this.NextActionTime = playerData.GameTime + 5; // Short pause after building
 			return;
 		}
 
-		// Thinking: Every 30 seconds when Idle
-		if (this.State === "Idle" && playerData.GameTime >= this.NextActionTime) {
-			this.State = "Thinking";
-			this.Think(playerData, mapGenerator);
-			this.NextActionTime = playerData.GameTime + 30; // Think every 30s
+		// Thinking: Synchronized with Pulse (60s and 30s)
+		if (this.State === "Idle") {
+			const pulseTimer = playerData.PulseTimer;
+			let shouldThink = false;
+
+			if (pulseTimer > 30 && this.lastPulsePhase === 1) {
+				// Pulse just happened (reset to 60)
+				this.lastPulsePhase = 0;
+				shouldThink = true;
+				Logger.Info("AIPlayer", `${this.Name} pulse reset detected, thinking...`);
+			} else if (pulseTimer <= 30 && this.lastPulsePhase === 0) {
+				// 30 seconds passed
+				this.lastPulsePhase = 1;
+				shouldThink = true;
+				Logger.Info("AIPlayer", `${this.Name} mid-pulse detected, thinking...`);
+			}
+
+			if (shouldThink) {
+				this.State = "Thinking";
+				this.Think(playerData, mapGenerator);
+			}
 		}
 	}
 

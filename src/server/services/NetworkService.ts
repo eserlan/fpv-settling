@@ -23,13 +23,31 @@ export class NetworkService implements OnStart {
 
             if (actionType === "PlaceBuilding") {
                 const [buildingType, position] = args as [string, Vector3];
-                playerData.BuildingManager.StartBuilding(buildingType, position);
+                const [success, result] = playerData.BuildingManager.StartBuilding(buildingType, position);
+                if (!success) {
+                    Logger.Warn("NetworkService", `[${player.Name}] Failed to PlaceBuilding ${buildingType}: ${result}`);
+                } else {
+                    Logger.Info("NetworkService", `[${player.Name}] PlaceBuilding ${buildingType} success`);
+                }
             } else if (actionType === "PlaceFoundation") {
                 const [blueprintName, position, rotation, snapKey] = args as [string, Vector3, Vector3, string];
-                playerData.BuildingManager.PlaceFoundation(blueprintName, position, rotation, snapKey);
+                const [success, result] = playerData.BuildingManager.PlaceFoundation(
+                    blueprintName,
+                    position,
+                    rotation,
+                    snapKey,
+                );
+                if (!success) {
+                    Logger.Warn("NetworkService", `[${player.Name}] Failed to PlaceFoundation ${blueprintName}: ${result}`);
+                } else {
+                    Logger.Info("NetworkService", `[${player.Name}] PlaceFoundation ${blueprintName} success`);
+                }
             } else if (actionType === "DepositResource") {
                 const [foundationId, resourceType] = args as [number, string];
-                Logger.Debug("NetworkService", `${player.Name} requesting deposit of ${resourceType} into foundation ${foundationId}`);
+                Logger.Debug(
+                    "NetworkService",
+                    `${player.Name} requesting deposit of ${resourceType} into foundation ${foundationId}`,
+                );
 
                 const inventory = this.collectionManager.GetInventory(player);
                 if (inventory && inventory[resourceType] && inventory[resourceType] > 0) {
@@ -42,13 +60,26 @@ export class NetworkService implements OnStart {
                 }
             } else if (actionType === "HireNPC") {
                 const [npcType, position] = args as [string, Vector3];
-                playerData.NPCManager.HireNPC(npcType, position);
+                const [success, result] = playerData.NPCManager.HireNPC(npcType, position);
+                if (!success) {
+                    Logger.Warn("NetworkService", `[${player.Name}] Failed to HireNPC ${npcType}: ${result}`);
+                } else {
+                    Logger.Info("NetworkService", `[${player.Name}] HireNPC ${npcType} success`);
+                }
             } else if (actionType === "StartResearch") {
                 const [techName] = args as [string];
-                playerData.ResearchManager.StartResearch(techName);
+                const [success, result] = playerData.ResearchManager.StartResearch(techName);
+                if (!success) {
+                    Logger.Warn("NetworkService", `[${player.Name}] Failed to StartResearch ${techName}: ${result}`);
+                } else {
+                    Logger.Info("NetworkService", `[${player.Name}] StartResearch ${techName} success`);
+                }
             } else if (actionType === "ExecuteTrade") {
                 const [giveResource, receiveResource, amount] = args as [string, string, number];
-                Logger.Debug("NetworkService", `${player.Name} requesting trade: ${amount ?? 1} x (${giveResource} -> ${receiveResource})`);
+                Logger.Debug(
+                    "NetworkService",
+                    `${player.Name} requesting trade: ${amount ?? 1} x (${giveResource} -> ${receiveResource})`,
+                );
                 playerData.PortManager.ExecuteTrade(giveResource, receiveResource, amount ?? 1);
             }
         });
@@ -61,7 +92,6 @@ export class NetworkService implements OnStart {
                 }
             }
         });
-
 
         this.serverEvents.DevEvent.connect((player: Player, action: string) => {
             if (action === "ForcePulse") {

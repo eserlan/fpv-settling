@@ -8,6 +8,7 @@ export interface PlayerData {
 	ResearchManager: import("./ResearchManager");
 	PortManager: import("./PortManager");
 	GameTime: number;
+	PulseTimer: number;
 	Settlements: unknown[];
 	NeedsFirstSettlement: boolean;
 }

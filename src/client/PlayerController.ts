@@ -54,7 +54,7 @@ task.spawn(() => {
 
 			selectedBlueprint = blueprintName;
 			placementMode = true;
-			Logger.Info("PlayerController", `Entering placement mode for: ${blueprintName}`);
+			Logger.Info("PlayerController", `[${player.Name}] Entering placement mode for: ${blueprintName}`);
 		});
 	} else {
 		Logger.Error("PlayerController", `Failed to load BlueprintBookUI: ${result}`);
@@ -406,7 +406,7 @@ const updatePlacementPreview = () => {
 		if (newValidState) {
 			Logger.Debug("Placement", `VALID placement at ${currentKey ?? "unknown"}`);
 		} else {
-			Logger.Info("Placement", `REJECTED placement at ${currentKey ?? "unknown"}`);
+			Logger.Info("Placement", `[${player.Name}] REJECTED placement at ${currentKey ?? "unknown"}`);
 		}
 		lastValidPlacement = newValidState;
 		lastLoggedKey = currentKey;
@@ -570,7 +570,7 @@ RunService.RenderStepped.Connect(() => {
 		nearbyFoundation = findNearbyFoundation();
 
 		if (nearbyFoundation && !lastFoundation) {
-			Logger.Info("PlayerController", `Now NEAR foundation: ${nearbyFoundation.Id}`);
+			Logger.Info("PlayerController", `[${player.Name}] Now NEAR foundation: ${nearbyFoundation.Id}`);
 		}
 
 		if (nearbyFoundation && promptFrame) {
@@ -613,10 +613,10 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 			const rotation = currentVertex.Rotation;
 			const snapKey = currentVertex.GetAttribute("Key") as string | undefined;
 			ClientEvents.ClientRequest.fire("PlaceFoundation", selectedBlueprint, currentVertex.Position, rotation, snapKey);
-			Logger.Info("PlayerController", `Placed foundation for ${selectedBlueprint}`);
+			Logger.Info("PlayerController", `[${player.Name}] Placed foundation for ${selectedBlueprint}`);
 			exitPlacementMode();
 		} else {
-			Logger.Warn("PlayerController", "Invalid placement location");
+			Logger.Warn("PlayerController", `[${player.Name}] Invalid placement location`);
 		}
 	}
 

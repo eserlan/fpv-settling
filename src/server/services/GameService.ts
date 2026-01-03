@@ -182,6 +182,7 @@ export class GameService implements OnStart, GameState {
 			ResearchManager: researchManager,
 			PortManager: portManager,
 			GameTime: 0,
+			PulseTimer: 0,
 			Settlements: [],
 			NeedsFirstSettlement: true,
 		};
@@ -232,8 +233,11 @@ export class GameService implements OnStart, GameState {
 	}
 
 	private handleHeartbeat(deltaTime: number) {
+		const pulseTimer = this.pulseManager.GetTimer();
+
 		for (const [userId, playerData] of pairs(this.PlayerData)) {
 			playerData.GameTime += deltaTime;
+			playerData.PulseTimer = pulseTimer;
 			playerData.BuildingManager.UpdateBuildings(deltaTime);
 			playerData.NPCManager.UpdateNPCs(deltaTime);
 			playerData.ResearchManager.UpdateResearch(deltaTime);
