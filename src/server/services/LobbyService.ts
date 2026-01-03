@@ -1,11 +1,24 @@
 import { Service, OnStart } from "@flamework/core";
-import { Players, Workspace } from "@rbxts/services";
+import { Players, Workspace, HttpService } from "@rbxts/services";
 import * as Logger from "shared/Logger";
 import { ServerEvents } from "../ServerEvents";
 import { NetworkUtils } from "../NetworkUtils";
 import { GameService } from "./GameService";
 import { SkillLevel } from "../AIPrompts";
-import type { RoomPlayer, RoomState } from "shared/RoomTypes";
+
+interface RoomPlayer {
+    name: string;
+    userId: number;
+    isAI: boolean;
+    skill?: SkillLevel;
+    isActive: boolean;
+}
+
+interface RoomState {
+    id: number;
+    players: RoomPlayer[];
+    isGameStarted: boolean;
+}
 
 @Service({})
 export class LobbyService implements OnStart {
@@ -314,7 +327,7 @@ export class LobbyService implements OnStart {
             }
         }
 
-        // Also sync to clients for any other UI (Flamework handles serialization)
-        NetworkUtils.Broadcast(ServerEvents.RoomUpdate, roomId, room);
+        // Also sync to clients for any other UI
+        NetworkUtils.Broadcast(ServerEvents.RoomUpdate, roomId, HttpService.JSONEncode(room));
     }
 }
