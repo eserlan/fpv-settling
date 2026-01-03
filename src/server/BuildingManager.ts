@@ -453,6 +453,17 @@ class BuildingManager {
 	GetBuildings() { return this.Buildings; }
 	GetSettlements() { return this.Settlements; }
 	GetBuildingsInProgress() { return this.BuildingInProgress; }
+	GetScore(): number {
+		let total = 0;
+		for (const b of this.Buildings) {
+			if (b.Completed) {
+				const typeData = BuildingTypes[b.Type as keyof typeof BuildingTypes];
+				const points = b.Blueprint?.Points ?? typeData?.Points ?? 0;
+				total += points;
+			}
+		}
+		return total;
+	}
 }
 
 export = BuildingManager;

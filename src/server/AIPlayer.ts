@@ -209,7 +209,10 @@ export class AIPlayer implements AIPlayerInterface {
 			const pulseTimer = playerData.PulseTimer;
 			let shouldThink = false;
 
-			if (pulseTimer > 30 && this.lastPulsePhase === 1) {
+			// Special case: Initial settlement placement (before pulse starts)
+			if (playerData.NeedsFirstSettlement) {
+				shouldThink = true;
+			} else if (pulseTimer > 30 && this.lastPulsePhase === 1) {
 				// Pulse just happened (reset to 60)
 				this.lastPulsePhase = 0;
 				shouldThink = true;

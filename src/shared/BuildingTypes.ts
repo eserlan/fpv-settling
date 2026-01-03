@@ -12,6 +12,7 @@ type BuildingInfo = {
 	IsRoad?: boolean;
 	Capacity?: number;
 	StorageCapacity?: number;
+	Points?: number;
 };
 
 const BuildingTypes: Record<string, BuildingInfo> = {
@@ -28,6 +29,7 @@ const BuildingTypes: Record<string, BuildingInfo> = {
 		Size: new Vector3(10, 8, 10),
 		ClaimRadius: 30, // Studs - claims tiles within this radius
 		IsSettlement: true,
+		Points: 1,
 	},
 	City: {
 		Name: "City",
@@ -41,6 +43,7 @@ const BuildingTypes: Record<string, BuildingInfo> = {
 		ClaimRadius: 40,
 		IsSettlement: true,
 		RequiresSettlement: true, // Must be built on existing settlement
+		Points: 2,
 	},
 	Road: {
 		Name: "Road",

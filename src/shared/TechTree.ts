@@ -9,6 +9,7 @@ type TechInfo = {
 	Effect: string;
 	Modifier?: number;
 	Unlocks?: string[];
+	Points?: number;
 };
 
 const TechTree: Record<string, TechInfo> = {
@@ -71,6 +72,7 @@ const TechTree: Record<string, TechInfo> = {
 		Prerequisites: ["BrickMasonry", "ImprovedTools"],
 		Effect: "BuildingCost",
 		Modifier: 0.8,
+		Points: 1,
 	},
 	Trading: {
 		Name: "Trading",

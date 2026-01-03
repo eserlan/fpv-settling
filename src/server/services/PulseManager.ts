@@ -214,14 +214,18 @@ export class PulseManager implements OnStart, OnTick {
 
 	private allPlayersReady() {
 		if (!this.GameManagerRef) return false;
-		const players = Players.GetPlayers();
-		if (players.size() === 0) return false;
 
-		for (const player of players) {
-			const playerData = this.GameManagerRef.PlayerData[player.UserId];
-			if (!playerData || !playerData.BuildingManager || !playerData.BuildingManager.HasPlacedFirstSettlement) return false;
+		const playerDataMap = this.GameManagerRef.PlayerData;
+		let count = 0;
+
+		for (const [userId, playerData] of pairs(playerDataMap)) {
+			count++;
+			if (!playerData.BuildingManager || !playerData.BuildingManager.HasPlacedFirstSettlement) {
+				return false;
+			}
 		}
-		return true;
+
+		return count > 0; // Don't start if no one is in the game
 	}
 
 	public SetGameManager(gm: GameState) {

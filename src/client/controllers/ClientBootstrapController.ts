@@ -30,6 +30,7 @@ export class ClientBootstrapController implements OnStart {
 		this.safeRequire(clientRoot, "BlueprintBookUI");
 		this.safeRequire(clientRoot, "DevPanel");
 		this.safeRequire(clientRoot, "TradeUI");
+		this.safeRequire(clientRoot, "ScoreboardUI");
 		// this.safeRequire(clientRoot, "LobbyUI");
 
 		Logger.Info("Client", "===========================================");

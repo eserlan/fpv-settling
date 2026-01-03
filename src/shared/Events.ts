@@ -41,6 +41,7 @@ interface ClientEvents {
         ratio: number,
     ): void;
     SystemMessageEvent(message: string): void;
+    ScoresUpdate(scores: { userId: number, name: string, score: number }[]): void;
 
     // Complex interaction events
     CollectEvent(action: string, ...args: unknown[]): void;

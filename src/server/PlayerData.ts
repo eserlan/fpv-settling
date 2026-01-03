@@ -11,4 +11,5 @@ export interface PlayerData {
 	PulseTimer: number;
 	Settlements: unknown[];
 	NeedsFirstSettlement: boolean;
+	Score: number;
 }

@@ -29,6 +29,8 @@ export class GameService implements OnStart, GameState {
 	private isGameStarted = false;
 	private readonly MIN_PLAYERS_TO_START = 1;
 	private readonly TARGET_PLAYER_COUNT = 4; // AI fill target
+	private scoreUpdateTimer = 0;
+	private readonly SCORE_UPDATE_INTERVAL = 2; // Broadcast scores every 2 seconds
 
 	constructor(
 		private mapGenerator: MapGenerator,
@@ -185,6 +187,7 @@ export class GameService implements OnStart, GameState {
 			PulseTimer: 0,
 			Settlements: [],
 			NeedsFirstSettlement: true,
+			Score: 0,
 		};
 	}
 
@@ -251,6 +254,28 @@ export class GameService implements OnStart, GameState {
 			if (!typeIs(entity, "Instance")) { // Is AI
 				(entity as AIPlayer).Update(deltaTime, playerData, this.mapGenerator);
 			}
+		}
+
+		// Periodic Score Update and Broadcast
+		this.scoreUpdateTimer += deltaTime;
+		if (this.scoreUpdateTimer >= this.SCORE_UPDATE_INTERVAL) {
+			this.scoreUpdateTimer = 0;
+			const scores: { userId: number; name: string; score: number }[] = [];
+
+			for (const [userId, playerData] of pairs(this.PlayerData)) {
+				const buildingScore = playerData.BuildingManager.GetScore();
+				const researchScore = playerData.ResearchManager.GetScore();
+				const currentScore = buildingScore + researchScore;
+
+				playerData.Score = currentScore;
+				scores.push({
+					userId: userId as number,
+					name: playerData.Player.Name,
+					score: currentScore,
+				});
+			}
+
+			NetworkUtils.Broadcast(ServerEvents.ScoresUpdate, scores);
 		}
 	}
 }

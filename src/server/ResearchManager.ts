@@ -154,6 +154,18 @@ class ResearchManager {
 
 		return modifier;
 	}
+
+	// Get total points from research
+	GetScore() {
+		let total = 0;
+		for (const techName of this.ResearchedTechs) {
+			const tech = TechTree[techName];
+			if (tech && tech.Points) {
+				total += tech.Points;
+			}
+		}
+		return total;
+	}
 }
 
 export = ResearchManager;

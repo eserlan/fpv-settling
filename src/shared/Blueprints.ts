@@ -13,6 +13,7 @@ type BlueprintInfo = {
 	RequiresExisting?: string;
 	ProductionMultiplier?: number;
 	RequiresConnection?: boolean;
+	Points?: number;
 };
 
 type BlueprintState = {
@@ -46,6 +47,7 @@ const Buildings: Record<string, BlueprintInfo> = {
 		Size: new Vector3(5, 4, 5),
 		ClaimsTiles: true,
 		FirstIsFree: true, // First settlement is free for new players
+		Points: 1,
 	},
 	City: {
 		Name: "City",
@@ -59,6 +61,7 @@ const Buildings: Record<string, BlueprintInfo> = {
 		},
 		Size: new Vector3(7, 6, 7),
 		ProductionMultiplier: 2,
+		Points: 2,
 	},
 	Road: {
 		Name: "Road",
