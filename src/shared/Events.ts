@@ -1,7 +1,15 @@
 import { Networking } from "@flamework/networking";
 
 interface ServerEvents {
-    ClientRequest(actionType: string, ...args: unknown[]): void;
+    // Typed action events (replacing generic ClientRequest)
+    PlaceBuilding(buildingType: string, position: Vector3): void;
+    PlaceFoundation(blueprintName: string, position: Vector3, rotation: Vector3, snapKey: string): void;
+    DepositResource(foundationId: number, resourceType: string): void;
+    HireNPC(npcType: string, position: Vector3): void;
+    StartResearch(techName: string): void;
+    ExecuteTrade(giveResource: string, receiveResource: string, amount: number): void;
+
+    // Utility events
     DevEvent(action: string): void;
     CollectEvent(action: "GetInventory"): void;
     ReadyForPulse(): void;

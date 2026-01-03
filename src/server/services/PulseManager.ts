@@ -218,19 +218,19 @@ export class PulseManager implements OnStart, OnTick {
 				}
 			}
 
-			if (matchingTiles.size() > 0) {
-				ServerEvents.SystemMessageEvent.broadcast(`🎲 [ROLL: ${total}] Resources dropped!`);
-				for (const [userId, drops] of pairs(playerDrops)) {
-					const playerName = this.GameManagerRef?.PlayerData[userId as number]?.Player.Name ?? `Player ${userId}`;
-					const dropList = new Array<string>();
-					for (const [res, count] of pairs(drops)) {
-						const data = ResourceTypes.Get(res);
-						dropList.push(`${count}x ${data?.Icon ?? ""} ${res}`);
-					}
-					ServerEvents.SystemMessageEvent.broadcast(`  👤 ${playerName}: ${dropList.join(", ")}`);
+			// Only announce if resources actually dropped (someone owns the tiles)
+			let totalDropped = 0;
+			for (const [_, count] of pairs(spawnedResources)) {
+				totalDropped += count;
+			}
+
+			if (totalDropped > 0) {
+				const resourceList = new Array<string>();
+				for (const [resource, count] of pairs(spawnedResources)) {
+					const data = ResourceTypes.Get(resource);
+					resourceList.push(`${count}x ${data?.Icon ?? ""} ${resource}`);
 				}
-			} else {
-				ServerEvents.SystemMessageEvent.broadcast(`🎲 [ROLL: ${total}] No matching tiles.`);
+				ServerEvents.SystemMessageEvent.broadcast(`🎲 [ROLL: ${total}] ${resourceList.join(", ")}`);
 			}
 			ServerEvents.PulseEvent.broadcast("RollComplete", die1, die2, total, matchingTiles.size());
 		}

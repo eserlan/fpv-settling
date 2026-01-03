@@ -459,7 +459,7 @@ const exitPlacementMode = () => {
 // Foundation interaction state
 let nearbyFoundation:
 	| {
-		Id: unknown;
+		Id: number;
 		Model: Model;
 		Part: BasePart;
 	}
@@ -510,7 +510,7 @@ const findNearbyFoundation = () => {
 	const playerPos = character.PrimaryPart.Position;
 	let closest:
 		| {
-			Id: unknown;
+			Id: number;
 			Model: Model;
 			Part: BasePart;
 		}
@@ -542,7 +542,7 @@ const findNearbyFoundation = () => {
 							if (dist < closestDist) {
 								closestDist = dist;
 								closest = {
-									Id: foundationId,
+									Id: foundationId as number,
 									Model: model,
 									Part: basePart,
 								};
@@ -612,7 +612,7 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 		if (currentVertex && isValidPlacement && selectedBlueprint) {
 			const rotation = currentVertex.Rotation;
 			const snapKey = currentVertex.GetAttribute("Key") as string | undefined;
-			ClientEvents.ClientRequest.fire("PlaceFoundation", selectedBlueprint, currentVertex.Position, rotation, snapKey);
+			ClientEvents.PlaceFoundation.fire(selectedBlueprint, currentVertex.Position, rotation, snapKey ?? "");
 			Logger.Info("PlayerController", `[${player.Name}] Placed foundation for ${selectedBlueprint}`);
 			exitPlacementMode();
 		} else {
@@ -627,7 +627,7 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 			// Deposit wood first, then brick, wheat, wool, ore in order
 			const resourcesToTry = ["Wood", "Brick", "Wheat", "Wool", "Ore"];
 			for (const resourceType of resourcesToTry) {
-				ClientEvents.ClientRequest.fire("DepositResource", nearbyFoundation.Id, resourceType);
+				ClientEvents.DepositResource.fire(nearbyFoundation.Id, resourceType);
 			}
 		} else {
 			const totalFound = (_G as Record<string, number>).FoundFoundations ?? 0;
@@ -649,7 +649,7 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 	if (input.KeyCode === Enum.KeyCode.H && isGameStarted) {
 		const character = player.Character;
 		if (character && character.PrimaryPart) {
-			ClientEvents.ClientRequest.fire("HireNPC", "Worker", character.PrimaryPart.Position);
+			ClientEvents.HireNPC.fire("Worker", character.PrimaryPart.Position);
 			Logger.Debug("PlayerController", "Requested Worker hire");
 		}
 	}
@@ -658,14 +658,14 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 	if (input.KeyCode === Enum.KeyCode.G && isGameStarted) {
 		const character = player.Character;
 		if (character && character.PrimaryPart) {
-			ClientEvents.ClientRequest.fire("HireNPC", "Guard", character.PrimaryPart.Position);
+			ClientEvents.HireNPC.fire("Guard", character.PrimaryPart.Position);
 			Logger.Debug("PlayerController", "Requested Guard hire");
 		}
 	}
 
 	// Open Research with 'R' key
 	if (input.KeyCode === Enum.KeyCode.R && isGameStarted) {
-		ClientEvents.ClientRequest.fire("StartResearch", "ImprovedTools");
+		ClientEvents.StartResearch.fire("ImprovedTools");
 		Logger.Debug("PlayerController", "Requested research: ImprovedTools");
 	}
 

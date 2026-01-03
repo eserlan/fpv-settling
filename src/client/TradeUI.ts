@@ -145,7 +145,7 @@ const createTradeUI = () => {
 	tradeButton.Parent = tradeFrame;
 
 	tradeButton.MouseButton1Click.Connect(() => {
-		ClientEvents.ClientRequest.fire("ExecuteTrade", currentGiveResource, currentReceiveResource, tradeAmount);
+		ClientEvents.ExecuteTrade.fire(currentGiveResource, currentReceiveResource, tradeAmount);
 		Logger.Info("TradeUI", `Requesting trade: ${currentGiveResource} -> ${currentReceiveResource}`);
 	});
 

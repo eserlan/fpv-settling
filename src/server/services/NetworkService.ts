@@ -17,71 +17,78 @@ export class NetworkService implements OnStart {
     ) { }
 
     onStart() {
-        this.serverEvents.ClientRequest.connect((player: Player, actionType: string, ...args: any[]) => {
+        // Typed event handlers (replacing generic ClientRequest)
+        this.serverEvents.PlaceBuilding.connect((player: Player, buildingType: string, position: Vector3) => {
             const playerData = this.gameService.PlayerData[player.UserId];
             if (!playerData) return;
 
-            if (actionType === "PlaceBuilding") {
-                const [buildingType, position] = args as [string, Vector3];
-                const [success, result] = playerData.BuildingManager.StartBuilding(buildingType, position);
-                if (!success) {
-                    Logger.Warn("NetworkService", `[${player.Name}] Failed to PlaceBuilding ${buildingType}: ${result}`);
-                } else {
-                    Logger.Info("NetworkService", `[${player.Name}] PlaceBuilding ${buildingType} success`);
-                }
-            } else if (actionType === "PlaceFoundation") {
-                const [blueprintName, position, rotation, snapKey] = args as [string, Vector3, Vector3, string];
-                const [success, result] = playerData.BuildingManager.PlaceFoundation(
-                    blueprintName,
-                    position,
-                    rotation,
-                    snapKey,
-                );
-                if (!success) {
-                    Logger.Warn("NetworkService", `[${player.Name}] Failed to PlaceFoundation ${blueprintName}: ${result}`);
-                } else {
-                    Logger.Info("NetworkService", `[${player.Name}] PlaceFoundation ${blueprintName} success`);
-                }
-            } else if (actionType === "DepositResource") {
-                const [foundationId, resourceType] = args as [number, string];
-                Logger.Debug(
-                    "NetworkService",
-                    `${player.Name} requesting deposit of ${resourceType} into foundation ${foundationId}`,
-                );
-
-                const inventory = this.collectionManager.GetInventory(player);
-                if (inventory && inventory[resourceType] && inventory[resourceType] > 0) {
-                    const [success] = playerData.BuildingManager.DepositResource(foundationId, resourceType);
-                    if (success) {
-                        this.collectionManager.RemoveResource(player, resourceType, 1);
-                    }
-                } else {
-                    Logger.Warn("NetworkService", `${player.Name} tried to deposit ${resourceType} but doesn't have any`);
-                }
-            } else if (actionType === "HireNPC") {
-                const [npcType, position] = args as [string, Vector3];
-                const [success, result] = playerData.NPCManager.HireNPC(npcType, position);
-                if (!success) {
-                    Logger.Warn("NetworkService", `[${player.Name}] Failed to HireNPC ${npcType}: ${result}`);
-                } else {
-                    Logger.Info("NetworkService", `[${player.Name}] HireNPC ${npcType} success`);
-                }
-            } else if (actionType === "StartResearch") {
-                const [techName] = args as [string];
-                const [success, result] = playerData.ResearchManager.StartResearch(techName);
-                if (!success) {
-                    Logger.Warn("NetworkService", `[${player.Name}] Failed to StartResearch ${techName}: ${result}`);
-                } else {
-                    Logger.Info("NetworkService", `[${player.Name}] StartResearch ${techName} success`);
-                }
-            } else if (actionType === "ExecuteTrade") {
-                const [giveResource, receiveResource, amount] = args as [string, string, number];
-                Logger.Debug(
-                    "NetworkService",
-                    `${player.Name} requesting trade: ${amount ?? 1} x (${giveResource} -> ${receiveResource})`,
-                );
-                playerData.PortManager.ExecuteTrade(giveResource, receiveResource, amount ?? 1);
+            const [success, result] = playerData.BuildingManager.StartBuilding(buildingType, position);
+            if (!success) {
+                Logger.Warn("NetworkService", `[${player.Name}] Failed to PlaceBuilding ${buildingType}: ${result}`);
+            } else {
+                Logger.Info("NetworkService", `[${player.Name}] PlaceBuilding ${buildingType} success`);
             }
+        });
+
+        this.serverEvents.PlaceFoundation.connect((player: Player, blueprintName: string, position: Vector3, rotation: Vector3, snapKey: string) => {
+            const playerData = this.gameService.PlayerData[player.UserId];
+            if (!playerData) return;
+
+            const [success, result] = playerData.BuildingManager.PlaceFoundation(blueprintName, position, rotation, snapKey);
+            if (!success) {
+                Logger.Warn("NetworkService", `[${player.Name}] Failed to PlaceFoundation ${blueprintName}: ${result}`);
+            } else {
+                Logger.Info("NetworkService", `[${player.Name}] PlaceFoundation ${blueprintName} success`);
+            }
+        });
+
+        this.serverEvents.DepositResource.connect((player: Player, foundationId: number, resourceType: string) => {
+            const playerData = this.gameService.PlayerData[player.UserId];
+            if (!playerData) return;
+
+            Logger.Debug("NetworkService", `${player.Name} requesting deposit of ${resourceType} into foundation ${foundationId}`);
+
+            const inventory = this.collectionManager.GetInventory(player);
+            if (inventory && inventory[resourceType] && inventory[resourceType] > 0) {
+                const [success] = playerData.BuildingManager.DepositResource(foundationId, resourceType);
+                if (success) {
+                    this.collectionManager.RemoveResource(player, resourceType, 1);
+                }
+            } else {
+                Logger.Warn("NetworkService", `${player.Name} tried to deposit ${resourceType} but doesn't have any`);
+            }
+        });
+
+        this.serverEvents.HireNPC.connect((player: Player, npcType: string, position: Vector3) => {
+            const playerData = this.gameService.PlayerData[player.UserId];
+            if (!playerData) return;
+
+            const [success, result] = playerData.NPCManager.HireNPC(npcType, position);
+            if (!success) {
+                Logger.Warn("NetworkService", `[${player.Name}] Failed to HireNPC ${npcType}: ${result}`);
+            } else {
+                Logger.Info("NetworkService", `[${player.Name}] HireNPC ${npcType} success`);
+            }
+        });
+
+        this.serverEvents.StartResearch.connect((player: Player, techName: string) => {
+            const playerData = this.gameService.PlayerData[player.UserId];
+            if (!playerData) return;
+
+            const [success, result] = playerData.ResearchManager.StartResearch(techName);
+            if (!success) {
+                Logger.Warn("NetworkService", `[${player.Name}] Failed to StartResearch ${techName}: ${result}`);
+            } else {
+                Logger.Info("NetworkService", `[${player.Name}] StartResearch ${techName} success`);
+            }
+        });
+
+        this.serverEvents.ExecuteTrade.connect((player: Player, giveResource: string, receiveResource: string, amount: number) => {
+            const playerData = this.gameService.PlayerData[player.UserId];
+            if (!playerData) return;
+
+            Logger.Debug("NetworkService", `${player.Name} requesting trade: ${amount ?? 1} x (${giveResource} -> ${receiveResource})`);
+            playerData.PortManager.ExecuteTrade(giveResource, receiveResource, amount ?? 1);
         });
 
         this.serverEvents.CollectEvent.connect((player: Player, action: string) => {
