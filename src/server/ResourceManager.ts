@@ -39,7 +39,9 @@ class ResourceManager {
 			return false;
 		}
 
-		Logger.Info("ResourceManager", `[${this.Player.Name}] Adding ${amount} ${resourceType}`);
+		if (amount > 0) {
+			Logger.Info("ResourceManager", `[${this.Player.Name}] Adding ${amount} ${resourceType}`);
+		}
 
 		const maxStack = resourceInfo.MaxStack;
 		const currentAmount = this.Resources[resourceType] ?? 0;
@@ -68,15 +70,17 @@ class ResourceManager {
 
 		const current = this.Resources[resourceType] ?? 0;
 		if (current >= amount) {
-			Logger.Info("ResourceManager", `[${this.Player.Name}] Removing ${amount} ${resourceType}. (Before: ${current})`);
-			this.Resources[resourceType] = current - amount;
+			if (amount > 0) {
+				Logger.Info("ResourceManager", `[${this.Player.Name}] Removing ${amount} ${resourceType}. (Before: ${current})`);
+				this.Resources[resourceType] = current - amount;
 
-			// Log current state
-			let state = "";
-			for (const [k, v] of pairs(this.Resources)) state += `${k}=${v} `;
-			Logger.Debug("ResourceManager", `[${this.Player.Name}] New State: ${state}`);
+				// Log current state
+				let state = "";
+				for (const [k, v] of pairs(this.Resources)) state += `${k}=${v} `;
+				Logger.Debug("ResourceManager", `[${this.Player.Name}] New State: ${state}`);
 
-			NetworkUtils.FireClient(this.Player, ServerEvents.ResourceUpdate, this.Resources);
+				NetworkUtils.FireClient(this.Player, ServerEvents.ResourceUpdate, this.Resources);
+			}
 			return true;
 		}
 
