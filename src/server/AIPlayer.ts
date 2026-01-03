@@ -20,6 +20,7 @@ export class AIPlayer implements AIPlayerInterface {
 	private pendingAction?: { type: string, position: Vector3, actionData?: AIAction };
 	private pendingResource?: BasePart;
 	private lastActedPulse: number = -1;
+	private actionsThisPulse: number = 0;
 
 	// Pathfinding
 	private currentPath?: Path;
@@ -247,14 +248,21 @@ export class AIPlayer implements AIPlayerInterface {
 
 			this.pendingAction = undefined;
 			this.State = "Idle";
+			this.actionsThisPulse++;
 			this.NextActionTime = playerData.GameTime + 2; // Pause after building
 			return;
 		}
 
 		// 3. Pulse Synchronization Check
-		// We only think if we haven't acted in the current pulse segment (60s chunks)
+		// AI can act up to 2 times per pulse (60s chunks)
 		const currentPulse = math.floor(playerData.GameTime / 60);
-		if (currentPulse <= this.lastActedPulse) return;
+		if (currentPulse !== this.lastActedPulse) {
+			// New pulse started, reset counter
+			this.lastActedPulse = currentPulse;
+			this.actionsThisPulse = 0;
+		}
+
+		if (this.actionsThisPulse >= 2) return; // Max 2 actions per pulse
 
 		// 4. Thinking Logic
 		if (playerData.GameTime < this.NextActionTime) return;
@@ -266,7 +274,6 @@ export class AIPlayer implements AIPlayerInterface {
 
 		if (this.State === "Idle") {
 			this.State = "Thinking";
-			this.lastActedPulse = currentPulse; // Mark this pulse as 'claimed' for thinking
 			this.Think(playerData, mapGenerator);
 		}
 	}
