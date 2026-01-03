@@ -1,7 +1,8 @@
 import type { AIPlayerInterface } from "shared/GameEntity";
 import type { PlayerData } from "./PlayerData";
 import { LLMService, AIAction } from "./services/LLMService";
-import { PROMPTS, SkillLevel } from "./AIPrompts";
+import { PROMPTS } from "./AIPrompts";
+import { SkillLevel } from "shared/GameTypes";
 import * as Logger from "shared/Logger";
 import type { MapGenerator } from "./services/MapGenerator";
 import { ServerEvents } from "./ServerEvents";

@@ -91,12 +91,10 @@ export class NetworkService implements OnStart {
             playerData.PortManager.ExecuteTrade(giveResource, receiveResource, amount ?? 1);
         });
 
-        this.serverEvents.CollectEvent.connect((player: Player, action: string) => {
-            if (action === "GetInventory") {
-                const inventory = this.collectionManager.GetInventory(player);
-                if (inventory) {
-                    this.serverEvents.CollectEvent.fire(player, "InventoryUpdate", inventory as any);
-                }
+        this.serverEvents.RequestInventory.connect((player: Player) => {
+            const inventory = this.collectionManager.GetInventory(player);
+            if (inventory) {
+                this.serverEvents.ResourceUpdate.fire(player, inventory as Record<string, number>);
             }
         });
 
@@ -104,7 +102,7 @@ export class NetworkService implements OnStart {
             this.pulseManager.SetPlayerReady(player.UserId, true);
         });
 
-        this.serverEvents.DevEvent.connect((player: Player, action: string) => {
+        this.serverEvents.DevEvent.connect((player: Player, action: "ForcePulse" | "AddResources") => {
             if (action === "ForcePulse") {
                 Logger.Info("NetworkService", `Force pulse triggered by ${player.Name}`);
                 this.pulseManager.ForcePulse();

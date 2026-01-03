@@ -178,13 +178,13 @@ export class PulseManager implements OnStart, OnTick {
 		const total = die1 + die2;
 
 		Logger.Info("PulseManager", `THE PULSE! Rolled ${die1} + ${die2} = ${total}`);
-		ServerEvents.PulseEvent.broadcast("RollStart", die1, die2, total);
+		ServerEvents.DiceRollStarted.broadcast(die1, die2, total);
 
 		task.wait(DICE_ROLL_DURATION);
 
 		if (total === 7) {
 			this.pulsesSinceLastSeven = 0;
-			ServerEvents.PulseEvent.broadcast("Robber");
+			ServerEvents.RobberEvent.broadcast();
 			ServerEvents.SystemMessageEvent.broadcast("🏴‍☠️ [THE ROBBER] A 7 was rolled! No resources dropped this pulse.");
 			if (this.GameManagerRef) this.robberManager.OnSevenRolled(this.GameManagerRef);
 		} else {
@@ -232,7 +232,7 @@ export class PulseManager implements OnStart, OnTick {
 				}
 				ServerEvents.SystemMessageEvent.broadcast(`🎲 [ROLL: ${total}] ${resourceList.join(", ")}`);
 			}
-			ServerEvents.PulseEvent.broadcast("RollComplete", die1, die2, total, matchingTiles.size());
+			ServerEvents.DiceRollCompleted.broadcast(die1, die2, total, matchingTiles.size());
 		}
 
 		this.isRolling = false;

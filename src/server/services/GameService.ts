@@ -21,7 +21,7 @@ import { ServerEvents } from "../ServerEvents";
 import { AIPlayer } from "../AIPlayer";
 import type { GameEntity } from "shared/GameEntity";
 import { NetworkUtils } from "../NetworkUtils";
-import { SkillLevel } from "../AIPrompts";
+import { SkillLevel } from "shared/GameTypes";
 
 @Service({})
 export class GameService implements OnStart, GameState {

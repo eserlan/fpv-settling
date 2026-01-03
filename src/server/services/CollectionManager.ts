@@ -61,7 +61,7 @@ export class CollectionManager implements OnStart, OnTick {
 
 		task.delay(0.5, () => {
 			const inventory = resourceManager.GetResources();
-			ServerEvents.CollectEvent.fire(player, "InventoryUpdate", inventory);
+			ServerEvents.ResourceUpdate.fire(player, inventory);
 		});
 		Logger.Debug("CollectionManager", `Initialized inventory for ${player.Name} with starting resources`);
 	}
@@ -123,10 +123,6 @@ export class CollectionManager implements OnStart, OnTick {
 		if (this.AddResource(entity, resourceType, amount)) {
 			this.playerCooldowns.set(userId, COLLECTION_COOLDOWN);
 			this.CreateCollectionEffect(resource.Position, resourceType);
-
-			if (typeIs(entity, "Instance")) {
-				ServerEvents.CollectEvent.fire(entity as Player, "Collected", resourceType, amount);
-			}
 
 			// Broadcast to all clients for visual feedback
 			ServerEvents.ResourceCollected.broadcast(resourceType, amount, entity.Name);

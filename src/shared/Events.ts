@@ -1,4 +1,5 @@
 import { Networking } from "@flamework/networking";
+import { SkillLevel } from "./GameTypes";
 
 // ============================================================================
 // SERVER EVENTS (Client → Server)
@@ -30,8 +31,8 @@ interface PulseActionEvents {
 
 /** Utility events - Debug and inventory */
 interface UtilityActionEvents {
-    DevEvent(action: string): void;
-    CollectEvent(action: "GetInventory"): void;
+    DevEvent(action: "ForcePulse" | "AddResources"): void;
+    RequestInventory(): void;
 }
 
 /** Combined Server Events interface */
@@ -41,9 +42,25 @@ interface ServerEvents extends GameActionEvents, LobbyActionEvents, PulseActionE
 // CLIENT EVENTS (Server → Client)
 // ============================================================================
 
+/** Room player info for lobby */
+export interface RoomPlayer {
+    name: string;
+    userId: number;
+    isAI: boolean;
+    skill?: SkillLevel;
+    isActive: boolean;
+}
+
+/** Room state for lobby */
+export interface RoomState {
+    id: number;
+    players: RoomPlayer[];
+    isGameStarted: boolean;
+}
+
 /** Lifecycle events - Game state & player presence */
 interface LifecycleEvents {
-    RoomUpdate(roomId: number, data: string): void;
+    RoomUpdate(roomId: number, room: RoomState): void;
     GameStart(): void;
     PlayerJoined(userId: number, name: string, isAI: boolean): void;
     PlayerLeft(userId: number, name: string): void;
@@ -86,7 +103,9 @@ interface NPCResearchEvents {
 interface PulseEvents {
     TimerEvent(time: number): void;
     PulseVotesUpdate(readyCount: number, totalCount: number): void;
-    PulseEvent(action: "RollStart" | "RollComplete" | "Robber", ...args: unknown[]): void;
+    DiceRollStarted(die1: number, die2: number, total: number): void;
+    DiceRollCompleted(die1: number, die2: number, total: number, matchingTiles: number): void;
+    RobberEvent(): void;
 }
 
 /** Trade events - Ports & trading */
@@ -111,7 +130,6 @@ interface ScoreEvents {
 /** System events - Messages & UI notifications */
 interface SystemEvents {
     SystemMessageEvent(message: string): void;
-    CollectEvent(action: string, ...args: unknown[]): void;
 }
 
 /** Combined Client Events interface */

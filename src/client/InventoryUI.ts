@@ -142,11 +142,9 @@ const showCollectionNotification = (resourceType: string, amount: number) => {
 };
 
 // Handle collection events
-ClientEvents.CollectEvent.connect((eventType, ...args) => {
-	if (eventType === "InventoryUpdate") {
-		updateInventory(args[0] as Record<string, number>);
-	} else if (eventType === "Collected") {
-		showCollectionNotification(args[0] as string, args[1] as number);
+ClientEvents.ResourceCollected.connect((resourceType, amount, collectorName) => {
+	if (collectorName === Players.LocalPlayer.Name) {
+		showCollectionNotification(resourceType, amount);
 	}
 });
 
@@ -157,7 +155,7 @@ ClientEvents.ResourceUpdate.connect((resources) => {
 
 // Request initial inventory
 task.delay(1, () => {
-	ClientEvents.CollectEvent.fire("GetInventory");
+	ClientEvents.RequestInventory.fire();
 });
 
 Logger.Info("InventoryUI", "Initialized");

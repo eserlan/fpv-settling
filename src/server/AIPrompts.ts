@@ -1,6 +1,4 @@
-// AI Prompts and Schemas
-
-export type SkillLevel = "Beginner" | "Intermediate" | "Expert";
+import { SkillLevel } from "shared/GameTypes";
 
 const BASE_RULES = `
 Your goal is to win by accumulating 10 victory points.

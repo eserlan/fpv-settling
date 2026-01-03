@@ -266,13 +266,6 @@ for (const name of sortedNames) {
 	card.Parent = container;
 }
 
-// Listen for inventory updates
-ClientEvents.CollectEvent.connect((action, ...args) => {
-	if (action === "InventoryUpdate") {
-		currentResources = args[0] as Record<string, number>;
-		refreshAffordability();
-	}
-});
 
 // Listen for direct resource updates (from building, trading, etc.)
 ClientEvents.ResourceUpdate.connect((resources) => {

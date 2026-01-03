@@ -173,52 +173,52 @@ ClientEvents.TimerEvent.connect((seconds) => {
 });
 
 // Handle pulse events
-ClientEvents.PulseEvent.connect((eventType, ...args) => {
-	if (eventType === "RollStart") {
-		const [die1, die2, total] = args as [number, number, number];
-		// Show dice rolling animation
-		diceFrame.Visible = true;
-		diceDisplay.Text = "🎲 Rolling... 🎲";
-		resultLabel.Text = "";
+ClientEvents.DiceRollStarted.connect((die1, die2, total) => {
+	// Show dice rolling animation
+	diceFrame.Visible = true;
+	diceDisplay.Text = "🎲 Rolling... 🎲";
+	resultLabel.Text = "";
 
-		// Animate the roll
-		for (let i = 1; i <= 10; i += 1) {
-			task.wait(0.2);
-			const fake1 = math.random(1, 6);
-			const fake2 = math.random(1, 6);
-			diceDisplay.Text = `🎲 ${fake1} + ${fake2} 🎲`;
-		}
-
-		// Show final result
-		diceDisplay.Text = `🎲 ${die1} + ${die2} = ${total} 🎲`;
-
-		// Reset ready state for next pulse
-		isReady = false;
-		readyButton.Text = "READY";
-		readyButton.BackgroundColor3 = Color3.fromRGB(60, 180, 60);
-	} else if (eventType === "RollComplete") {
-		const [die1, die2, total, matchingCount] = args as [number, number, number, number];
-		if (matchingCount > 0) {
-			resultLabel.Text = `✅ ${matchingCount} tiles produce resources!`;
-			resultLabel.TextColor3 = Color3.fromRGB(100, 255, 100);
-		} else {
-			resultLabel.Text = "❌ No matching tiles";
-			resultLabel.TextColor3 = Color3.fromRGB(255, 150, 150);
-		}
-
-		// Hide after delay
-		task.delay(4, () => {
-			diceFrame.Visible = false;
-		});
-	} else if (eventType === "Robber") {
-		diceDisplay.Text = "🎲 7 🎲";
-		resultLabel.Text = "🏴‍☠️ ROBBER! No resources this round!";
-		resultLabel.TextColor3 = Color3.fromRGB(255, 50, 50);
-
-		task.delay(4, () => {
-			diceFrame.Visible = false;
-		});
+	// Animate the roll
+	for (let i = 1; i <= 10; i += 1) {
+		task.wait(0.2);
+		const fake1 = math.random(1, 6);
+		const fake2 = math.random(1, 6);
+		diceDisplay.Text = `🎲 ${fake1} + ${fake2} 🎲`;
 	}
+
+	// Show final result
+	diceDisplay.Text = `🎲 ${die1} + ${die2} = ${total} 🎲`;
+
+	// Reset ready state for next pulse
+	isReady = false;
+	readyButton.Text = "READY";
+	readyButton.BackgroundColor3 = Color3.fromRGB(60, 180, 60);
+});
+
+ClientEvents.DiceRollCompleted.connect((die1, die2, total, matchingCount) => {
+	if (matchingCount > 0) {
+		resultLabel.Text = `✅ ${matchingCount} tiles produce resources!`;
+		resultLabel.TextColor3 = Color3.fromRGB(100, 255, 100);
+	} else {
+		resultLabel.Text = "❌ No matching tiles";
+		resultLabel.TextColor3 = Color3.fromRGB(255, 150, 150);
+	}
+
+	// Hide after delay
+	task.delay(4, () => {
+		diceFrame.Visible = false;
+	});
+});
+
+ClientEvents.RobberEvent.connect(() => {
+	diceDisplay.Text = "🎲 7 🎲";
+	resultLabel.Text = "🏴‍☠️ ROBBER! No resources this round!";
+	resultLabel.TextColor3 = Color3.fromRGB(255, 50, 50);
+
+	task.delay(4, () => {
+		diceFrame.Visible = false;
+	});
 });
 
 Logger.Info("PulseUI", "Initialized");
