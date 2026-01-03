@@ -21,6 +21,7 @@ export class AIPlayer implements AIPlayerInterface {
 	private actionsThisPulse: number = 0;
 	private lastPulsePhase: number = 1; // 0 for [60-30], 1 for [30-0]
 	private thoughtPending: boolean = false;
+	private taskQueue: Array<{ type: "BUILD" | "COLLECT", buildingType?: string, position: Vector3, part?: BasePart }> = [];
 
 	// Pathfinding
 	private currentPath?: Path;
@@ -155,24 +156,32 @@ export class AIPlayer implements AIPlayerInterface {
 			}
 		}
 
-		// Priority 1: Strategic Thinking (Pulse synchronized)
 		if (this.State === "Idle") {
+			// Priority 1: Strategic Thinking (Pulse synchronized)
 			if (this.thoughtPending || playerData.NeedsFirstSettlement) {
 				this.thoughtPending = false;
 				this.State = "Thinking";
 				this.Think(playerData, mapGenerator);
 				return;
 			}
-		}
 
-		// Priority 2: Collect nearby resources on owned tiles
-		if (this.State === "Idle") {
+			// Priority 2: Process Task Queue (Strategic decisions from Think)
+			if (this.taskQueue.size() > 0) {
+				const task = this.taskQueue.shift()!;
+				this.pendingAction = { type: task.buildingType ?? "", position: task.position };
+				this.pendingResource = task.part;
+				this.State = task.type === "BUILD" ? "Moving" : "MovingToResource";
+				return;
+			}
+
+			// Priority 3: Collect nearby resources autonomously
 			const resource = this.FindNearestOwnedResource(playerData);
 			if (resource) {
 				this.pendingResource = resource;
 				this.State = "MovingToResource";
-				this.currentPath = undefined; // Force new path
+				this.currentPath = undefined;
 				Logger.Info("AIPlayer", `${this.Name} → collecting ${resource.GetAttribute("ResourceType")}`);
+				return;
 			}
 		}
 
@@ -181,9 +190,7 @@ export class AIPlayer implements AIPlayerInterface {
 			const targetPos = this.State === "MovingToResource" ? this.pendingResource?.Position : this.pendingAction?.position;
 
 			if (!targetPos || (this.State === "MovingToResource" && !this.pendingResource?.Parent)) {
-				this.pendingResource = undefined;
-				this.currentPath = undefined;
-				this.State = "Idle";
+				this.CancelCurrentAction("Target lost or missing");
 				return;
 			}
 
@@ -226,8 +233,18 @@ export class AIPlayer implements AIPlayerInterface {
 			this.State = "Idle";
 			return;
 		}
+	}
 
-		// Thinking block removed (now handled at top)
+	private CancelCurrentAction(reason: string) {
+		Logger.Warn("AIPlayer", `${this.Name} cancelling action: ${reason}`);
+		this.pendingAction = undefined;
+		this.pendingResource = undefined;
+		this.currentPath = undefined;
+		this.State = "Idle";
+		// Clear queue if we are totally stuck, so we can re-evaluate on next pulse
+		if (reason === "Stuck" || reason === "Timeout") {
+			this.taskQueue = [];
+		}
 	}
 
 	private FollowPath(humanoid: Humanoid, targetPos: Vector3, gameTime: number) {
@@ -274,9 +291,7 @@ export class AIPlayer implements AIPlayerInterface {
 
 		// 3. Absolute Timeout (30s)
 		if (gameTime - this.lastMoveTime > 30) {
-			Logger.Warn("AIPlayer", `${this.Name} absolute move timeout reached.`);
-			this.currentPath = undefined;
-			this.State = "Idle";
+			this.CancelCurrentAction("Timeout");
 			return;
 		}
 
@@ -303,7 +318,6 @@ export class AIPlayer implements AIPlayerInterface {
 		const context = this.GatherContext(playerData, mapGenerator);
 		const prompt = PROMPTS[this.Skill];
 
-		// Call LLM
 		try {
 			const decision = await this.llmService.GetDecision(this.Name, prompt, context);
 			if (decision) {
@@ -413,16 +427,21 @@ export class AIPlayer implements AIPlayerInterface {
 	}
 
 	private ExecuteAction(decision: AIAction, playerData: PlayerData, mapGenerator: MapGenerator) {
-		const action = decision.action ? (decision.action as string).upper() : "WAIT";
+		const action = (decision.action as string ?? "WAIT").upper();
 		const reason = decision.reason ?? "No reason provided";
-		const target = decision.target ? (decision.target as string) : undefined;
-
-		const resources = playerData.ResourceManager.Resources;
+		const target = decision.target as string | undefined;
 
 		Logger.Info("AIPlayer", `${this.Name} (${this.Skill}) Decided: ${action} because "${reason}"`);
-		Logger.Info("AIPlayer", `${this.Name} Resources: W=${resources.Wood} B=${resources.Brick} Wh=${resources.Wheat} Wo=${resources.Wool} O=${resources.Ore}`);
 
 		if (action === "WAIT" || action === "END_TURN") {
+			this.State = "Idle";
+			return;
+		}
+
+		if (action === "TRADE") {
+			if (decision.resource_give && decision.resource_receive) {
+				playerData.PortManager.ExecuteTrade(decision.resource_give, decision.resource_receive);
+			}
 			this.State = "Idle";
 			return;
 		}
@@ -432,13 +451,6 @@ export class AIPlayer implements AIPlayerInterface {
 
 		switch (action) {
 			case "BUILD_SETTLEMENT": {
-				// Check resources - settlements always cost resources
-				if (resources.Wood < 1 || resources.Brick < 1 || resources.Wheat < 1 || resources.Wool < 1) {
-					Logger.Warn("AIPlayer", `${this.Name} can't afford Settlement (need 1 each of Wood, Brick, Wheat, Wool)`);
-					this.State = "Idle";
-					return;
-				}
-
 				buildingType = "Settlement";
 				if (target) {
 					const vertex = mapGenerator.FindVertexById(target);
@@ -451,35 +463,17 @@ export class AIPlayer implements AIPlayerInterface {
 				break;
 			}
 			case "BUILD_ROAD": {
-				// Check resources
-				if (resources.Wood < 1 || resources.Brick < 1) {
-					Logger.Warn("AIPlayer", `${this.Name} can't afford Road (need 1 Wood, 1 Brick)`);
-					this.State = "Idle";
-					return;
-				}
-
-				// Roads must connect to existing settlements or roads
-				const settlements = playerData.BuildingManager.Settlements;
-				if (settlements.size() === 0) {
-					Logger.Warn("AIPlayer", `${this.Name} can't build Road (no settlements)`);
-					this.State = "Idle";
-					return;
-				}
-
-				// Scan for vacant edges near settlements
 				buildingType = "Road";
+				const settlements = playerData.BuildingManager.Settlements;
+				// Scan for vacant edges near settlements
 				for (const s of settlements) {
 					const edgesFolder = game.Workspace.FindFirstChild("Edges");
 					if (!edgesFolder) break;
-
-					// Find an edge that touches this settlement but has no road
 					for (const edge of edgesFolder.GetChildren()) {
 						if (edge.IsA("BasePart")) {
 							const dist = edge.Position.sub(s.Position).Magnitude;
-							if (dist < 45) { // Searching radius
+							if (dist < 45) {
 								const key = edge.GetAttribute("Key") as string;
-
-								// Check if already has a road
 								const buildingsFolder = game.Workspace.FindFirstChild("Buildings");
 								let occupied = false;
 								if (buildingsFolder) {
@@ -490,7 +484,6 @@ export class AIPlayer implements AIPlayerInterface {
 										}
 									}
 								}
-
 								if (!occupied) {
 									targetPos = edge.Position;
 									break;
@@ -500,22 +493,9 @@ export class AIPlayer implements AIPlayerInterface {
 					}
 					if (targetPos) break;
 				}
-
-				if (!targetPos) {
-					Logger.Warn("AIPlayer", `${this.Name} couldn't find vacant expansion edge`);
-					this.State = "Idle";
-					return;
-				}
 				break;
 			}
 			case "BUILD_CITY": {
-				// Check resources
-				if (resources.Ore < 3 || resources.Wheat < 2) {
-					Logger.Warn("AIPlayer", `${this.Name} can't afford City (need 3 Ore, 2 Wheat)`);
-					this.State = "Idle";
-					return;
-				}
-
 				buildingType = "City";
 				const settlements = playerData.BuildingManager.Settlements;
 				if (settlements.size() > 0) {
@@ -524,21 +504,15 @@ export class AIPlayer implements AIPlayerInterface {
 				}
 				break;
 			}
-			case "TRADE": {
-				if (decision.resource_give && decision.resource_receive) {
-					playerData.PortManager.ExecuteTrade(decision.resource_give, decision.resource_receive);
-				}
-				this.State = "Idle";
-				return;
-			}
 		}
 
 		if (targetPos && buildingType) {
-			this.pendingAction = { type: buildingType, position: targetPos, actionData: decision };
-			this.State = "Moving";
-			Logger.Info("AIPlayer", `${this.Name} is moving to build ${buildingType}...`);
+			this.taskQueue.push({ type: "BUILD", buildingType, position: targetPos });
+			Logger.Info("AIPlayer", `${this.Name} queued ${buildingType} at ${targetPos}`);
 		} else {
-			this.State = "Idle";
+			Logger.Warn("AIPlayer", `${this.Name} couldn't find a valid target for ${action}`);
 		}
+
+		this.State = "Idle";
 	}
 }

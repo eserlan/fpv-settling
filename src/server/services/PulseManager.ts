@@ -165,6 +165,7 @@ export class PulseManager implements OnStart, OnTick {
 
 		this.isRolling = false;
 		this.pulseTimer = PULSE_INTERVAL;
+		this.GameManagerRef?.UpdateScores();
 	}
 
 	private GetMatchingTiles(diceTotal: number) {

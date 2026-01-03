@@ -29,8 +29,6 @@ export class GameService implements OnStart, GameState {
 	private isGameStarted = false;
 	private readonly MIN_PLAYERS_TO_START = 1;
 	private readonly TARGET_PLAYER_COUNT = 4; // AI fill target
-	private scoreUpdateTimer = 0;
-	private readonly SCORE_UPDATE_INTERVAL = 2; // Broadcast scores every 2 seconds
 
 	constructor(
 		private mapGenerator: MapGenerator,
@@ -102,6 +100,7 @@ export class GameService implements OnStart, GameState {
 		}
 
 		NetworkUtils.Broadcast(ServerEvents.GameStart);
+		this.UpdateScores();
 		Logger.Info("GameManager", "Game Started!");
 	}
 
@@ -140,6 +139,7 @@ export class GameService implements OnStart, GameState {
 		}
 
 		NetworkUtils.Broadcast(ServerEvents.GameStart);
+		this.UpdateScores();
 		Logger.Info("GameManager", "Game Started!");
 	}
 
@@ -256,26 +256,24 @@ export class GameService implements OnStart, GameState {
 			}
 		}
 
-		// Periodic Score Update and Broadcast
-		this.scoreUpdateTimer += deltaTime;
-		if (this.scoreUpdateTimer >= this.SCORE_UPDATE_INTERVAL) {
-			this.scoreUpdateTimer = 0;
-			const scores: { userId: number; name: string; score: number }[] = [];
+	}
 
-			for (const [userId, playerData] of pairs(this.PlayerData)) {
-				const buildingScore = playerData.BuildingManager.GetScore();
-				const researchScore = playerData.ResearchManager.GetScore();
-				const currentScore = buildingScore + researchScore;
+	public UpdateScores() {
+		const scores: { userId: number; name: string; score: number }[] = [];
 
-				playerData.Score = currentScore;
-				scores.push({
-					userId: userId as number,
-					name: playerData.Player.Name,
-					score: currentScore,
-				});
-			}
+		for (const [userId, playerData] of pairs(this.PlayerData)) {
+			const buildingScore = playerData.BuildingManager.GetScore();
+			const researchScore = playerData.ResearchManager.GetScore();
+			const currentScore = buildingScore + researchScore;
 
-			NetworkUtils.Broadcast(ServerEvents.ScoresUpdate, scores);
+			playerData.Score = currentScore;
+			scores.push({
+				userId: userId as number,
+				name: playerData.Player.Name,
+				score: currentScore,
+			});
 		}
+
+		NetworkUtils.Broadcast(ServerEvents.ScoresUpdate, scores);
 	}
 }
