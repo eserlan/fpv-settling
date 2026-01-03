@@ -241,33 +241,43 @@ helpText.TextXAlignment = Enum.TextXAlignment.Left;
 helpText.TextYAlignment = Enum.TextYAlignment.Top;
 helpText.Parent = helpFrame;
 
-// System message handler (for chat log)
-const StarterGui = game.GetService("StarterGui");
+// System message handler (for Roblox's built-in chat)
+const TextChatService = game.GetService("TextChatService");
 
-// Wait for chat to be ready
-let chatReady = false;
+// Get or wait for the RBXGeneral channel (the main chat channel)
+let generalChannel: TextChannel | undefined;
+
 task.spawn(() => {
-	let attempts = 0;
-	while (!chatReady && attempts < 30) {
-		const [success] = pcall(() => {
-			StarterGui.SetCore("ChatMakeSystemMessage", {
-				Text: "",
-				Color: new Color3(1, 1, 1),
-			});
-		});
-		if (success) {
-			chatReady = true;
-			Logger.Info("UIManager", "Chat system ready");
+	// Wait for TextChatService to be ready
+	const textChannels = TextChatService.WaitForChild("TextChannels", 10) as Folder | undefined;
+	if (textChannels) {
+		generalChannel = textChannels.WaitForChild("RBXGeneral", 10) as TextChannel | undefined;
+		if (generalChannel) {
+			Logger.Info("UIManager", "TextChatService ready - RBXGeneral channel found");
 		} else {
-			attempts += 1;
-			task.wait(0.5);
+			Logger.Warn("UIManager", "RBXGeneral channel not found, trying RBXSystem...");
+			generalChannel = textChannels.FindFirstChild("RBXSystem") as TextChannel | undefined;
 		}
+	} else {
+		Logger.Warn("UIManager", "TextChannels folder not found in TextChatService");
 	}
 });
 
-// Function to send system message to chat
+// Function to send system message to Roblox's built-in chat
 const sendSystemMessage = (message: string) => {
-	// Try to send to Roblox chat
+	// Try TextChatService first (modern chat)
+	if (generalChannel) {
+		const [success] = pcall(() => {
+			generalChannel!.DisplaySystemMessage(message);
+		});
+		if (success) {
+			Logger.Debug("UIManager", `Sent to TextChatService: ${message}`);
+			return true;
+		}
+	}
+
+	// Fallback to legacy chat (StarterGui.SetCore)
+	const StarterGui = game.GetService("StarterGui");
 	const [success] = pcall(() => {
 		StarterGui.SetCore("ChatMakeSystemMessage", {
 			Text: message,
@@ -277,8 +287,11 @@ const sendSystemMessage = (message: string) => {
 		});
 	});
 
-	// Also log it
-	Logger.Info("System", message);
+	if (success) {
+		Logger.Debug("UIManager", `Sent to legacy chat: ${message}`);
+	} else {
+		Logger.Warn("UIManager", `Failed to send chat message: ${message}`);
+	}
 
 	return success;
 };

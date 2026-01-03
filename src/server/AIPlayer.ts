@@ -32,6 +32,8 @@ export class AIPlayer implements AIPlayerInterface {
 	private lastPositionTime: number = 0;
 	private consecutiveStuckCount: number = 0;
 	private lastThoughtPendingTime?: number;
+	private spawnTime?: number;
+	private static readonly STARTUP_DELAY = 25; // Seconds to wait before AI starts acting
 
 	private llmService: LLMService;
 
@@ -143,6 +145,14 @@ export class AIPlayer implements AIPlayerInterface {
 
 	public Update(deltaTime: number, playerData: PlayerData, mapGenerator: MapGenerator) {
 		if (!this.Character || !this.Character.PrimaryPart) return;
+
+		// Startup delay: give human players time to orient
+		if (!this.spawnTime) {
+			this.spawnTime = playerData.GameTime;
+		}
+		if (playerData.GameTime - this.spawnTime < AIPlayer.STARTUP_DELAY) {
+			return; // Still in grace period
+		}
 
 		// 0. Detect Pulse Phase Transitions (must happen regardless of state)
 		const pulseTimer = playerData.PulseTimer;
