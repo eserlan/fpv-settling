@@ -23,6 +23,11 @@ let isValidPlacement = false;
 let lastValidPlacement: boolean | undefined; // Track to log only on change
 let lastLoggedKey: string | undefined; // Track location to log change
 let lastBlueprintSelectionTime = 0;
+let isGameStarted = false;
+
+ClientEvents.GameStart.connect(() => {
+	isGameStarted = true;
+});
 
 // Wait for BlueprintBookUI to be available
 let BlueprintBookUI: BlueprintBookUIType | undefined;
@@ -589,7 +594,7 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 	}
 
 	// Toggle Blueprint Book with 'B' key
-	if (input.KeyCode === Enum.KeyCode.B) {
+	if (input.KeyCode === Enum.KeyCode.B && isGameStarted) {
 		if (placementMode) {
 			exitPlacementMode();
 		} else if (BlueprintBookUI) {
@@ -616,7 +621,7 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 	}
 
 	// Deposit resource into foundation with E key
-	if (input.KeyCode === Enum.KeyCode.E) {
+	if (input.KeyCode === Enum.KeyCode.E && isGameStarted) {
 		if (nearbyFoundation) {
 			Logger.Debug("PlayerController", `Pressing E near foundation: ${nearbyFoundation.Id}`);
 			// Deposit wood first, then brick, wheat, wool, ore in order
@@ -641,7 +646,7 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 	}
 
 	// Hire Worker with 'H' key
-	if (input.KeyCode === Enum.KeyCode.H) {
+	if (input.KeyCode === Enum.KeyCode.H && isGameStarted) {
 		const character = player.Character;
 		if (character && character.PrimaryPart) {
 			ClientEvents.ClientRequest.fire("HireNPC", "Worker", character.PrimaryPart.Position);
@@ -650,7 +655,7 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 	}
 
 	// Hire Guard with 'G' key
-	if (input.KeyCode === Enum.KeyCode.G) {
+	if (input.KeyCode === Enum.KeyCode.G && isGameStarted) {
 		const character = player.Character;
 		if (character && character.PrimaryPart) {
 			ClientEvents.ClientRequest.fire("HireNPC", "Guard", character.PrimaryPart.Position);
@@ -659,7 +664,7 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 	}
 
 	// Open Research with 'R' key
-	if (input.KeyCode === Enum.KeyCode.R) {
+	if (input.KeyCode === Enum.KeyCode.R && isGameStarted) {
 		ClientEvents.ClientRequest.fire("StartResearch", "ImprovedTools");
 		Logger.Debug("PlayerController", "Requested research: ImprovedTools");
 	}

@@ -12,6 +12,7 @@ import { MapGenerator } from "./MapGenerator";
 import { PulseManager } from "./PulseManager";
 import { CollectionManager } from "./CollectionManager";
 import { TileOwnershipManager } from "./TileOwnershipManager";
+import { LobbyGeneratorService } from "./LobbyGeneratorService";
 import LogService = require("../LogService");
 import type { PlayerData } from "../PlayerData";
 import type { GameState } from "../GameState";
@@ -26,15 +27,15 @@ import { SkillLevel } from "../AIPrompts";
 export class GameService implements OnStart, GameState {
 	public PlayerData: Record<number, PlayerData> = {};
 	private isGameStarted = false;
-	private readyPlayers = new Set<number>();
 	private readonly MIN_PLAYERS_TO_START = 1;
-	private readonly TARGET_PLAYER_COUNT = 4; // Fill up to 4 players
+	private readonly TARGET_PLAYER_COUNT = 4; // AI fill target
 
 	constructor(
 		private mapGenerator: MapGenerator,
 		private pulseManager: PulseManager,
 		private collectionManager: CollectionManager,
 		private tileOwnershipManager: TileOwnershipManager,
+		private lobbyGenerator: LobbyGeneratorService,
 	) { }
 
 	onStart() {
@@ -44,7 +45,7 @@ export class GameService implements OnStart, GameState {
 		Logger.Info("Server", "FPV Settling - Server Starting");
 		Logger.Info("Server", "===========================================");
 
-		this.mapGenerator.GenerateLobby();
+		this.lobbyGenerator.GenerateLobby();
 		this.pulseManager.SetGameManager(this);
 
 		Players.PlayerAdded.Connect((player) => this.handlePlayerAdded(player));
@@ -62,32 +63,54 @@ export class GameService implements OnStart, GameState {
 		Logger.Info("Server", "===========================================");
 	}
 
-	public ToggleReady(player: Player) {
-		if (this.isGameStarted) return;
-
-		if (this.readyPlayers.has(player.UserId)) {
-			this.readyPlayers.delete(player.UserId);
-		} else {
-			this.readyPlayers.add(player.UserId);
+	public StartRoomGame(entities: { userId: number, name: string, isAI: boolean, skill?: SkillLevel }[]) {
+		if (this.isGameStarted) {
+			Logger.Warn("GameManager", "Game already in progress. Resetting state for new room...");
+			// Ideally we'd have multiple instances, but for now we reset.
+			this.isGameStarted = false;
+			// Clear existing units/buildings? (Out of scope for this simple refactor)
 		}
 
-		const readyCount = this.readyPlayers.size();
-		const totalPlayers = Players.GetPlayers().size();
-		NetworkUtils.Broadcast(ServerEvents.LobbyUpdate, readyCount, totalPlayers);
-		Logger.Info("GameManager", `${player.Name} is ${this.readyPlayers.has(player.UserId) ? "Ready" : "Not Ready"}. (${readyCount}/${totalPlayers})`);
+		this.isGameStarted = true;
+		Logger.Info("GameManager", `Starting Room Game with ${entities.size()} entities...`);
 
-		if (readyCount === totalPlayers && readyCount >= this.MIN_PLAYERS_TO_START) {
-			this.StartGame();
+		// Generate the real map
+		this.mapGenerator.Generate();
+		this.pulseManager.AssignTileNumbers();
+
+		// Setup players and AI
+		for (const e of entities) {
+			if (e.isAI) {
+				const aiPlayer = new AIPlayer(e.userId, e.name, e.skill ?? "Intermediate");
+				this.initializePlayerData(aiPlayer);
+				aiPlayer.Spawn(new Vector3(math.random(-50, 50), 150, math.random(-50, 50)));
+			} else {
+				const player = Players.GetPlayerByUserId(e.userId);
+				if (player) {
+					// Player Data is already initialized on join
+					const character = player.Character;
+					if (character) character.PivotTo(new CFrame(0, 150, 0));
+				}
+			}
+
+			const playerData = this.PlayerData[e.userId];
+			if (playerData) {
+				playerData.PortManager.SetPortLocations(this.mapGenerator.GetPortLocations());
+			}
 		}
+
+		NetworkUtils.Broadcast(ServerEvents.GameStart);
+		Logger.Info("GameManager", "Game Started!");
 	}
 
 	public StartGame() {
 		if (this.isGameStarted) return;
 		this.isGameStarted = true;
-		Logger.Info("GameManager", "Starting Game...");
+		Logger.Info("GameManager", "Starting Global Game...");
 
 		// Generate the real map
 		this.mapGenerator.Generate();
+		this.pulseManager.AssignTileNumbers();
 
 		// Spawn AI Players to fill lobby
 		const humanCount = Players.GetPlayers().size();
@@ -101,12 +124,12 @@ export class GameService implements OnStart, GameState {
 			if (!typeIs(entity, "Instance")) { // Is AI
 				const ai = entity as AIPlayer;
 				// AI Spawn logic
-				ai.Spawn(new Vector3(math.random(-50, 50), 50, math.random(-50, 50)));
+				ai.Spawn(new Vector3(math.random(-50, 50), 150, math.random(-50, 50)));
 			} else {
 				const player = entity as Player;
 				const character = player.Character;
 				if (character) {
-					character.PivotTo(new CFrame(0, 50, 0));
+					character.PivotTo(new CFrame(0, 150, 0));
 				}
 			}
 
@@ -141,6 +164,9 @@ export class GameService implements OnStart, GameState {
 		const researchManager = new ResearchManager(entity, resourceManager);
 		const portManager = new PortManager(entity, resourceManager);
 
+		// Register with collection manager for inventory tracking
+		this.collectionManager.RegisterEntity(entity, resourceManager);
+
 		// If game already started, get ports immediately
 		if (this.isGameStarted) {
 			portManager.SetPortLocations(this.mapGenerator.GetPortLocations());
@@ -164,8 +190,14 @@ export class GameService implements OnStart, GameState {
 	private handlePlayerAdded(player: Player) {
 		Logger.Info("GameManager", `Player joined: ${player.Name}`);
 
-		this.collectionManager.InitPlayer(player);
+		// Initialize player data first so ResourceManager exists
 		this.initializePlayerData(player);
+
+		// Then init collection with the resource manager
+		const playerData = this.PlayerData[player.UserId];
+		if (playerData) {
+			this.collectionManager.InitPlayer(player, playerData.ResourceManager);
+		}
 
 		player.CharacterAdded.Connect((character) => {
 			const humanoid = character.WaitForChild("Humanoid") as Humanoid;
@@ -176,7 +208,7 @@ export class GameService implements OnStart, GameState {
 				character.PivotTo(new CFrame(0, 103, 0));
 			} else {
 				// Late joiner spawn
-				character.PivotTo(new CFrame(0, 50, 0));
+				character.PivotTo(new CFrame(0, 150, 0));
 			}
 
 			const playerData = this.PlayerData[player.UserId];
@@ -185,10 +217,8 @@ export class GameService implements OnStart, GameState {
 			}
 		});
 
-		// Send initial lobby status to new player
-		if (!this.isGameStarted) {
-			NetworkUtils.FireClient(player, ServerEvents.LobbyUpdate, this.readyPlayers.size(), Players.GetPlayers().size());
-		} else {
+		// If game already started, tell the player
+		if (this.isGameStarted) {
 			NetworkUtils.FireClient(player, ServerEvents.GameStart);
 		}
 	}
@@ -198,18 +228,7 @@ export class GameService implements OnStart, GameState {
 		this.collectionManager.RemovePlayer(player);
 		delete this.PlayerData[player.UserId];
 
-		if (!this.isGameStarted) {
-			this.readyPlayers.delete(player.UserId);
-			const readyCount = this.readyPlayers.size();
-			// Subtract 1 because Players.GetPlayers() still includes the leaving player
-			const totalPlayers = Players.GetPlayers().size() - 1;
-			NetworkUtils.Broadcast(ServerEvents.LobbyUpdate, readyCount, totalPlayers);
-
-			// Check if we should start (e.g. everyone else was ready)
-			if (readyCount > 0 && readyCount === totalPlayers && readyCount >= this.MIN_PLAYERS_TO_START) {
-				this.StartGame();
-			}
-		}
+		// Player removal cleanup finished
 	}
 
 	private handleHeartbeat(deltaTime: number) {

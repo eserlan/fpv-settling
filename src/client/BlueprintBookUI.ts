@@ -31,6 +31,11 @@ let currentResources: Record<string, number> = {
 	Wool: 0,
 	Ore: 0,
 };
+let isGameStarted = false;
+
+ClientEvents.GameStart.connect(() => {
+	isGameStarted = true;
+});
 
 type CardData = {
 	SelectButton: TextButton;
@@ -283,6 +288,7 @@ helpText.Parent = mainFrame;
 
 // Public Functions
 BlueprintBookUI.Open = () => {
+	if (!isGameStarted) return;
 	isOpen = true;
 	screenGui.Enabled = true;
 	refreshAffordability();

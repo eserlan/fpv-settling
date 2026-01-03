@@ -12,7 +12,7 @@ type TileOwnershipRecord = {
 
 @Service({})
 export class TileOwnershipManager implements OnStart {
-	private tileOwnership: Record<string, TileOwnershipRecord | undefined> = {};
+	private tileOwnership: Record<string, TileOwnershipRecord[]> = {};
 
 	onStart() {
 		Logger.Info("TileOwnershipManager", "Initialized");
@@ -20,37 +20,72 @@ export class TileOwnershipManager implements OnStart {
 
 	public PlayerOwnsTile(player: GameEntity, tileQ: number, tileR: number) {
 		const key = TileKey.makeTileKey(tileQ, tileR);
-		const ownership = this.tileOwnership[key];
-		return ownership ? ownership.playerUserId === player.UserId : false;
+		const records = this.tileOwnership[key];
+		if (!records) return false;
+
+		for (const record of records) {
+			if (record.playerUserId === player.UserId) return true;
+		}
+		return false;
 	}
 
 	public ClaimTile(player: GameEntity, tileQ: number, tileR: number, settlementId: string) {
 		const key = TileKey.makeTileKey(tileQ, tileR);
-		if (this.tileOwnership[key] && this.tileOwnership[key]!.playerUserId !== player.UserId) {
-			Logger.Warn("TileOwnership", `Tile ${key} already owned by another player`);
-			return false;
+		if (!this.tileOwnership[key]) {
+			this.tileOwnership[key] = [];
 		}
 
-		this.tileOwnership[key] = {
+		// Check if already claimed by this player
+		const records = this.tileOwnership[key]!;
+		for (const record of records) {
+			if (record.playerUserId === player.UserId && record.settlementId === settlementId) {
+				return true; // Already claimed by this specific settlement
+			}
+		}
+
+		records.push({
 			playerUserId: player.UserId,
 			playerName: player.Name,
 			settlementId,
 			claimedAt: os.time(),
-		};
-		Logger.Info("TileOwnership", `${player.Name} claimed tile ${key}`);
+		});
+
+		Logger.Info("TileOwnership", `${player.Name} (Settlement: ${settlementId}) claimed part of tile ${key}. Total owners: ${records.size()}`);
 		return true;
 	}
 
-	public ReleaseTile(tileQ: number, tileR: number) {
+	public ReleaseTile(tileQ: number, tileR: number, settlementId?: string) {
 		const key = TileKey.makeTileKey(tileQ, tileR);
-		this.tileOwnership[key] = undefined;
-		Logger.Info("TileOwnership", `Tile ${key} released`);
+		if (!this.tileOwnership[key]) return;
+
+		if (settlementId) {
+			const records = this.tileOwnership[key]!;
+			for (let i = records.size(); i >= 1; i--) {
+				if (records[i - 1].settlementId === settlementId) {
+					records.remove(i - 1);
+				}
+			}
+			if (records.size() === 0) {
+				delete this.tileOwnership[key];
+			}
+		} else {
+			delete this.tileOwnership[key];
+		}
+
+		Logger.Info("TileOwnership", `Tile ${key} released (Settlement: ${settlementId ?? "All"})`);
 	}
 
 	public GetPlayerTiles(player: GameEntity) {
 		const tiles = new Array<string>();
-		for (const [key, ownership] of pairs(this.tileOwnership)) {
-			if (ownership && ownership.playerUserId === player.UserId) tiles.push(key);
+		for (const [key, records] of pairs(this.tileOwnership)) {
+			if (records) {
+				for (const record of records) {
+					if (record.playerUserId === player.UserId) {
+						tiles.push(key);
+						break;
+					}
+				}
+			}
 		}
 		return tiles;
 	}
@@ -86,9 +121,9 @@ export class TileOwnershipManager implements OnStart {
 		return claimedTiles;
 	}
 
-	public GetTileOwner(tileQ: number, tileR: number) {
+	public GetTileOwners(tileQ: number, tileR: number) {
 		const key = TileKey.makeTileKey(tileQ, tileR);
-		return this.tileOwnership[key];
+		return this.tileOwnership[key] ?? [];
 	}
 
 	public ClearAll() {

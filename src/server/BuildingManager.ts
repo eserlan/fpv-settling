@@ -61,12 +61,21 @@ class BuildingManager {
 		if (!buildingTypeData) return $tuple(false, "Invalid building type");
 
 		let finalPosition = position;
+		let finalRotation: Vector3 | undefined;
+
 		if (buildingTypeData.IsSettlement) {
 			const [nearestVertex, dist] = this.mapGenerator.FindNearestVertex(position);
 			if (nearestVertex) {
 				const adjCount = (nearestVertex.GetAttribute("AdjacentTileCount") as number) ?? 0;
 				if (adjCount < 2) return $tuple(false, "Invalid settlement location (must touch 2+ tiles)");
 				finalPosition = nearestVertex.Position;
+			}
+		} else if (buildingTypeData.IsRoad) {
+			const [nearestEdge, dist] = this.mapGenerator.FindNearestEdge(position);
+			if (nearestEdge && dist < 30) {
+				finalPosition = nearestEdge.Position;
+				const [rx, ry, rz] = nearestEdge.CFrame.ToEulerAnglesXYZ();
+				finalRotation = new Vector3(math.deg(rx), math.deg(ry), math.deg(rz));
 			}
 		}
 
@@ -81,11 +90,13 @@ class BuildingManager {
 			Id: buildingId,
 			Type: buildingType,
 			Position: finalPosition,
+			Rotation: finalRotation,
 			Progress: 0,
 			BuildTime: buildingTypeData.BuildTime,
 			Completed: false,
 			Data: buildingTypeData,
 			IsSettlement: buildingTypeData.IsSettlement,
+			OwnerId: this.Player.UserId,
 		};
 
 		if (buildingTypeData.BuildTime === 0) {
@@ -359,6 +370,11 @@ class BuildingManager {
 			door.Anchored = true;
 			door.Color = Color3.fromRGB(101, 67, 33);
 			door.Parent = model;
+		} else if (building.Type === "Road") {
+			part.Size = new Vector3(37, 0.5, 3);
+			part.CFrame = baseCFrame;
+			part.Color = Color3.fromRGB(200, 200, 200);
+			part.Material = Enum.Material.Concrete;
 		}
 
 		const folderName = building.IsSettlement ? "Settlements" : "Buildings";
@@ -367,8 +383,13 @@ class BuildingManager {
 		model.Parent = folder;
 		model.PrimaryPart = part;
 		building.Model = model;
+
+		// Set attributes on both Model and Part for easy access
+		model.SetAttribute("OwnerId", building.OwnerId ?? this.Player.UserId);
+		model.SetAttribute("Key", building.SnapKey);
 		part.SetAttribute("Key", building.SnapKey);
-		part.SetAttribute("OwnerId", building.OwnerId);
+		part.SetAttribute("OwnerId", building.OwnerId ?? this.Player.UserId);
+
 		return model;
 	}
 

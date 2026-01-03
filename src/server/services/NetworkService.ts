@@ -62,9 +62,6 @@ export class NetworkService implements OnStart {
             }
         });
 
-        this.serverEvents.ToggleReady.connect((player: Player) => {
-            this.gameService.ToggleReady(player);
-        });
 
         this.serverEvents.DevEvent.connect((player: Player, action: string) => {
             if (action === "ForcePulse") {

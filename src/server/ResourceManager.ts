@@ -14,8 +14,10 @@ class ResourceManager {
 		this.Player = player;
 		this.Resources = {};
 
+		const VALID_RESOURCES = ["Wood", "Brick", "Wheat", "Wool", "Ore"];
+
 		// Initialize all resource types with 0
-		for (const [resourceName] of pairs(ResourceTypes)) {
+		for (const resourceName of VALID_RESOURCES) {
 			this.Resources[resourceName] = 0;
 		}
 

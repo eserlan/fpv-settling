@@ -4,12 +4,18 @@ interface ServerEvents {
     ClientRequest(actionType: string, ...args: unknown[]): void;
     DevEvent(action: string): void;
     CollectEvent(action: "GetInventory"): void;
-    ToggleReady(): void;
+
+    // Lobby Room Events
+    JoinRoom(roomId: number): void;
+    LeaveRoom(): void;
+    AddAIRoom(roomId: number, skill: string): void;
+    RemoveAIRoom(roomId: number, aiUserId: number): void;
+    StartRoomGame(roomId: number): void;
 }
 
 interface ClientEvents {
     // Traditional individual events
-    LobbyUpdate(readyCount: number, totalCount: number): void;
+    RoomUpdate(roomId: number, data: string): void; // JSON string of room state
     GameStart(): void;
     ResourceUpdate(resources: Record<string, number>): void;
     ConstructionStarted(buildingId: number, buildingType: string, position: Vector3): void;

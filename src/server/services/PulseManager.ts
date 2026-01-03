@@ -7,6 +7,7 @@ import ResourceTypes from "shared/ResourceTypes";
 import { ServerEvents } from "../ServerEvents";
 import * as Logger from "shared/Logger";
 import { RobberManager } from "./RobberManager";
+import { TileOwnershipManager } from "./TileOwnershipManager";
 import type { GameState } from "../GameState";
 
 const PULSE_INTERVAL = 60;
@@ -25,13 +26,10 @@ export class PulseManager implements OnStart, OnTick {
 
 	private rng = new Random();
 
-	constructor(private robberManager: RobberManager) { }
+	constructor(private robberManager: RobberManager, private tileOwnershipManager: TileOwnershipManager) { }
 
 	onStart() {
 		Logger.Info("PulseManager", "Initialized - Waiting for players to place settlements...");
-		task.delay(1, () => {
-			this.AssignTileNumbers();
-		});
 	}
 
 	onTick(deltaTime: number) {
@@ -138,8 +136,17 @@ export class PulseManager implements OnStart, OnTick {
 				if (!tileType) continue;
 				const [resourceKey, resourceData] = ResourceTypes.GetByTileType(tileType);
 				if (resourceKey && resourceData) {
-					this.SpawnResource(tile, resourceKey, resourceData);
-					spawnedResources[resourceKey] = (spawnedResources[resourceKey] ?? 0) + 1;
+					// Spawn one resource for EVERY unique owner
+					const owners = this.tileOwnershipManager.GetTileOwners(tileQ, tileR);
+					const uniqueOwners = new Set<number>();
+
+					for (const owner of owners) {
+						if (!uniqueOwners.has(owner.playerUserId)) {
+							uniqueOwners.add(owner.playerUserId);
+							this.SpawnResource(tile, resourceKey, resourceData);
+							spawnedResources[resourceKey] = (spawnedResources[resourceKey] ?? 0) + 1;
+						}
+					}
 				}
 			}
 

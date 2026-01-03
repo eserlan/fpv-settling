@@ -24,7 +24,12 @@ const RESOURCES = [
 const screenGui = new Instance("ScreenGui");
 screenGui.Name = "InventoryUI";
 screenGui.ResetOnSpawn = false;
+screenGui.Enabled = false;
 screenGui.Parent = playerGui;
+
+ClientEvents.GameStart.connect(() => {
+	screenGui.Enabled = true;
+});
 
 // Inventory bar (bottom center)
 const inventoryFrame = new Instance("Frame");

@@ -14,7 +14,10 @@ export class AIPlayer implements AIPlayerInterface {
 
 	// AI Logic State
 	public NextActionTime: number = 0;
-	public State: "Idle" | "Thinking" | "Executing" = "Idle";
+	public State: "Idle" | "Thinking" | "Moving" | "Executing" | "MovingToResource" = "Idle";
+	private pendingAction?: { type: string, position: Vector3, actionData?: AIAction };
+	private pendingResource?: BasePart;
+	private lastActedPulse: number = -1;
 
 	private llmService: LLMService;
 
@@ -42,6 +45,44 @@ export class AIPlayer implements AIPlayerInterface {
 		const torso = new Instance("Part");
 		torso.Name = "Torso";
 		torso.Size = new Vector3(2, 2, 1);
+		torso.Position = position.add(new Vector3(0, 3, 0));
+		torso.CanCollide = true;
+		torso.Anchored = false;
+		torso.Parent = model;
+
+		const root = new Instance("Part");
+		root.Name = "HumanoidRootPart";
+		root.Size = new Vector3(2, 2, 1);
+		root.Position = torso.Position;
+		root.Transparency = 1;
+		root.CanCollide = false;
+		root.Parent = model;
+
+		const head = new Instance("Part");
+		head.Name = "Head";
+		head.Size = new Vector3(1, 1, 1);
+		head.Shape = Enum.PartType.Ball;
+		head.Color = Color3.fromRGB(200, 200, 200);
+		head.Position = torso.Position.add(new Vector3(0, 1.5, 0));
+		head.Parent = model;
+
+		const weld = new Instance("WeldConstraint");
+		weld.Part0 = torso;
+		weld.Part1 = head;
+		weld.Parent = torso;
+
+		const weld2 = new Instance("WeldConstraint");
+		weld2.Part0 = torso;
+		weld2.Part1 = root;
+		weld2.Parent = torso;
+
+		const humanoid = new Instance("Humanoid");
+		humanoid.DisplayName = `[${this.Skill}] ${this.Name}`;
+		humanoid.Parent = model;
+
+		model.PrimaryPart = torso;
+		model.Parent = game.Workspace;
+		this.Character = model;
 
 		// Color based on skill level
 		if (this.Skill === "Beginner") {
@@ -51,52 +92,127 @@ export class AIPlayer implements AIPlayerInterface {
 		} else {
 			torso.Color = Color3.fromRGB(255, 100, 100); // Red (Expert)
 		}
+	}
 
-		torso.Anchored = false;
-		torso.Position = position;
-		torso.Parent = model;
+	private FindNearestOwnedResource(playerData: PlayerData): BasePart | undefined {
+		const resourcesFolder = game.Workspace.FindFirstChild("Resources");
+		if (!resourcesFolder) return undefined;
 
-		const head = new Instance("Part");
-		head.Name = "Head";
-		head.Size = new Vector3(1, 1, 1);
-		head.Shape = Enum.PartType.Ball;
-		head.Color = Color3.fromRGB(200, 200, 200);
-		head.Position = position.add(new Vector3(0, 1.5, 0));
-		head.Parent = model;
+		let nearest: BasePart | undefined;
+		let minDist = 150; // Max search distance for AI
 
-		const weld = new Instance("WeldConstraint");
-		weld.Part0 = torso;
-		weld.Part1 = head;
-		weld.Parent = torso;
+		for (const res of resourcesFolder.GetChildren()) {
+			if (res.IsA("BasePart")) {
+				const q = res.GetAttribute("TileQ") as number;
+				const r = res.GetAttribute("TileR") as number;
 
-		const humanoid = new Instance("Humanoid");
-		humanoid.DisplayName = `[${this.Skill}] ${this.Name}`;
-		humanoid.Parent = model;
+				// Check if AI owns this tile (via its settlements)
+				let owns = false;
+				for (const s of playerData.BuildingManager.Settlements) {
+					// This is a bit expensive but accurate
+					const dist = res.Position.sub(s.Position).Magnitude;
+					if (dist < 45) { // Settlement claim radius
+						owns = true;
+						break;
+					}
+				}
 
-		model.PrimaryPart = torso;
-		model.Parent = game.Workspace;
-		this.Character = model;
+				if (owns) {
+					const dist = this.Character!.PrimaryPart!.Position.sub(res.Position).Magnitude;
+					if (dist < minDist) {
+						minDist = dist;
+						nearest = res;
+					}
+				}
+			}
+		}
+
+		return nearest;
 	}
 
 	public Update(deltaTime: number, playerData: PlayerData, mapGenerator: MapGenerator) {
-		// Only run logic periodically to avoid spamming API
-		if (playerData.GameTime < this.NextActionTime) return;
+		if (!this.Character || !this.Character.PrimaryPart) return;
 
-		// Set next check time
-		// Beginners think slower, Experts think faster (simulated)
-		let thinkDelay = 5;
-		if (this.Skill === "Beginner") thinkDelay = 8;
-		else if (this.Skill === "Expert") thinkDelay = 3;
+		// 0. Resource Gathering Check (High Priority)
+		if (this.State === "Idle" || this.State === "Thinking") {
+			const resource = this.FindNearestOwnedResource(playerData);
+			if (resource) {
+				this.pendingResource = resource;
+				this.State = "MovingToResource";
+				Logger.Info("AIPlayer", `${this.Name} moving to collect ${resource.GetAttribute("ResourceType")}...`);
+			}
+		}
+
+		if (this.State === "MovingToResource" && this.pendingResource) {
+			if (!this.pendingResource.Parent) {
+				this.pendingResource = undefined;
+				this.State = "Idle";
+				return;
+			}
+
+			const humanoid = this.Character.FindFirstChildOfClass("Humanoid");
+			if (humanoid) {
+				humanoid.MoveTo(this.pendingResource.Position);
+				const dist = this.Character.PrimaryPart.Position.sub(this.pendingResource.Position).Magnitude;
+				if (dist < 8) {
+					// CollectionManager should handle it if proximity is right
+					// We'll call it ourselves via the Service if we want to be explicit,
+					// but let's assume the CollectionManager onTick handles it too.
+					// Actually, CollectionManager onTick only checks real players.
+					// So let's rely on a more explicit call if we can get it, but for now 
+					// we just wait 1s and hope it works if we reach it.
+					// INSTEAD: Let's let the manager handle it by updating it too.
+					this.State = "Idle";
+					this.NextActionTime = playerData.GameTime + 1;
+				}
+			}
+		}
+
+		// 1. Handle Movement
+		if (this.State === "Moving" && this.pendingAction) {
+			const humanoid = this.Character.FindFirstChildOfClass("Humanoid");
+			if (humanoid) {
+				humanoid.MoveTo(this.pendingAction.position);
+
+				// Check distance to target
+				const dist = this.Character.PrimaryPart.Position.sub(this.pendingAction.position).Magnitude;
+				if (dist < 8) { // Increased tolerance for simple MoveTo
+					this.State = "Executing";
+					Logger.Info("AIPlayer", `${this.Name} reached destination, starting construction...`);
+				}
+			}
+		}
+
+		// 2. Handle Action Execution
+		if (this.State === "Executing" && this.pendingAction) {
+			const { type: actionType, position } = this.pendingAction;
+			playerData.BuildingManager.StartBuilding(actionType, position);
+			if (playerData.NeedsFirstSettlement && actionType === "Settlement") {
+				playerData.NeedsFirstSettlement = false;
+			}
+
+			this.pendingAction = undefined;
+			this.State = "Idle";
+			this.NextActionTime = playerData.GameTime + 2; // Pause after building
+			return;
+		}
+
+		// 3. Pulse Synchronization Check
+		// We only think if we haven't acted in the current pulse segment (60s chunks)
+		const currentPulse = math.floor(playerData.GameTime / 60);
+		if (currentPulse <= this.lastActedPulse) return;
+
+		// 4. Thinking Logic
+		if (playerData.GameTime < this.NextActionTime) return;
 
 		if (this.State === "Thinking") {
 			this.NextActionTime = playerData.GameTime + 0.5;
 			return;
-		} else {
-			this.NextActionTime = playerData.GameTime + thinkDelay;
 		}
 
 		if (this.State === "Idle") {
 			this.State = "Thinking";
+			this.lastActedPulse = currentPulse; // Mark this pulse as 'claimed' for thinking
 			this.Think(playerData, mapGenerator);
 		}
 	}
@@ -110,10 +226,11 @@ export class AIPlayer implements AIPlayerInterface {
 			const decision = await this.llmService.GetDecision(prompt, context);
 			if (decision) {
 				this.ExecuteAction(decision, playerData, mapGenerator);
+			} else {
+				this.State = "Idle";
 			}
 		} catch (e) {
 			Logger.Warn("AIPlayer", `Thinking failed: ${e}`);
-		} finally {
 			this.State = "Idle";
 		}
 	}
@@ -129,84 +246,83 @@ export class AIPlayer implements AIPlayerInterface {
 
 		if (playerData.NeedsFirstSettlement) {
 			context += `STATUS: Must build INITIAL SETTLEMENT.\n`;
-			// Provide some random valid vertices as options
-			// In a real implementation, we'd list all valid available spots
 			const validOptions = [];
-			for(let i=0; i<3; i++) {
+			for (let i = 0; i < 5; i++) {
 				const v = mapGenerator.GetRandomVertex();
-				if (v) validOptions.push(v.Name); // Assuming Name is Vertex_ID
+				if (v) validOptions.push(v.Name);
 			}
 			context += `Available Settlement Spots: ${validOptions.join(", ")}\n`;
 		} else {
 			context += `STATUS: Normal Play.\n`;
 			const validOptions = [];
-			// Simplified: Suggest building near existing settlements (expansion) or just random spots
-			// Ideally we would traverse the graph from our existing settlements
-			for(let i=0; i<3; i++) {
+			for (let i = 0; i < 5; i++) {
 				const v = mapGenerator.GetRandomVertex();
 				if (v) validOptions.push(v.Name);
 			}
-			context += `Potential Expansion Spots (Simplified): ${validOptions.join(", ")}\n`;
+			context += `Potential Expansion Spots: ${validOptions.join(", ")}\n`;
 		}
 
 		return context;
 	}
 
 	private ExecuteAction(decision: AIAction, playerData: PlayerData, mapGenerator: MapGenerator) {
-		Logger.Info("AIPlayer", `${this.Name} (${this.Skill}) Decided: ${decision.action} because "${decision.reason}"`);
+		const action = decision.action ? (decision.action as string).upper() : "WAIT";
+		const reason = decision.reason ?? "No reason provided";
+		const target = decision.target ? (decision.target as string).upper() : undefined;
 
-		switch (decision.action) {
+		Logger.Info("AIPlayer", `${this.Name} (${this.Skill}) Decided: ${action} because "${reason}"`);
+
+		if (action === "WAIT" || action === "END_TURN") {
+			this.State = "Idle";
+			return;
+		}
+
+		let targetPos: Vector3 | undefined;
+		let buildingType: string | undefined;
+
+		switch (action) {
 			case "BUILD_SETTLEMENT": {
-				if (decision.target) {
-					// We need to find the position from the target ID
-					const vertex = mapGenerator.FindVertexById(decision.target);
-					if (vertex) {
-						playerData.BuildingManager.StartBuilding("Settlement", vertex.Position);
-						if (playerData.NeedsFirstSettlement) playerData.NeedsFirstSettlement = false;
-					}
-				} else {
-					// Fallback if LLM didn't give target
+				buildingType = "Settlement";
+				if (target) {
+					const vertex = mapGenerator.FindVertexById(target);
+					if (vertex) targetPos = vertex.Position;
+				}
+				if (!targetPos) {
 					const v = mapGenerator.GetRandomVertex();
-					if (v) {
-						playerData.BuildingManager.StartBuilding("Settlement", v.Position);
-						playerData.NeedsFirstSettlement = false;
-					}
+					if (v) targetPos = v.Position;
 				}
 				break;
 			}
 			case "BUILD_ROAD": {
-				// Road building requires finding a random edge (simplified)
-				// In a real game, this would need graph traversal to find connected edges
+				buildingType = "Road";
 				const edge = mapGenerator.GetRandomEdge();
-				if (edge) {
-					// Road building is just calling StartBuilding with "Road"
-					// We assume the game logic handles connectivity checks or we just try
-					playerData.BuildingManager.StartBuilding("Road", edge.Position);
-				}
+				if (edge) targetPos = edge.Position;
 				break;
 			}
 			case "BUILD_CITY": {
-				// Cities replace settlements. We need to find a settlement we own.
+				buildingType = "City";
 				const settlements = playerData.BuildingManager.Settlements;
 				if (settlements.size() > 0) {
-					// Try to upgrade the first one
 					const s = settlements[0];
-					if (s && s.Type === "Settlement") {
-						playerData.BuildingManager.StartBuilding("City", s.Position);
-					}
+					if (s && s.Type === "Settlement") targetPos = s.Position;
 				}
 				break;
 			}
 			case "TRADE": {
 				if (decision.resource_give && decision.resource_receive) {
-					// Try to trade with the PortManager (Bank/Ports)
 					playerData.PortManager.ExecuteTrade(decision.resource_give, decision.resource_receive);
 				}
-				break;
+				this.State = "Idle";
+				return;
 			}
-			case "WAIT":
-				// Do nothing
-				break;
+		}
+
+		if (targetPos && buildingType) {
+			this.pendingAction = { type: buildingType, position: targetPos, actionData: decision };
+			this.State = "Moving";
+			Logger.Info("AIPlayer", `${this.Name} is moving to ${targetPos} to build ${buildingType}...`);
+		} else {
+			this.State = "Idle";
 		}
 	}
 }

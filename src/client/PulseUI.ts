@@ -14,7 +14,12 @@ const PulseUI = {} as Record<string, unknown>;
 const screenGui = new Instance("ScreenGui");
 screenGui.Name = "PulseUI";
 screenGui.ResetOnSpawn = false;
+screenGui.Enabled = false;
 screenGui.Parent = playerGui;
+
+ClientEvents.GameStart.connect(() => {
+	screenGui.Enabled = true;
+});
 
 // Timer display (top center)
 const timerFrame = new Instance("Frame");

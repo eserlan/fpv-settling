@@ -12,7 +12,12 @@ const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
 const screenGui = new Instance("ScreenGui");
 screenGui.Name = "GameUI";
 screenGui.ResetOnSpawn = false;
+screenGui.Enabled = false;
 screenGui.Parent = playerGui;
+
+ClientEvents.GameStart.connect(() => {
+	screenGui.Enabled = true;
+});
 
 // Note: Resource display removed - using InventoryUI at bottom center instead
 
@@ -37,6 +42,100 @@ buildingTitle.TextColor3 = Color3.fromRGB(255, 255, 255);
 buildingTitle.Font = Enum.Font.SourceSansBold;
 buildingTitle.TextSize = 20;
 buildingTitle.Parent = buildingFrame;
+
+// Building List Content
+const buildingList = new Instance("ScrollingFrame");
+buildingList.Name = "List";
+buildingList.Size = new UDim2(1, -10, 1, -80);
+buildingList.Position = new UDim2(0, 5, 0, 35);
+buildingList.BackgroundTransparency = 1;
+buildingList.CanvasSize = new UDim2(0, 0, 0, 0); // Automatic
+buildingList.ScrollBarThickness = 4;
+buildingList.Parent = buildingFrame;
+
+const listLayout = new Instance("UIListLayout");
+listLayout.Padding = new UDim(0, 5);
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder;
+listLayout.Parent = buildingList;
+
+// Function to refresh the building list
+const refreshBuildingList = () => {
+	buildingList.ClearAllChildren();
+	listLayout.Parent = buildingList; // Re-add layout
+
+	const foldersToCheck = ["Settlements", "Buildings"];
+	let itemCount = 0;
+
+	for (const folderName of foldersToCheck) {
+		const folder = game.Workspace.FindFirstChild(folderName);
+		if (!folder) continue;
+
+		for (const building of folder.GetChildren()) {
+			if (building.IsA("Model")) {
+				const ownerId = building.GetAttribute("OwnerId") as number | undefined;
+				if (ownerId === undefined) continue;
+
+				const icon = folderName === "Settlements" ? "🏠" : "🛤️";
+				const btn = new Instance("TextButton");
+				btn.Name = building.Name;
+				btn.Size = new UDim2(1, -5, 0, 30);
+				btn.BackgroundColor3 = ownerId === player.UserId ? Color3.fromRGB(60, 100, 60) : Color3.fromRGB(100, 60, 60);
+				btn.Text = `${icon} ${building.Name}`;
+				btn.TextColor3 = new Color3(1, 1, 1);
+				btn.Font = Enum.Font.GothamBold;
+				btn.TextSize = 14;
+				btn.Parent = buildingList;
+				itemCount++;
+
+				const corner = new Instance("UICorner");
+				corner.CornerRadius = new UDim(0, 4);
+				corner.Parent = btn;
+
+				btn.MouseButton1Click.Connect(() => {
+					const camera = game.Workspace.CurrentCamera;
+					if (camera && building.PrimaryPart) {
+						camera.CameraSubject = building.PrimaryPart;
+						Logger.Info("Camera", `Focused on ${building.Name}`);
+					}
+				});
+			}
+		}
+	}
+
+	buildingList.CanvasSize = new UDim2(0, 0, 0, itemCount * 35);
+};
+
+const resetCamBtn = new Instance("TextButton");
+resetCamBtn.Name = "ResetCamera";
+resetCamBtn.Size = new UDim2(1, -10, 0, 30);
+resetCamBtn.Position = new UDim2(0, 5, 1, -35);
+resetCamBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60);
+resetCamBtn.Text = "Reset Focus";
+resetCamBtn.TextColor3 = new Color3(1, 1, 1);
+resetCamBtn.Font = Enum.Font.GothamBold;
+resetCamBtn.TextSize = 14;
+resetCamBtn.Parent = buildingFrame;
+
+const btnCorner = new Instance("UICorner");
+btnCorner.CornerRadius = new UDim(0, 4);
+btnCorner.Parent = resetCamBtn;
+
+resetCamBtn.MouseButton1Click.Connect(() => {
+	const camera = game.Workspace.CurrentCamera;
+	const character = player.Character;
+	if (camera && character) {
+		const humanoid = character.FindFirstChildOfClass("Humanoid");
+		if (humanoid) camera.CameraSubject = humanoid;
+	}
+});
+
+// Periodically refresh the list
+task.spawn(() => {
+	while (true) {
+		refreshBuildingList();
+		task.wait(5); // Refresh every 5s
+	}
+});
 
 // Help text
 const helpFrame = new Instance("Frame");

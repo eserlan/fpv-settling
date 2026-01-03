@@ -6,6 +6,7 @@ import { ServerEvents } from "../ServerEvents";
 import * as Logger from "shared/Logger";
 import { TileOwnershipManager } from "./TileOwnershipManager";
 import HexMath from "shared/HexMath";
+import type { GameEntity } from "shared/GameEntity";
 
 const COLLECTION_RANGE = 8;
 const COLLECTION_COOLDOWN = 0.5;
@@ -13,7 +14,8 @@ const COLLECTION_COOLDOWN = 0.5;
 @Service({})
 export class CollectionManager implements OnStart, OnTick {
 	private playerCooldowns = new Map<number, number>();
-	private playerInventories = new Map<number, Record<string, number>>();
+	private playerResourceManagers = new Map<number, import("../ResourceManager")>();
+	private registeredEntities = new Set<GameEntity>();
 
 	constructor(private tileOwnershipManager: TileOwnershipManager) { }
 
@@ -29,95 +31,85 @@ export class CollectionManager implements OnStart, OnTick {
 		const resourcesFolder = game.Workspace.FindFirstChild("Resources");
 		if (!resourcesFolder) return;
 
-		for (const player of Players.GetPlayers()) {
-			const character = player.Character;
+		for (const entity of this.registeredEntities) {
+			const character = typeIs(entity, "Instance") ? (entity as Player).Character : (entity as import("../AIPlayer").AIPlayer).Character;
 			if (!character) continue;
 
-			const humanoidRootPart = character.FindFirstChild("HumanoidRootPart");
-			if (!humanoidRootPart || !humanoidRootPart.IsA("BasePart")) continue;
+			const rootPart = character.FindFirstChild("HumanoidRootPart") ?? character.PrimaryPart;
+			if (!rootPart || !rootPart.IsA("BasePart")) continue;
 
-			const playerPos = humanoidRootPart.Position;
+			const playerPos = rootPart.Position;
 			for (const resource of resourcesFolder.GetChildren()) {
 				if (resource.IsA("BasePart")) {
 					const distance = playerPos.sub(resource.Position).Magnitude;
-					if (distance <= COLLECTION_RANGE) this.TryCollect(player, resource);
+					if (distance <= COLLECTION_RANGE) {
+						this.TryCollect(entity, resource);
+					}
 				}
 			}
 		}
 	}
 
-	public InitPlayer(player: Player) {
-		this.playerInventories.set(player.UserId, {
-			Wood: 2,
-			Brick: 2,
-			Wheat: 1,
-			Wool: 1,
-			Ore: 0,
-		});
-		this.playerCooldowns.set(player.UserId, 0);
+	public RegisterEntity(entity: GameEntity, resourceManager: import("../ResourceManager")) {
+		this.registeredEntities.add(entity);
+		this.playerResourceManagers.set(entity.UserId, resourceManager);
+		this.playerCooldowns.set(entity.UserId, 0);
+	}
+
+	public InitPlayer(player: Player, resourceManager: import("../ResourceManager")) {
+		this.RegisterEntity(player, resourceManager);
 
 		task.delay(0.5, () => {
-			const inventory = this.playerInventories.get(player.UserId);
-			if (inventory) ServerEvents.CollectEvent.fire(player, "InventoryUpdate", inventory);
+			const inventory = resourceManager.GetResources();
+			ServerEvents.CollectEvent.fire(player, "InventoryUpdate", inventory);
 		});
 		Logger.Debug("CollectionManager", `Initialized inventory for ${player.Name} with starting resources`);
 	}
 
 	public RemovePlayer(player: Player) {
-		this.playerInventories.delete(player.UserId);
+		this.playerResourceManagers.delete(player.UserId);
 		this.playerCooldowns.delete(player.UserId);
+		this.registeredEntities.delete(player);
 	}
 
-	public GetInventory(player: Player) {
-		return this.playerInventories.get(player.UserId);
+	public GetInventory(entity: GameEntity) {
+		return this.playerResourceManagers.get(entity.UserId)?.GetResources();
 	}
 
-	public AddResource(player: Player, resourceType: string, amount: number) {
-		const inventory = this.playerInventories.get(player.UserId);
-		if (!inventory) return false;
+	public AddResource(entity: GameEntity, resourceType: string, amount: number) {
+		const rm = this.playerResourceManagers.get(entity.UserId);
+		if (!rm) return false;
 
-		if (inventory[resourceType] !== undefined) {
-			inventory[resourceType] += amount;
-			ServerEvents.CollectEvent.fire(player, "InventoryUpdate", inventory);
-			return true;
-		}
-		return false;
+		const added = rm.AddResource(resourceType, amount);
+		return typeOf(added) === "number" && (added as number) > 0;
 	}
 
-	public RemoveResource(player: Player, resourceType: string, amount: number) {
-		const inventory = this.playerInventories.get(player.UserId);
-		if (!inventory) return false;
+	public RemoveResource(entity: GameEntity, resourceType: string, amount: number) {
+		const rm = this.playerResourceManagers.get(entity.UserId);
+		if (!rm) return false;
 
-		if (inventory[resourceType] !== undefined && inventory[resourceType] >= amount) {
-			inventory[resourceType] -= amount;
-			ServerEvents.CollectEvent.fire(player, "InventoryUpdate", inventory);
-			return true;
-		}
-		return false;
+		return rm.RemoveResource(resourceType, amount);
 	}
 
-	public HasResources(player: Player, requirements: Record<string, number>) {
-		const inventory = this.playerInventories.get(player.UserId);
-		if (!inventory) return false;
-		for (const [resourceType, amount] of pairs(requirements)) {
-			if (!inventory[resourceType] || inventory[resourceType] < amount) return false;
-		}
-		return true;
+	public HasResources(entity: GameEntity, requirements: Record<string, number>) {
+		const rm = this.playerResourceManagers.get(entity.UserId);
+		if (!rm) return false;
+		return rm.HasResources(requirements);
 	}
 
-	public TryCollect(player: Player, resource: BasePart) {
+	public TryCollect(entity: GameEntity, resource: BasePart) {
 		if (!resource || !resource.Parent) return false;
-		const userId = player.UserId;
+		const userId = entity.UserId;
 		const cooldown = this.playerCooldowns.get(userId);
 		if (cooldown !== undefined && cooldown > 0) return false;
 
-		const character = player.Character;
+		const character = typeIs(entity, "Instance") ? (entity as Player).Character : (entity as import("../AIPlayer").AIPlayer).Character;
 		if (!character) return false;
 
-		const humanoidRootPart = character.FindFirstChild("HumanoidRootPart");
-		if (!humanoidRootPart || !humanoidRootPart.IsA("BasePart")) return false;
+		const rootPart = character.FindFirstChild("HumanoidRootPart") ?? character.PrimaryPart;
+		if (!rootPart || !rootPart.IsA("BasePart")) return false;
 
-		const distance = humanoidRootPart.Position.sub(resource.Position).Magnitude;
+		const distance = rootPart.Position.sub(resource.Position).Magnitude;
 		if (distance > COLLECTION_RANGE) return false;
 
 		const resourceType = resource.GetAttribute("ResourceType") as string | undefined;
@@ -125,19 +117,21 @@ export class CollectionManager implements OnStart, OnTick {
 		if (!resourceType) return false;
 
 		const currentAxial = HexMath.worldToAxial(resource.Position.X, resource.Position.Z);
-		if (!this.tileOwnershipManager.PlayerOwnsTile(player, currentAxial.q, currentAxial.r)) return false;
+		const ownsTile = this.tileOwnershipManager.PlayerOwnsTile(entity, currentAxial.q, currentAxial.r);
+		if (!ownsTile) return false;
 
-		if (this.AddResource(player, resourceType, amount)) {
+		if (this.AddResource(entity, resourceType, amount)) {
 			this.playerCooldowns.set(userId, COLLECTION_COOLDOWN);
 			this.CreateCollectionEffect(resource.Position, resourceType);
-			ServerEvents.CollectEvent.fire(player, "Collected", resourceType, amount);
 
-			// Show collection in chat for the player
-			const data = ResourceTypes.Get(resourceType);
-			ServerEvents.SystemMessageEvent.fire(player, `📦 Collected ${amount}x ${data?.Icon ?? ""} ${resourceType}`);
+			if (typeIs(entity, "Instance")) {
+				ServerEvents.CollectEvent.fire(entity as Player, "Collected", resourceType, amount);
+				const data = ResourceTypes.Get(resourceType);
+				ServerEvents.SystemMessageEvent.fire(entity as Player, `📦 Collected ${amount}x ${data?.Icon ?? ""} ${resourceType}`);
+			}
 
 			resource.Destroy();
-			Logger.Debug("CollectionManager", `${player.Name} collected ${amount} ${resourceType}`);
+			Logger.Debug("CollectionManager", `${entity.Name} collected ${amount} ${resourceType}`);
 			return true;
 		}
 		return false;

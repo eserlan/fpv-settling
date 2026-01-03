@@ -15,6 +15,11 @@ let currentReceiveResource = "Brick";
 let tradeAmount = 1;
 let ownedPorts: string[] = [];
 let harborMasterPoints = 0;
+let isGameStarted = false;
+
+ClientEvents.GameStart.connect(() => {
+	isGameStarted = true;
+});
 
 // Create Trade UI
 const createTradeUI = () => {
@@ -257,7 +262,7 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 		return;
 	}
 
-	if (input.KeyCode === Enum.KeyCode.T && tradeFrame) {
+	if (input.KeyCode === Enum.KeyCode.T && tradeFrame && isGameStarted) {
 		tradeFrame.Visible = !tradeFrame.Visible;
 	}
 });
