@@ -32,6 +32,7 @@ interface ClientEvents {
     // Resource events
     ResourceUpdate(resources: Record<string, number>): void;
     ResourceSpawned(resourceType: string, position: Vector3, tileQ: number, tileR: number): void;
+    ResourceCollected(resourceType: string, amount: number, collectorName: string): void;
 
     // Building events
     ConstructionStarted(buildingId: number, buildingType: string, position: Vector3): void;
@@ -72,6 +73,7 @@ interface ClientEvents {
     // UI/System events
     SystemMessageEvent(message: string): void;
     ScoresUpdate(scores: { userId: number, name: string, score: number }[]): void;
+    ScoreChanged(userId: number, playerName: string, newScore: number, delta: number): void;
 
     // Legacy complex events (consider refactoring later)
     CollectEvent(action: string, ...args: unknown[]): void;

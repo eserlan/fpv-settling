@@ -128,6 +128,9 @@ export class CollectionManager implements OnStart, OnTick {
 				ServerEvents.CollectEvent.fire(entity as Player, "Collected", resourceType, amount);
 			}
 
+			// Broadcast to all clients for visual feedback
+			ServerEvents.ResourceCollected.broadcast(resourceType, amount, entity.Name);
+
 			resource.Destroy();
 			Logger.Debug("CollectionManager", `${entity.Name} collected ${amount} ${resourceType}`);
 			return true;

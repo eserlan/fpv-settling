@@ -274,12 +274,20 @@ export class GameService implements OnStart, GameState {
 			const researchScore = playerData.ResearchManager.GetScore();
 			const currentScore = buildingScore + researchScore;
 
+			const previousScore = playerData.Score;
+			const delta = currentScore - previousScore;
+
 			playerData.Score = currentScore;
 			scores.push({
 				userId: userId as number,
 				name: playerData.Player.Name,
 				score: currentScore,
 			});
+
+			// Fire individual ScoreChanged event if score actually changed
+			if (delta !== 0) {
+				NetworkUtils.Broadcast(ServerEvents.ScoreChanged, userId as number, playerData.Player.Name, currentScore, delta);
+			}
 		}
 
 		NetworkUtils.Broadcast(ServerEvents.ScoresUpdate, scores);
