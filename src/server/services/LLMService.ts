@@ -74,9 +74,17 @@ export class LLMService {
 	}
 
 	private MockDecision(): AIAction {
+		// Much more aggressive when gateway isn't available
 		const roll = math.random();
-		if (roll < 0.1) return { action: "BUILD_SETTLEMENT", reason: "Mock: Random chance" };
-		if (roll < 0.2) return { action: "BUILD_ROAD", reason: "Mock: Random chance" };
-		return { action: "WAIT", reason: "Mock: Waiting for resources" };
+		if (roll < 0.7) {
+			Logger.Info("LLMService", "Mock: Building settlement");
+			return { action: "BUILD_SETTLEMENT", reason: "Mock: Building settlement (gateway offline)" };
+		}
+		if (roll < 0.9) {
+			Logger.Info("LLMService", "Mock: Building road");
+			return { action: "BUILD_ROAD", reason: "Mock: Building road (gateway offline)" };
+		}
+		Logger.Info("LLMService", "Mock: Waiting");
+		return { action: "WAIT", reason: "Mock: Waiting briefly" };
 	}
 }
