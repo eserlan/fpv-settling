@@ -26,6 +26,8 @@ export class AIPlayer implements AIPlayerInterface {
 	private currentPath?: Path;
 	private currentWaypointIndex: number = 0;
 	private lastMoveTime: number = 0;
+	private lastCheckedPosition?: Vector3;
+	private lastPositionTime: number = 0;
 
 	private llmService: LLMService;
 
@@ -147,87 +149,38 @@ export class AIPlayer implements AIPlayerInterface {
 			if (resource) {
 				this.pendingResource = resource;
 				this.State = "MovingToResource";
+				this.currentPath = undefined; // Force new path
 				Logger.Info("AIPlayer", `${this.Name} → collecting ${resource.GetAttribute("ResourceType")}`);
 			}
 		}
 
-		// Handle resource collection movement
-		if (this.State === "MovingToResource" && this.pendingResource) {
-			if (!this.pendingResource.Parent) {
-				// Resource was collected or disappeared
+		// Handle movement states (Both Resource and Build)
+		if (this.State === "MovingToResource" || this.State === "Moving") {
+			const targetPos = this.State === "MovingToResource" ? this.pendingResource?.Position : this.pendingAction?.position;
+
+			if (!targetPos || (this.State === "MovingToResource" && !this.pendingResource?.Parent)) {
 				this.pendingResource = undefined;
+				this.currentPath = undefined;
 				this.State = "Idle";
 				return;
 			}
 
 			const humanoid = this.Character.FindFirstChildOfClass("Humanoid");
 			if (humanoid) {
-				humanoid.MoveTo(this.pendingResource.Position);
-				const dist = this.Character.PrimaryPart.Position.sub(this.pendingResource.Position).Magnitude;
-				if (dist < 8) {
-					// CollectionManager will pick it up
-					this.pendingResource = undefined;
-					this.State = "Idle";
-				}
-			}
-			return; // Focus on collecting
-		}
+				this.FollowPath(humanoid, targetPos, playerData.GameTime);
 
-		// Handle build movement with pathfinding
-		if (this.State === "Moving" && this.pendingAction) {
-			const humanoid = this.Character.FindFirstChildOfClass("Humanoid");
-			if (humanoid) {
-				// Compute path if we don't have one
-				if (!this.currentPath) {
-					const newPath = PathfindingService.CreatePath({
-						AgentRadius: 2,
-						AgentHeight: 5,
-						AgentCanJump: true,
-					});
-					const [success] = pcall(() => {
-						newPath.ComputeAsync(this.Character!.PrimaryPart!.Position, this.pendingAction!.position);
-					});
-					if (success && newPath.Status === Enum.PathStatus.Success) {
-						this.currentPath = newPath;
-						this.currentWaypointIndex = 0;
+				const dist = this.Character.PrimaryPart.Position.sub(targetPos).Magnitude;
+				const arrivalThreshold = this.State === "MovingToResource" ? 8 : 12;
+
+				if (dist < arrivalThreshold) {
+					if (this.State === "MovingToResource") {
+						this.pendingResource = undefined;
+						this.State = "Idle";
 					} else {
-						Logger.Warn("AIPlayer", `${this.Name} pathfinding failed, using direct`);
-						this.currentPath = undefined;
+						this.State = "Executing";
+						Logger.Info("AIPlayer", `${this.Name} arrived at build site.`);
 					}
-					this.lastMoveTime = playerData.GameTime;
-				}
-
-				// Follow waypoints or direct movement
-				if (this.currentPath && this.currentPath.Status === Enum.PathStatus.Success) {
-					const waypoints = this.currentPath.GetWaypoints();
-					if (this.currentWaypointIndex < waypoints.size()) {
-						const wp = waypoints[this.currentWaypointIndex];
-						humanoid.MoveTo(wp.Position);
-						if (this.Character.PrimaryPart.Position.sub(wp.Position).Magnitude < 4) {
-							this.currentWaypointIndex++;
-							if (wp.Action === Enum.PathWaypointAction.Jump) humanoid.Jump = true;
-						}
-					} else {
-						this.currentPath = undefined;
-					}
-				} else {
-					humanoid.MoveTo(this.pendingAction.position);
-				}
-
-				// Check if arrived
-				const dist = this.Character.PrimaryPart.Position.sub(this.pendingAction.position).Magnitude;
-				if (dist < 12) {
-					this.State = "Executing";
 					this.currentPath = undefined;
-					Logger.Info("AIPlayer", `${this.Name} arrived, building...`);
-				}
-
-				// Stuck detection - give up after 30 seconds
-				if (playerData.GameTime - this.lastMoveTime > 30) {
-					Logger.Warn("AIPlayer", `${this.Name} stuck, giving up on action`);
-					this.pendingAction = undefined;
-					this.currentPath = undefined;
-					this.State = "Idle";
 				}
 			}
 			return;
@@ -258,6 +211,75 @@ export class AIPlayer implements AIPlayerInterface {
 			this.State = "Thinking";
 			this.Think(playerData, mapGenerator);
 			this.NextActionTime = playerData.GameTime + 30; // Think every 30s
+		}
+	}
+
+	private FollowPath(humanoid: Humanoid, targetPos: Vector3, gameTime: number) {
+		const myPos = this.Character!.PrimaryPart!.Position;
+
+		// 1. Compute path if missing
+		if (!this.currentPath) {
+			const newPath = PathfindingService.CreatePath({
+				AgentRadius: 3, // Slightly larger for better clearance
+				AgentHeight: 6,
+				AgentCanJump: true,
+			});
+
+			const [success] = pcall(() => {
+				newPath.ComputeAsync(myPos, targetPos);
+			});
+
+			if (success && newPath.Status === Enum.PathStatus.Success) {
+				this.currentPath = newPath;
+				this.currentWaypointIndex = 0;
+			} else {
+				humanoid.MoveTo(targetPos);
+				return;
+			}
+			this.lastMoveTime = gameTime;
+			this.lastPositionTime = gameTime;
+			this.lastCheckedPosition = myPos;
+		}
+
+		// 2. Active Stuck Detection (Is actually moving?)
+		if (gameTime - this.lastPositionTime > 3) {
+			const travelled = this.lastCheckedPosition ? myPos.sub(this.lastCheckedPosition).Magnitude : 10;
+			if (travelled < 2) {
+				Logger.Warn("AIPlayer", `${this.Name} hasn't progressed much, recomputing path...`);
+				this.currentPath = undefined; // Force recalculate
+				humanoid.Jump = true; // Try jumping out of it
+				this.lastPositionTime = gameTime;
+				this.lastCheckedPosition = myPos;
+				return;
+			}
+			this.lastPositionTime = gameTime;
+			this.lastCheckedPosition = myPos;
+		}
+
+		// 3. Absolute Timeout (30s)
+		if (gameTime - this.lastMoveTime > 30) {
+			Logger.Warn("AIPlayer", `${this.Name} absolute move timeout reached.`);
+			this.currentPath = undefined;
+			this.State = "Idle";
+			return;
+		}
+
+		// 4. Follow waypoints
+		const waypoints = this.currentPath.GetWaypoints();
+		if (this.currentWaypointIndex < waypoints.size()) {
+			const wp = waypoints[this.currentWaypointIndex];
+			humanoid.MoveTo(wp.Position);
+
+			if (myPos.sub(wp.Position).Magnitude < 4) {
+				this.currentWaypointIndex++;
+				if (wp.Action === Enum.PathWaypointAction.Jump) humanoid.Jump = true;
+			}
+		} else {
+			// Reached end of waypoints but not destination?
+			humanoid.MoveTo(targetPos);
+			if (myPos.sub(targetPos).Magnitude > 20) {
+				this.currentPath = undefined; // Too far from final target, recalc
+			}
 		}
 	}
 
