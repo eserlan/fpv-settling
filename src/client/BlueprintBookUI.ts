@@ -274,6 +274,12 @@ ClientEvents.CollectEvent.connect((action, ...args) => {
 	}
 });
 
+// Listen for direct resource updates (from building, trading, etc.)
+ClientEvents.ResourceUpdate.connect((resources) => {
+	currentResources = resources;
+	refreshAffordability();
+});
+
 // Help text
 const helpText = new Instance("TextLabel");
 helpText.Name = "HelpText";

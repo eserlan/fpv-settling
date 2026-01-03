@@ -150,6 +150,11 @@ ClientEvents.CollectEvent.connect((eventType, ...args) => {
 	}
 });
 
+// Handle direct resource updates (from building, trading, etc.)
+ClientEvents.ResourceUpdate.connect((resources) => {
+	updateInventory(resources);
+});
+
 // Request initial inventory
 task.delay(1, () => {
 	ClientEvents.CollectEvent.fire("GetInventory");

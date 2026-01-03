@@ -313,7 +313,10 @@ export class AIPlayer implements AIPlayerInterface {
 		const reason = decision.reason ?? "No reason provided";
 		const target = decision.target ? (decision.target as string).upper() : undefined;
 
+		const resources = playerData.ResourceManager.Resources;
+
 		Logger.Info("AIPlayer", `${this.Name} (${this.Skill}) Decided: ${action} because "${reason}"`);
+		Logger.Info("AIPlayer", `${this.Name} Resources: W=${resources.Wood} B=${resources.Brick} Wh=${resources.Wheat} Wo=${resources.Wool} O=${resources.Ore}`);
 
 		if (action === "WAIT" || action === "END_TURN") {
 			this.State = "Idle";
@@ -325,6 +328,14 @@ export class AIPlayer implements AIPlayerInterface {
 
 		switch (action) {
 			case "BUILD_SETTLEMENT": {
+				// Check resources (first settlement is free)
+				const isFree = playerData.NeedsFirstSettlement;
+				if (!isFree && (resources.Wood < 1 || resources.Brick < 1 || resources.Wheat < 1 || resources.Wool < 1)) {
+					Logger.Warn("AIPlayer", `${this.Name} can't afford Settlement`);
+					this.State = "Idle";
+					return;
+				}
+
 				buildingType = "Settlement";
 				if (target) {
 					const vertex = mapGenerator.FindVertexById(target);
@@ -337,12 +348,47 @@ export class AIPlayer implements AIPlayerInterface {
 				break;
 			}
 			case "BUILD_ROAD": {
+				// Check resources
+				if (resources.Wood < 1 || resources.Brick < 1) {
+					Logger.Warn("AIPlayer", `${this.Name} can't afford Road (need 1 Wood, 1 Brick)`);
+					this.State = "Idle";
+					return;
+				}
+
+				// Roads must connect to existing settlements
+				const settlements = playerData.BuildingManager.Settlements;
+				if (settlements.size() === 0) {
+					Logger.Warn("AIPlayer", `${this.Name} can't build Road (no settlements)`);
+					this.State = "Idle";
+					return;
+				}
+
+				// Find an edge near one of our settlements
 				buildingType = "Road";
-				const edge = mapGenerator.GetRandomEdge();
-				if (edge) targetPos = edge.Position;
+				const settlement = settlements[math.random(0, settlements.size() - 1)];
+				if (settlement && settlement.Position) {
+					// Find nearest edge to settlement
+					const [nearestEdge] = mapGenerator.FindNearestEdge(settlement.Position);
+					if (nearestEdge) {
+						targetPos = nearestEdge.Position;
+					}
+				}
+
+				if (!targetPos) {
+					Logger.Warn("AIPlayer", `${this.Name} couldn't find edge near settlement`);
+					this.State = "Idle";
+					return;
+				}
 				break;
 			}
 			case "BUILD_CITY": {
+				// Check resources
+				if (resources.Ore < 3 || resources.Wheat < 2) {
+					Logger.Warn("AIPlayer", `${this.Name} can't afford City (need 3 Ore, 2 Wheat)`);
+					this.State = "Idle";
+					return;
+				}
+
 				buildingType = "City";
 				const settlements = playerData.BuildingManager.Settlements;
 				if (settlements.size() > 0) {
@@ -363,7 +409,7 @@ export class AIPlayer implements AIPlayerInterface {
 		if (targetPos && buildingType) {
 			this.pendingAction = { type: buildingType, position: targetPos, actionData: decision };
 			this.State = "Moving";
-			Logger.Info("AIPlayer", `${this.Name} is moving to ${targetPos} to build ${buildingType}...`);
+			Logger.Info("AIPlayer", `${this.Name} is moving to build ${buildingType}...`);
 		} else {
 			this.State = "Idle";
 		}

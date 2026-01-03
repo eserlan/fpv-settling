@@ -390,6 +390,26 @@ class BuildingManager {
 		part.SetAttribute("Key", building.SnapKey);
 		part.SetAttribute("OwnerId", building.OwnerId ?? this.Player.UserId);
 
+		// Add owner label above the building
+		const ownerBillboard = new Instance("BillboardGui");
+		ownerBillboard.Name = "OwnerLabel";
+		ownerBillboard.Size = new UDim2(0, 100, 0, 30);
+		ownerBillboard.StudsOffset = new Vector3(0, size.Y + 2, 0);
+		ownerBillboard.AlwaysOnTop = true;
+		ownerBillboard.Adornee = part;
+		ownerBillboard.Parent = part;
+
+		const ownerText = new Instance("TextLabel");
+		ownerText.Name = "OwnerName";
+		ownerText.Size = new UDim2(1, 0, 1, 0);
+		ownerText.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
+		ownerText.BackgroundTransparency = 0.3;
+		ownerText.TextColor3 = new Color3(1, 1, 1);
+		ownerText.TextScaled = true;
+		ownerText.Font = Enum.Font.GothamBold;
+		ownerText.Text = this.Player.Name;
+		ownerText.Parent = ownerBillboard;
+
 		return model;
 	}
 

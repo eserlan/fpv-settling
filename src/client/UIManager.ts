@@ -108,8 +108,31 @@ const refreshBuildingList = () => {
 				btn.MouseButton1Click.Connect(() => {
 					const camera = game.Workspace.CurrentCamera;
 					if (camera && building.PrimaryPart) {
-						camera.CameraSubject = building.PrimaryPart;
-						Logger.Info("Camera", `Focused on ${building.Name}`);
+						// Get the building position and size
+						const buildingPos = building.PrimaryPart.Position;
+						const boundingBox = building.GetExtentsSize();
+
+						// Calculate offset distance based on building size (ensure we're outside)
+						const maxDimension = math.max(boundingBox.X, boundingBox.Y, boundingBox.Z);
+						const offsetDistance = math.max(30, maxDimension * 1.5);
+
+						// Position camera at an angle behind/above the building
+						const offsetVector = new Vector3(offsetDistance * 0.7, offsetDistance * 0.5, offsetDistance * 0.7);
+						const cameraPos = buildingPos.add(offsetVector);
+
+						// Set camera to Scriptable mode so we can control it freely
+						camera.CameraType = Enum.CameraType.Scriptable;
+
+						// Create the target CFrame looking at the building
+						const targetCFrame = CFrame.lookAt(cameraPos, buildingPos);
+
+						// Smoothly tween the camera to the new position
+						const TweenService = game.GetService("TweenService");
+						const tweenInfo = new TweenInfo(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+						const tween = TweenService.Create(camera, tweenInfo, { CFrame: targetCFrame });
+						tween.Play();
+
+						Logger.Info("Camera", `Focused on ${building.Name} (third-person view)`);
 					}
 				});
 			}
@@ -155,7 +178,10 @@ resetCamBtn.MouseButton1Click.Connect(() => {
 	const character = player.Character;
 	if (camera && character) {
 		const humanoid = character.FindFirstChildOfClass("Humanoid");
-		if (humanoid) camera.CameraSubject = humanoid;
+		if (humanoid) {
+			camera.CameraType = Enum.CameraType.Custom;
+			camera.CameraSubject = humanoid;
+		}
 	}
 });
 

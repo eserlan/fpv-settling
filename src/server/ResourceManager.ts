@@ -47,6 +47,7 @@ class ResourceManager {
 			// Add only what fits
 			const addedAmount = maxStack - currentAmount;
 			this.Resources[resourceType] = maxStack;
+			NetworkUtils.FireClient(this.Player, ServerEvents.ResourceUpdate, this.Resources);
 			return addedAmount;
 		}
 
