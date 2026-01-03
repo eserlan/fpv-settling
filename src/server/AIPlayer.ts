@@ -31,6 +31,7 @@ export class AIPlayer implements AIPlayerInterface {
 	private lastCheckedPosition?: Vector3;
 	private lastPositionTime: number = 0;
 	private consecutiveStuckCount: number = 0;
+	private lastThoughtPendingTime?: number;
 
 	private llmService: LLMService;
 
@@ -151,8 +152,22 @@ export class AIPlayer implements AIPlayerInterface {
 				this.lastPulsePhase = currentPhase;
 				this.thoughtPending = true;
 				const phaseName = currentPhase === 0 ? "Pulse Reset" : "Mid-Pulse";
-				Logger.Info("AIPlayer", `${this.Name} phase transition: ${phaseName} (pending thought)`);
+				Logger.Info("AIPlayer", `${this.Name} phase transition: ${phaseName} (pending thought, state=${this.State})`);
 			}
+		}
+
+		// Safety: If we have a pending thought but are stuck in a non-Idle state, force reset
+		if (this.thoughtPending && this.State !== "Idle" && this.State !== "Thinking") {
+			// Give the current action a few seconds to finish, then force unstick
+			if (!this.lastThoughtPendingTime) {
+				this.lastThoughtPendingTime = playerData.GameTime;
+			} else if (playerData.GameTime - this.lastThoughtPendingTime > 15) {
+				Logger.Warn("AIPlayer", `${this.Name} stuck in ${this.State} for 15s with pending thought, forcing Idle`);
+				this.CancelCurrentAction("Thought Timeout");
+				this.lastThoughtPendingTime = undefined;
+			}
+		} else {
+			this.lastThoughtPendingTime = undefined;
 		}
 
 		if (this.State === "Idle") {
@@ -216,22 +231,30 @@ export class AIPlayer implements AIPlayerInterface {
 		}
 
 		// Handle action execution
-		if (this.State === "Executing" && this.pendingAction) {
-			const { type: actionType, position } = this.pendingAction;
-			const [success, result] = playerData.BuildingManager.StartBuilding(actionType, position);
+		if (this.State === "Executing") {
+			if (this.pendingAction && this.pendingAction.type !== "") {
+				const { type: actionType, position } = this.pendingAction;
+				const [success, result] = playerData.BuildingManager.StartBuilding(actionType, position);
 
-			if (success) {
-				Logger.Info("AIPlayer", `${this.Name} built ${actionType}!`);
-				if (playerData.NeedsFirstSettlement && actionType === "Settlement") {
-					playerData.NeedsFirstSettlement = false;
+				if (success) {
+					Logger.Info("AIPlayer", `${this.Name} built ${actionType}!`);
+					if (playerData.NeedsFirstSettlement && actionType === "Settlement") {
+						playerData.NeedsFirstSettlement = false;
+					}
+				} else {
+					Logger.Warn("AIPlayer", `${this.Name} failed to build ${actionType}: ${result}`);
 				}
-			} else {
-				Logger.Warn("AIPlayer", `${this.Name} failed to build ${actionType}: ${result}`);
-			}
 
-			this.pendingAction = undefined;
-			this.State = "Idle";
-			return;
+				this.pendingAction = undefined;
+				this.State = "Idle";
+				return;
+			} else {
+				// Safety: Stuck in Executing with no valid action
+				Logger.Warn("AIPlayer", `${this.Name} stuck in Executing with no action, resetting to Idle`);
+				this.pendingAction = undefined;
+				this.State = "Idle";
+				return;
+			}
 		}
 	}
 
