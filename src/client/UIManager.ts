@@ -4,6 +4,7 @@ const Players = game.GetService("Players");
 
 import * as Logger from "shared/Logger";
 import { ClientEvents } from "./ClientEvents";
+import { MakeDraggable } from "./UIUtils";
 
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
@@ -25,7 +26,7 @@ ClientEvents.GameStart.connect(() => {
 const mainSidebar = new Instance("Frame");
 mainSidebar.Name = "ManagementMenu";
 mainSidebar.Size = new UDim2(0, 250, 0, 400);
-mainSidebar.Position = new UDim2(1, -260, 0, 10);
+mainSidebar.Position = new UDim2(1, -250, 0, 0);
 mainSidebar.BackgroundColor3 = Color3.fromRGB(40, 40, 40);
 mainSidebar.BackgroundTransparency = 0.3;
 mainSidebar.BorderSizePixel = 2;
@@ -42,6 +43,8 @@ menuTitle.TextColor3 = Color3.fromRGB(255, 255, 255);
 menuTitle.Font = Enum.Font.GothamBold;
 menuTitle.TextSize = 18;
 menuTitle.Parent = mainSidebar;
+
+MakeDraggable(mainSidebar, menuTitle);
 
 // Tabs
 const tabFrame = new Instance("Frame");
@@ -313,6 +316,8 @@ helpTitle.TextColor3 = Color3.fromRGB(255, 255, 255);
 helpTitle.Font = Enum.Font.SourceSansBold;
 helpTitle.TextSize = 18;
 helpTitle.Parent = helpFrame;
+
+MakeDraggable(helpFrame, helpTitle);
 
 const helpText = new Instance("TextLabel");
 helpText.Name = "HelpText";

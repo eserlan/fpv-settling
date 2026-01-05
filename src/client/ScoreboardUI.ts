@@ -3,6 +3,7 @@ const Players = game.GetService("Players");
 const TweenService = game.GetService("TweenService");
 import { ClientEvents } from "./ClientEvents";
 import * as Logger from "shared/Logger";
+import { MakeDraggable } from "./UIUtils";
 
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
@@ -22,7 +23,8 @@ let lastScores: { userId: number; name: string; score: number }[] = [];
 const mainFrame = new Instance("Frame");
 mainFrame.Name = "MainFrame";
 mainFrame.Size = new UDim2(0, 220, 0, 45); // Start small
-mainFrame.Position = new UDim2(1, -230, 0, 320); // Below building menu
+mainFrame.AnchorPoint = new Vector2(1, 1);
+mainFrame.Position = new UDim2(1, -10, 1, -100); // Above inventory bar
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25);
 mainFrame.BackgroundTransparency = 0.2;
 mainFrame.BorderSizePixel = 0;
@@ -47,6 +49,8 @@ title.TextColor3 = Color3.fromRGB(255, 215, 0); // Gold
 title.Font = Enum.Font.GothamBold;
 title.TextSize = 16;
 title.Parent = mainFrame;
+
+MakeDraggable(mainFrame, title);
 
 const divider = new Instance("Frame");
 divider.Name = "Divider";
