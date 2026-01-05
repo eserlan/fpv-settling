@@ -159,6 +159,72 @@ export class BuildingVisualsService {
             door.Anchored = true;
             door.Color = Color3.fromRGB(101, 67, 33);
             door.Parent = model;
+        } else if (building.Type === "City") {
+            // Main Hall (Slightly larger than Town)
+            part.Size = new Vector3(8, 6, 8);
+            part.CFrame = baseCFrame.mul(new CFrame(-2, 3, 0));
+            part.Color = Color3.fromRGB(210, 190, 150);
+
+            // Tower Spire
+            const tower = new Instance("Part");
+            tower.Name = "Tower";
+            tower.Size = new Vector3(5, 14, 5);
+            tower.CFrame = baseCFrame.mul(new CFrame(4.5, 7, 0));
+            tower.Color = Color3.fromRGB(190, 170, 130);
+            tower.Anchored = true;
+            tower.Parent = model;
+
+            // Main Hall Roof (Team Color)
+            const roof1 = new Instance("WedgePart");
+            roof1.Size = new Vector3(9, 4, 4.5);
+            roof1.CFrame = baseCFrame.mul(new CFrame(-2, 8, -2.25));
+            roof1.Anchored = true;
+            roof1.Color = playerData.Color;
+            roof1.Parent = model;
+            const roof2 = new Instance("WedgePart");
+            roof2.Size = new Vector3(9, 4, 4.5);
+            roof2.CFrame = baseCFrame.mul(new CFrame(-2, 8, 2.25)).mul(CFrame.Angles(0, math.pi, 0));
+            roof2.Anchored = true;
+            roof2.Color = playerData.Color;
+            roof2.Parent = model;
+
+            // Tower Peak (Team Color)
+            const peak = new Instance("Part");
+            peak.Name = "TowerPeak";
+            peak.Size = new Vector3(6, 2, 6);
+            peak.CFrame = baseCFrame.mul(new CFrame(4.5, 15, 0));
+            peak.Anchored = true;
+            peak.Color = playerData.Color;
+            peak.Parent = model;
+
+            // Flagpole
+            const pole = new Instance("Part");
+            pole.Name = "Flagpole";
+            pole.Size = new Vector3(0.5, 8, 0.5);
+            pole.Position = peak.Position.add(new Vector3(0, 5, 0));
+            pole.Color = Color3.fromRGB(200, 200, 200);
+            pole.Anchored = true;
+            pole.Parent = model;
+
+            // Flag (Team Color)
+            const flag = new Instance("Part");
+            flag.Name = "Flag";
+            flag.Size = new Vector3(3, 2.5, 0.2);
+            flag.Position = pole.Position.add(new Vector3(1.7, 2.5, 0));
+            flag.Color = playerData.Color;
+            flag.Anchored = true;
+            flag.Parent = model;
+
+            // Windows for detail
+            for (let i = 0; i < 2; i++) {
+                const window = new Instance("Part");
+                window.Size = new Vector3(0.1, 1.5, 1);
+                window.CFrame = baseCFrame.mul(new CFrame(-6.1, 3.5, i === 0 ? -2 : 2));
+                window.Color = Color3.fromRGB(100, 150, 255);
+                window.Transparency = 0.3;
+                window.Anchored = true;
+                window.Parent = model;
+            }
         } else if (building.Type === "Road") {
             part.Size = new Vector3(37, 0.5, 3);
             part.CFrame = baseCFrame;
