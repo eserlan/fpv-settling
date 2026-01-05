@@ -377,11 +377,12 @@ export class AIPlayer implements AIPlayerInterface {
 
 		// Dynamic Speed: Scaled aggressively for long distances to ensure quick map traversal
 		let multiplier = 1;
-		if (totalDist > 400) multiplier = 5.0;      // Extreme distance (e.g. across map)
-		else if (totalDist > 200) multiplier = 4.0; // Very far
-		else if (totalDist > 100) multiplier = 2.5; // Far
-		else if (totalDist > 50) multiplier = 1.8;  // Approaching
-		else if (totalDist > 25) multiplier = 1.3;  // Near
+		if (totalDist > 800) multiplier = 12.0;     // Huge distance (e.g. across whole map)
+		else if (totalDist > 400) multiplier = 8.0;      // Extreme distance
+		else if (totalDist > 200) multiplier = 5.0; // Very far
+		else if (totalDist > 100) multiplier = 3.0; // Far
+		else if (totalDist > 50) multiplier = 2.0;  // Approaching
+		else if (totalDist > 25) multiplier = 1.4;  // Near
 
 		humanoid.WalkSpeed = this.baseWalkSpeed * multiplier;
 
