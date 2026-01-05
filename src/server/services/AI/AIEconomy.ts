@@ -26,16 +26,16 @@ export class AIEconomy {
         return getMissingResources(resources, cost);
     }
 
-    public TryTrade(playerData: PlayerData) {
+    public TryPortBalance(playerData: PlayerData) {
         const res = playerData.ResourceManager.Resources;
-        // Basic Balancing: if > 4 of anything, trade for something we have 0 of
+        // Port balancing is a last resort: if > 5 of anything, trade for something we have < 1
         for (const [r, amt] of pairs(res)) {
-            if ((amt as number) > 4) {
+            if ((amt as number) > 5) {
                 // Find shortage
                 for (const [missing, mAmt] of pairs(res)) {
-                    if ((mAmt as number) === 0) {
+                    if ((mAmt as number) < 1) {
                         playerData.PortManager.ExecuteTrade(r as string, missing as string);
-                        Logger.Info("AIPlayer", `Trade Balance: ${r} -> ${missing}`);
+                        Logger.Info("AIPlayer", `Port Balance: ${r} -> ${missing}`);
                         return;
                     }
                 }
@@ -71,21 +71,9 @@ export class AIEconomy {
         // Sort surpluses by amount descending
         surpluses.sort((a, b) => a.amt > b.amt);
 
-        // 1. Try Port Trade first
-        for (const surplus of surpluses) {
-            const ratio = playerData.PortManager.GetBestTradeRatio(surplus.res);
-            if (surplus.amt >= ratio) {
-                const [success] = playerData.PortManager.ExecuteTrade(surplus.res, nextNeed);
-                if (success) {
-                    Logger.Info("AIPlayer", `${this.name} traded surplus ${surplus.res} for needed ${nextNeed} (Port)`);
-                    return;
-                }
-            }
-        }
-
-        // 2. Try Posting to Market
+        // 1. Try Posting to Market first (better rates: 1:1)
         const myActiveOffers = marketManager.GetOffers().filter(o => o.posterId === this.userId);
-        if (myActiveOffers.size() < 3) {
+        if (myActiveOffers.size() < 4) { // Increased limit
             const alreadySeeking = myActiveOffers.some(o => o.wantType === nextNeed);
             if (!alreadySeeking) {
                 for (const surplus of surpluses) {
@@ -97,6 +85,18 @@ export class AIEconomy {
                             return;
                         }
                     }
+                }
+            }
+        }
+
+        // 2. Try Port Trade as fallback (worse rates: 4:1, 3:1, 2:1)
+        for (const surplus of surpluses) {
+            const ratio = playerData.PortManager.GetBestTradeRatio(surplus.res);
+            if (surplus.amt >= ratio) {
+                const [success] = playerData.PortManager.ExecuteTrade(surplus.res, nextNeed);
+                if (success) {
+                    Logger.Info("AIPlayer", `${this.name} traded surplus ${surplus.res} for needed ${nextNeed} (Port)`);
+                    return;
                 }
             }
         }
@@ -116,7 +116,7 @@ export class AIEconomy {
             if (totalGive >= 1 && (resources[offer.wantType] ?? 0) >= 2) {
                 let helpsMe = false;
                 for (const [res, amt] of pairs(offer.giveResources)) {
-                    if ((resources[res as string] ?? 0) === 0 && (amt as number) > 0) {
+                    if ((resources[res as string] ?? 0) < 2 && (amt as number) > 0) {
                         helpsMe = true;
                         break;
                     }
@@ -134,11 +134,11 @@ export class AIEconomy {
 
         // Priority 2: Balancing
         const myActiveCount = activeOffers.filter(o => o.posterId === this.userId).size();
-        if (myActiveCount < 2) {
+        if (myActiveCount < 3) { // Increased from 2
             for (const [res, amt] of pairs(resources)) {
-                if ((amt as number) > 4) {
+                if ((amt as number) > 3) { // Decreased from 4
                     for (const [neededRes, neededAmt] of pairs(resources)) {
-                        if ((neededAmt as number) <= 1 && neededRes !== res) {
+                        if ((neededAmt as number) < 2 && neededRes !== res) { // Increased from <= 1
                             const giveDict: ResourceDict = { [res as string]: 1 };
                             const success = marketManager.PostOffer(this.userId, giveDict, neededRes as ResourceType, 1);
                             if (success) {

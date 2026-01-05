@@ -200,8 +200,13 @@ export class AIPlayer implements AIPlayerInterface {
 				this.taskQueue = [...this.taskQueue, ...newTasks];
 
 				// Also do economy checks
-				this.economy.TryTrade(playerData);
+				const target = this.strategist.GetTargetBuilding(playerData, mapGenerator, gameState);
+				if (target) {
+					this.economy.TryTradeForNeeds(playerData, target.type as any, marketManager);
+				}
+
 				this.economy.TryMarketTrade(playerData, marketManager);
+				this.economy.TryPortBalance(playerData);
 
 				this.State = "Idle"; // Instant think finish
 				return;
