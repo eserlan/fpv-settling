@@ -4,14 +4,17 @@ import { ResourceDict, MarketOffer } from "shared/MarketTypes";
 import { ResourceType } from "shared/TradeMath";
 import * as Logger from "shared/Logger";
 import { canAfford, getMissingResources, getBuildingCost } from "shared/lib/EconomyRules";
+import { SkillLevel } from "shared/GameTypes";
 
 export class AIEconomy {
     private userId: number;
     private name: string;
+    private skill: SkillLevel;
 
-    constructor(userId: number, name: string) {
+    constructor(userId: number, name: string, skill: SkillLevel = "Intermediate") {
         this.userId = userId;
         this.name = name;
+        this.skill = skill;
     }
 
     public CanAfford(building: string, resources: Record<string, number>): boolean {
@@ -113,10 +116,17 @@ export class AIEconomy {
             let totalGive = 0;
             for (const [_, amt] of pairs(offer.giveResources)) totalGive += (amt as number);
 
-            if (totalGive >= 1 && (resources[offer.wantType] ?? 0) >= 2) {
+            // Skill-based Thresholds
+            const keepThreshold = this.skill === "Expert" ? 3 : (this.skill === "Beginner" ? 1 : 2);
+            const wantLimit = this.skill === "Expert" ? 1 : 2;
+
+            if (totalGive >= 1 && (resources[offer.wantType] ?? 0) >= keepThreshold) {
                 let helpsMe = false;
                 for (const [res, amt] of pairs(offer.giveResources)) {
-                    if ((resources[res as string] ?? 0) < 2 && (amt as number) > 0) {
+                    // Expert only takes what they strictly need (< 1)
+                    // Beginner takes anything they don't have a ton of (< 3)
+                    const needLimit = this.skill === "Expert" ? 1 : (this.skill === "Beginner" ? 3 : 2);
+                    if ((resources[res as string] ?? 0) < needLimit && (amt as number) > 0) {
                         helpsMe = true;
                         break;
                     }

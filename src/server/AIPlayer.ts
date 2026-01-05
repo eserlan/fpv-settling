@@ -60,8 +60,8 @@ export class AIPlayer implements AIPlayerInterface {
 		} else {
 			// Fallback for easy instantiation if needed, or legacy
 			this.pathfinder = new AIPathfinder();
-			this.strategist = new AIStrategist(id, name);
-			this.economy = new AIEconomy(id, name);
+			this.strategist = new AIStrategist(id, name, this.Skill);
+			this.economy = new AIEconomy(id, name, this.Skill);
 		}
 	}
 

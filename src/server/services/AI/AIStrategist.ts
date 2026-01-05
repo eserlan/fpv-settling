@@ -3,15 +3,18 @@ import { ServerGameState } from "../ServerGameState";
 import { MapGenerator } from "../MapGenerator";
 import * as Logger from "shared/Logger";
 import { validateTownPlacement, validateRoadPlacement, isConnectedToNetwork } from "shared/lib/GameRules";
+import { SkillLevel } from "shared/GameTypes";
 
 export class AIStrategist {
     private userId: number;
     private name: string;
+    private skill: SkillLevel;
     private failedTownSpots: Vector3[] = [];
 
-    constructor(userId: number, name: string) {
+    constructor(userId: number, name: string, skill: SkillLevel = "Intermediate") {
         this.userId = userId;
         this.name = name;
+        this.skill = skill;
     }
 
     public RecordFailedPlacement(pos: Vector3) {
@@ -126,7 +129,9 @@ export class AIStrategist {
         const allVertices = gameState.GetVertices();
         if (allVertices.size() === 0) return undefined;
 
-        for (let i = 0; i < 50; i++) {
+        const sampleCount = this.skill === "Expert" ? 100 : (this.skill === "Beginner" ? 20 : 50);
+
+        for (let i = 0; i < sampleCount; i++) {
             const v = allVertices[math.random(0, allVertices.size() - 1)];
             if (!v) continue;
 
@@ -184,7 +189,9 @@ export class AIStrategist {
             }
         } else {
             // Non-setup: sample random edges for expansion
-            for (let i = 0; i < 30; i++) {
+            const sampleLimit = this.skill === "Beginner" ? 10 : (this.skill === "Expert" ? 50 : 30);
+
+            for (let i = 0; i < sampleLimit; i++) {
                 const edge = allEdges[math.random(0, allEdges.size() - 1)];
                 if (!edge) continue;
 
@@ -196,7 +203,17 @@ export class AIStrategist {
                 let score = math.random(1, 100);
                 if (targetTownPos) {
                     const dist = edge.Center.sub(targetTownPos).Magnitude;
-                    score += (1000 - dist);
+
+                    if (this.skill === "Expert") {
+                        // Experts heavily favor directional expansion
+                        score += (2000 - dist * 2);
+                    } else if (this.skill === "Beginner") {
+                        // Beginners barely care about direction
+                        score += (100 - dist * 0.1);
+                    } else {
+                        score += (1000 - dist);
+                    }
+
                     candidates.push({ pos: edge.Center, score });
                 } else {
                     candidates.push({ pos: edge.Center, score });
@@ -219,9 +236,24 @@ export class AIStrategist {
                 const tile = gameState.GetTile(Q, R);
                 if (tile) {
                     const diceNum = tile.DiceNumber;
-                    if (diceNum) totalScore += (6 - math.abs(7 - diceNum));
+                    if (diceNum) {
+                        const dots = (6 - math.abs(7 - diceNum));
+                        if (this.skill === "Expert") {
+                            totalScore += dots * 2; // Experts love dots
+                        } else if (this.skill === "Beginner") {
+                            totalScore += math.random(1, 6); // Beginners guess
+                        } else {
+                            totalScore += dots; // Standard
+                        }
+                    }
                 }
             }
+        }
+
+        if (this.skill === "Expert") {
+            // Experts prefer variety and resources over nothing
+            // (Simplified heuristic for now)
+            totalScore += math.random(0, 3);
         }
 
         return totalScore;
