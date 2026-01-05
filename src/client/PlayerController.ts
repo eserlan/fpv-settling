@@ -368,6 +368,9 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 
 		return false;
 	} else if (blueprint.PlacementType === "edge") {
+		// During setup turn, we are more lenient with road checks to avoid replication lag issues
+		if (isMySetupTurn) return true;
+
 		// Roads MUST connect to a town or road you own
 		const v1 = marker.GetAttribute("Vertex1") as string | undefined;
 		const v2 = marker.GetAttribute("Vertex2") as string | undefined;

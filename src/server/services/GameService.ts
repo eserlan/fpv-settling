@@ -139,7 +139,11 @@ export class GameService implements OnStart, GameState {
 
 		NetworkUtils.Broadcast(ServerEvents.GameStart);
 		this.UpdateScores();
-		this.StartSetupPhase(entities.map(e => e.userId));
+
+		// Delay setup phase slightly to ensure all clients have processed GameStart
+		task.delay(1, () => {
+			this.StartSetupPhase(entities.map(e => e.userId));
+		});
 	}
 
 	public StartGame() {
@@ -178,7 +182,18 @@ export class GameService implements OnStart, GameState {
 
 		NetworkUtils.Broadcast(ServerEvents.GameStart);
 		this.UpdateScores();
-		Logger.Info("GameManager", "Game Started!");
+
+		// Start setup phase for everyone currently in-game
+		const ids = new Array<number>();
+		for (const [id] of pairs(this.PlayerData)) {
+			ids.push(id as number);
+		}
+
+		task.delay(1, () => {
+			this.StartSetupPhase(ids);
+		});
+
+		Logger.Info("GameManager", "Global Game Started with Setup Phase!");
 	}
 
 	private SpawnAIPlayers(count: number) {
@@ -357,20 +372,31 @@ export class GameService implements OnStart, GameState {
 			this.setupSequence.push({ userId: id, step: "Road2" });
 		}
 
-		Logger.Info("GameManager", `Setup Phase Initialized with ${this.setupSequence.size()} steps for ${playerIds.size()} players`);
+		Logger.Info("GameManager", `Setup Phase Init: Sequence has ${this.setupSequence.size()} steps for players: [${playerIds.join(", ")}]`);
 		this.BroadcastSetupTurn();
 	}
 
 	private BroadcastSetupTurn() {
 		const current = this.setupSequence[this.currentSetupIndex];
 		if (current) {
-			Logger.Info("GameManager", `Setup: Turn for ${this.PlayerData[current.userId]?.Player.Name} - ${current.step}`);
+			const playerData = this.PlayerData[current.userId];
+			const ownerName = playerData?.Player.Name ?? "Unknown";
+			Logger.Info("GameManager", `Setup Phase: Turn ${this.currentSetupIndex + 1}/${this.setupSequence.size()} belongs to ${ownerName} (ID: ${current.userId}) - Task: ${current.step}`);
+
 			NetworkUtils.Broadcast(ServerEvents.SetupTurnUpdate, current.userId, current.step);
 
 			// If AI, trigger AI placement logic
-			const playerData = this.PlayerData[current.userId];
 			if (playerData && !typeIs(playerData.Player, "Instance")) {
-				task.delay(1, () => (playerData.Player as AIPlayer).HandleSetupTurn(current.step, this.mapGenerator, this));
+				const ai = playerData.Player as AIPlayer;
+				task.delay(1, () => {
+					// Double check it's STILL this AI's turn after the delay
+					const checkCurrent = this.setupSequence[this.currentSetupIndex];
+					if (checkCurrent && checkCurrent.userId === ai.UserId && this.isSetupPhase) {
+						ai.HandleSetupTurn(checkCurrent.step, this.mapGenerator, this);
+					} else {
+						Logger.Warn("GameManager", `AI ${ai.Name} attempted setup turn but it's no longer their turn or phase ended.`);
+					}
+				});
 			}
 		} else {
 			this.EndSetupPhase();
@@ -383,7 +409,10 @@ export class GameService implements OnStart, GameState {
 		if (!current || current.userId !== userId) return false;
 
 		const playerData = this.PlayerData[userId];
-		if (!playerData) return false;
+		if (!playerData) {
+			Logger.Error("GameManager", `Setup: No player data found for ${userId}`);
+			return false;
+		}
 
 		// Place for free
 		const [success, err] = playerData.BuildingManager.StartBuilding(buildingType, position, true);
@@ -392,19 +421,24 @@ export class GameService implements OnStart, GameState {
 				this.lastPlacedTownPos = position;
 				playerData.NeedsFirstTown = false;
 			}
-			Logger.Info("GameManager", `Setup: Successful placement ${this.currentSetupIndex + 1}/${this.setupSequence.size()} for ${playerData.Player.Name}`);
+			Logger.Info("GameManager", `Setup: Success! ${playerData.Player.Name} placed ${buildingType} at ${position}. Advancing...`);
 			this.currentSetupIndex++;
 			this.BroadcastSetupTurn();
 			return true;
 		} else {
-			Logger.Warn("GameManager", `Setup placement failed for ${playerData.Player.Name}: ${err}`);
+			Logger.Warn("GameManager", `Setup: Placement REJECTED for ${playerData.Player.Name} (${buildingType}): ${err}`);
 			// If AI, trigger AI placement logic again to pick a new spot
-			if (playerData && !typeIs(playerData.Player, "Instance")) {
+			if (!typeIs(playerData.Player, "Instance")) {
 				const ai = playerData.Player as AIPlayer;
 				if (buildingType === "Town") {
 					ai.RecordFailedPlacement(position);
 				}
-				task.defer(() => ai.HandleSetupTurn(current.step, this.mapGenerator, this));
+				task.defer(() => {
+					const check = this.setupSequence[this.currentSetupIndex];
+					if (check && check.userId === userId && this.isSetupPhase) {
+						ai.HandleSetupTurn(check.step, this.mapGenerator, this);
+					}
+				});
 			}
 			return false;
 		}
