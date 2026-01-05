@@ -73,22 +73,25 @@ export class AIPlayer implements AIPlayerInterface {
 		this.strategist.RecordFailedPlacement(pos);
 	}
 
-	public Spawn(position: Vector3) {
+	public Spawn(position: Vector3, gameColor?: Color3) {
 		if (this.Character) {
 			this.Character.Destroy();
 		}
 
 		// Setup Model (Simplified for brevity, reusing existing logic structure)
-		const charModel = this.CreateCharacterModel(position);
+		const charModel = this.CreateCharacterModel(position, gameColor);
 		this.Character = charModel;
 
 		Logger.Info("AIPlayer", `Spawned ${this.Name} (${this.Skill}) at ${position}`);
 	}
 
-	private CreateCharacterModel(position: Vector3): Model {
-		// Logic same as original, just moved to helper for readability
-		let bodyColor: Color3 = this.Skill === "Beginner" ? Color3.fromRGB(100, 255, 100) :
+	private CreateCharacterModel(position: Vector3, gameColor?: Color3): Model {
+		// Torso indicates difficulty (Beginner=Green, Intermediate=Blue, Expert=Red)
+		const difficultyColor: Color3 = this.Skill === "Beginner" ? Color3.fromRGB(100, 255, 100) :
 			(this.Skill === "Intermediate" ? Color3.fromRGB(100, 150, 255) : Color3.fromRGB(255, 80, 80));
+
+		// Limbs/Head match the player's game color (for Buildings/Roads)
+		const bodyColor = gameColor ?? difficultyColor;
 
 		const SCALE = 1.3;
 		const model = new Instance("Model");
@@ -107,7 +110,7 @@ export class AIPlayer implements AIPlayerInterface {
 		torso.Name = "Torso";
 		torso.Size = new Vector3(2 * SCALE, 2 * SCALE, 1 * SCALE);
 		torso.Position = root.Position;
-		torso.Color = bodyColor;
+		torso.Color = difficultyColor; // Specific to skill level
 		torso.CanCollide = true;
 		torso.Anchored = false;
 		torso.Parent = model;
@@ -116,7 +119,7 @@ export class AIPlayer implements AIPlayerInterface {
 		head.Name = "Head";
 		head.Size = new Vector3(1.2 * SCALE, 1.2 * SCALE, 1.2 * SCALE); // Square head
 		head.Position = torso.Position.add(new Vector3(0, 1.6 * SCALE, 0));
-		head.Color = bodyColor; // Same as body color
+		head.Color = bodyColor; // Team color
 		head.CanCollide = false;
 		head.Parent = model;
 
@@ -126,7 +129,7 @@ export class AIPlayer implements AIPlayerInterface {
 		face.Face = Enum.NormalId.Front;
 		face.Parent = head;
 
-		// Limbs
+		// Limbs match Team Color
 		const leftArm = new Instance("Part");
 		leftArm.Name = "Left Arm";
 		leftArm.Size = new Vector3(1 * SCALE, 2 * SCALE, 1 * SCALE);

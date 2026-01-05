@@ -128,7 +128,7 @@ export class GameService implements OnStart, GameState {
 				const aiPlayer = new AIPlayer(e.userId, e.name, e.skill ?? "Intermediate", { strategist, economy, pathfinder });
 				const color = this.getNextColor(); // AI gets a color too
 				this.initializePlayerData(aiPlayer, color);
-				aiPlayer.Spawn(new Vector3(math.random(-50, 50), 150, math.random(-50, 50)));
+				aiPlayer.Spawn(new Vector3(math.random(-50, 50), 150, math.random(-50, 50)), color);
 			} else {
 				const player = Players.GetPlayerByUserId(e.userId);
 				if (player) {
@@ -174,7 +174,7 @@ export class GameService implements OnStart, GameState {
 			if (!typeIs(entity, "Instance")) { // Is AI
 				const ai = entity as AIPlayer;
 				// AI Spawn logic
-				ai.Spawn(new Vector3(math.random(-50, 50), 150, math.random(-50, 50)));
+				ai.Spawn(new Vector3(math.random(-50, 50), 150, math.random(-50, 50)), playerData.Color);
 			} else {
 				const player = entity as Player;
 				const character = player.Character;
@@ -219,6 +219,7 @@ export class GameService implements OnStart, GameState {
 
 			const color = this.getNextColor();
 			this.initializePlayerData(aiPlayer, color);
+			aiPlayer.Spawn(new Vector3(math.random(-50, 50), 150, math.random(-50, 50)), color);
 
 			Logger.Info("GameManager", `Spawned AI: ${aiName} (${skill})`);
 		}
