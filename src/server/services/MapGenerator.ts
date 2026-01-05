@@ -279,13 +279,22 @@ export class MapGenerator implements OnStart {
 					if (obj.IsA("BasePart")) {
 						obj.Anchored = true;
 						obj.CanCollide = canCollide;
-						if (isObstacleAsset) obj.CollisionGroup = "Obstacles";
+						if (isObstacleAsset) {
+							obj.CollisionGroup = "Obstacles";
+							obj.Transparency = 1; // Hide by default
+						}
 					}
 					for (const child of obj.GetDescendants()) {
 						if (child.IsA("BasePart")) {
 							(child as BasePart).Anchored = true;
 							(child as BasePart).CanCollide = canCollide;
-							if (isObstacleAsset) (child as BasePart).CollisionGroup = "Obstacles";
+							if (isObstacleAsset) {
+								(child as BasePart).CollisionGroup = "Obstacles";
+								(child as BasePart).Transparency = 1; // Hide by default
+							}
+						}
+						if (child.IsA("Decal") || child.IsA("Texture")) {
+							if (isObstacleAsset) (child as Decal | Texture).Transparency = 1;
 						}
 					}
 				};
