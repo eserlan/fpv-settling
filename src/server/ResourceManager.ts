@@ -5,6 +5,7 @@ import { ServerEvents } from "./ServerEvents";
 import * as Logger from "shared/Logger";
 import type { GameEntity } from "shared/GameEntity";
 import { NetworkUtils } from "./NetworkUtils";
+import { canAfford } from "shared/lib/EconomyRules";
 
 class ResourceManager {
 	Player: GameEntity;
@@ -88,12 +89,7 @@ class ResourceManager {
 
 	// Check if player has enough resources
 	HasResources(costs: Record<string, number>) {
-		for (const [resourceType, amount] of pairs(costs)) {
-			if (!this.Resources[resourceType] || this.Resources[resourceType] < amount) {
-				return false;
-			}
-		}
-		return true;
+		return canAfford(this.Resources, costs);
 	}
 
 	// Get current resource amounts

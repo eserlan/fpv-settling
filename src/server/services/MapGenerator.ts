@@ -5,29 +5,20 @@ import PortTypes, { StandardPortConfiguration, PortLocation } from "shared/PortT
 import * as HexMath from "shared/HexMath";
 import * as Logger from "shared/Logger";
 import { RobberManager } from "./RobberManager";
+import { ServerGameState } from "./ServerGameState";
 
 const PhysicsService = game.GetService("PhysicsService");
 const Players = game.GetService("Players");
 
+import { GameState, BuildingData, VertexData, EdgeData, TileData } from "shared/lib/GameRules";
+
 const HEX_SIZE = HexMath.HEX_SIZE;
 const HEIGHT = HexMath.HEX_HEIGHT;
-
-type VertexData = {
-	Position: Vector3;
-	AdjacentTiles: Array<{ Q: number; R: number }>;
-};
-
-type EdgeData = {
-	V1: Vector3;
-	V2: Vector3;
-	Center: Vector3;
-	AdjacentTiles: Array<{ Q: number; R: number }>;
-};
 
 @Service({})
 export class MapGenerator implements OnStart {
 	private PortLocations: PortLocation[] = [];
-	constructor(private robberManager: RobberManager) { }
+	constructor(private robberManager: RobberManager, private serverGameState: ServerGameState) { }
 	private rng = new Random();
 
 	onStart() {
@@ -402,6 +393,26 @@ export class MapGenerator implements OnStart {
 					hex.PrimaryPart.SetAttribute("Resource", tileData.Resource ?? "");
 					hex.PrimaryPart.SetAttribute("Q", q);
 					hex.PrimaryPart.SetAttribute("R", r);
+
+					// [NEW] Register with GameState
+					const diceNum = tileData.Name === "Desert" ? undefined : (
+						// We need dice number assignment logic here or ensure it's synced.
+						// Currently dice numbers are assigned later in PulseManager.AssignTileNumbers().
+						// So we register the basic tile info now, and maybe update dice later?
+						// Or just register what we know. AIStrategist reads DiceNumber from Attributes which are updated later.
+						// Ideally ServerGameState should be the source of truth for Dice too.
+						undefined
+					);
+
+					this.serverGameState.RegisterTile({
+						Key: `Tile_${q}_${r}`,
+						Q: q,
+						R: r,
+						Type: tileData.Name,
+						Resource: tileData.Resource ?? "",
+						Position: worldPos,
+						DiceNumber: diceNum
+					});
 				}
 
 				if (tileData.Name === "Forest") {
@@ -550,11 +561,15 @@ export class MapGenerator implements OnStart {
 
 					if (!vertices[key]) {
 						vertices[key] = {
+							Key: key,
 							Position: new Vector3(vx, HEIGHT + 0.5, vz),
+							AdjacentLandTileCount: 0,
+							AdjacentTileCount: 0,
 							AdjacentTiles: [],
 						};
 					}
-					vertices[key].AdjacentTiles.push({ Q: q, R: r });
+					// Cast to mutable array to push
+					(vertices[key].AdjacentTiles as { Q: number, R: number }[]).push({ Q: q, R: r });
 				}
 
 				for (let i = 0; i <= 5; i += 1) {
@@ -566,13 +581,15 @@ export class MapGenerator implements OnStart {
 						const v1 = vertices[key1].Position;
 						const v2 = vertices[key2].Position;
 						edges[eKey] = {
-							V1: v1,
-							V2: v2,
+							Key: eKey,
+							Vertex1: key1,
+							Vertex2: key2,
+							AdjacentLandTileCount: 0, // Filled in later
 							Center: v1.add(v2).div(2),
 							AdjacentTiles: [],
 						};
 					}
-					edges[eKey].AdjacentTiles.push({ Q: q, R: r });
+					(edges[eKey].AdjacentTiles as { Q: number, R: number }[]).push({ Q: q, R: r });
 				}
 			}
 		}
@@ -624,6 +641,15 @@ export class MapGenerator implements OnStart {
 				marker.SetAttribute(`Neighbor_${i + 1}`, neighbors[i]);
 			}
 			vertexId += 1;
+
+			// [NEW] Register with GameState
+			this.serverGameState.RegisterVertex({
+				Key: key,
+				Position: data.Position,
+				AdjacentLandTileCount: landTileCount,
+				AdjacentTileCount: data.AdjacentTiles.size(),
+				AdjacentTiles: data.AdjacentTiles
+			});
 		}
 
 		let edgeId = 1;
@@ -635,7 +661,7 @@ export class MapGenerator implements OnStart {
 			marker.Anchored = true;
 			marker.CanCollide = false;
 			marker.Transparency = 1;
-			marker.CFrame = CFrame.lookAt(data.Center, data.V1).mul(CFrame.Angles(0, math.rad(90), 0));
+			marker.CFrame = CFrame.lookAt(data.Center, vertices[data.Vertex1].Position).mul(CFrame.Angles(0, math.rad(90), 0));
 			marker.Parent = edgeFolder;
 			marker.SetAttribute("EdgeId", edgeId);
 			marker.SetAttribute("Key", key);
@@ -653,6 +679,16 @@ export class MapGenerator implements OnStart {
 			marker.SetAttribute("AdjacentLandTileCount", landTileCount);
 
 			edgeId += 1;
+
+			// [NEW] Register with GameState
+			this.serverGameState.RegisterEdge({
+				Key: key,
+				Vertex1: vKeys[0],
+				Vertex2: vKeys[1],
+				AdjacentLandTileCount: landTileCount,
+				Center: data.Center,
+				AdjacentTiles: data.AdjacentTiles
+			});
 		}
 	}
 

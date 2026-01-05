@@ -8,6 +8,7 @@ const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
 
 import { ClientEvents } from "./ClientEvents";
 import * as Logger from "shared/Logger";
+import { MakeDraggable } from "./UIUtils";
 
 const PulseUI = {} as Record<string, unknown>;
 
@@ -31,6 +32,8 @@ timerFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
 timerFrame.BackgroundTransparency = 0.3;
 timerFrame.BorderSizePixel = 0;
 timerFrame.Parent = screenGui;
+
+MakeDraggable(timerFrame);
 
 const timerCorner = new Instance("UICorner");
 timerCorner.CornerRadius = new UDim(0, 16);
@@ -140,6 +143,8 @@ pulseTitle.TextScaled = true;
 pulseTitle.Font = Enum.Font.GothamBold;
 pulseTitle.Text = "⚡ THE PULSE ⚡";
 pulseTitle.Parent = diceFrame;
+
+MakeDraggable(diceFrame, pulseTitle);
 
 const diceDisplay = new Instance("TextLabel");
 diceDisplay.Name = "DiceDisplay";

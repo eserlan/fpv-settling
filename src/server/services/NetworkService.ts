@@ -6,6 +6,8 @@ import { PulseManager } from "./PulseManager";
 import { GameService } from "./GameService";
 import { ServerEvents } from "../ServerEvents";
 
+import { BuildingManager } from "./BuildingManager";
+
 @Service({})
 export class NetworkService implements OnStart {
     private serverEvents = ServerEvents;
@@ -14,6 +16,7 @@ export class NetworkService implements OnStart {
         private gameService: GameService,
         private collectionManager: CollectionManager,
         private pulseManager: PulseManager,
+        private buildingManager: BuildingManager,
     ) { }
 
     onStart() {
@@ -22,7 +25,7 @@ export class NetworkService implements OnStart {
             const playerData = this.gameService.PlayerData[player.UserId];
             if (!playerData) return;
 
-            const [success, result] = playerData.BuildingManager.StartBuilding(buildingType, position);
+            const [success, result] = this.buildingManager.StartBuilding(playerData, buildingType, position);
             if (!success) {
                 Logger.Warn("NetworkService", `[${player.Name}] Failed to PlaceBuilding ${buildingType}: ${result}`);
             } else {
@@ -34,7 +37,7 @@ export class NetworkService implements OnStart {
             const playerData = this.gameService.PlayerData[player.UserId];
             if (!playerData) return;
 
-            const [success, result] = playerData.BuildingManager.PlaceFoundation(blueprintName, position, rotation, snapKey);
+            const [success, result] = this.buildingManager.PlaceFoundation(playerData, blueprintName, position, rotation, snapKey);
             if (!success) {
                 Logger.Warn("NetworkService", `[${player.Name}] Failed to PlaceFoundation ${blueprintName}: ${result}`);
             } else {
@@ -50,7 +53,7 @@ export class NetworkService implements OnStart {
 
             const inventory = this.collectionManager.GetInventory(player);
             if (inventory && inventory[resourceType] && inventory[resourceType] > 0) {
-                const [success] = playerData.BuildingManager.DepositResource(foundationId, resourceType);
+                const [success] = this.buildingManager.DepositResource(playerData, foundationId, resourceType);
                 if (success) {
                     this.collectionManager.RemoveResource(player, resourceType, 1);
                 }

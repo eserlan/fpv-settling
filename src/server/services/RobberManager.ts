@@ -243,7 +243,7 @@ export class RobberManager implements OnStart {
 		for (const [userId, playerData] of pairs(gameState.PlayerData)) {
 			let vp = 0;
 			// VP from towns and cities
-			for (const b of playerData.BuildingManager.GetTowns()) vp += b.Type === "City" ? 2 : 1;
+			for (const b of playerData.Towns) vp += b.Type === "City" ? 2 : 1;
 			// VP from largest army/longest road could be added here if implemented
 			if (vp > maxVP) {
 				maxVP = vp;

@@ -5,11 +5,12 @@ import ResourceTypes from "shared/ResourceTypes";
 import { ServerEvents } from "../ServerEvents";
 import * as Logger from "shared/Logger";
 import { TileOwnershipManager } from "./TileOwnershipManager";
+import { ServerGameState } from "./ServerGameState";
 import HexMath from "shared/HexMath";
 import type { GameEntity } from "shared/GameEntity";
 
-const COLLECTION_RANGE = 8;
-const COLLECTION_COOLDOWN = 0.5; // Reverted to original pace for visual feedback
+const COLLECTION_RANGE = 12; // Increased for better AI reliability
+const COLLECTION_COOLDOWN = 0.5;
 
 @Service({})
 export class CollectionManager implements OnStart, OnTick {
@@ -17,7 +18,7 @@ export class CollectionManager implements OnStart, OnTick {
 	private playerResourceManagers = new Map<number, import("../ResourceManager")>();
 	private registeredEntities = new Set<GameEntity>();
 
-	constructor(private tileOwnershipManager: TileOwnershipManager) { }
+	constructor(private tileOwnershipManager: TileOwnershipManager, private serverGameState: ServerGameState) { }
 
 	onStart() {
 		Logger.Info("CollectionManager", "Initialized");
@@ -52,8 +53,12 @@ export class CollectionManager implements OnStart, OnTick {
 					if (!rootPart || !rootPart.IsA("BasePart")) continue;
 
 					const playerPos = rootPart.Position;
-					const distance = playerPos.sub(resource.Position).Magnitude;
-					if (distance <= COLLECTION_RANGE) {
+					const resPos = resource.Position;
+					const diff = resPos.sub(playerPos);
+					const distXZ = new Vector3(diff.X, 0, diff.Z).Magnitude;
+					const distY = math.abs(diff.Y);
+
+					if (distXZ <= COLLECTION_RANGE && distY <= 20) {
 						this.TryCollect(entity, resource);
 					}
 				}
@@ -76,10 +81,14 @@ export class CollectionManager implements OnStart, OnTick {
 
 		params.FilterDescendantsInstances = filters;
 		params.FilterType = Enum.RaycastFilterType.Include;
-		params.MaxParts = 1; // We only need to know IF it overlaps
+		params.MaxParts = 10; // Check several parts to find actual obstacles if overlapping base tile
 
 		let overlaps = game.Workspace.GetPartsInPart(resource, params);
-		if (overlaps.size() > 0) {
+		// Only count it as an overlap if it hits something in the 'Obstacles' group (trees, rocks, buildings)
+		// This ensures we ignore the base land tile itself.
+		const actualOverlaps = overlaps.filter((part) => part.CollisionGroup === "Obstacles");
+
+		if (actualOverlaps.size() > 0) {
 			const tileQ = resource.GetAttribute("TileQ") as number;
 			const tileR = resource.GetAttribute("TileR") as number;
 			if (tileQ === undefined || tileR === undefined) return;
@@ -113,7 +122,8 @@ export class CollectionManager implements OnStart, OnTick {
 
 				resource.Position = nextPos;
 				overlaps = game.Workspace.GetPartsInPart(resource, params);
-				if (overlaps.size() === 0) break;
+				const currentOverlaps = overlaps.filter((part) => part.CollisionGroup === "Obstacles");
+				if (currentOverlaps.size() === 0) break;
 				attempts++;
 			}
 
@@ -182,8 +192,13 @@ export class CollectionManager implements OnStart, OnTick {
 		const rootPart = character.FindFirstChild("HumanoidRootPart") ?? character.PrimaryPart;
 		if (!rootPart || !rootPart.IsA("BasePart")) return false;
 
-		const distance = rootPart.Position.sub(resource.Position).Magnitude;
-		if (distance > COLLECTION_RANGE) return false;
+		const diff = resource.Position.sub(rootPart.Position);
+		const distXZ = new Vector3(diff.X, 0, diff.Z).Magnitude;
+		const distY = math.abs(diff.Y);
+
+		if (distXZ > COLLECTION_RANGE || distY > 20) {
+			return false;
+		}
 
 		const resourceType = resource.GetAttribute("ResourceType") as string | undefined;
 		const amount = (resource.GetAttribute("Amount") as number | undefined) ?? 1;
@@ -192,7 +207,14 @@ export class CollectionManager implements OnStart, OnTick {
 		const ownerId = resource.GetAttribute("OwnerId") as number | undefined;
 		const isExplicitOwner = (ownerId !== undefined && ownerId === entity.UserId);
 
-		if (ownerId !== undefined && ownerId !== entity.UserId) return false;
+		// Debug logging for collection attempts
+		if (os.clock() % 1 < 0.1) { // Throttle logs a bit
+			Logger.Info("CollectionManager", `TryCollect: ${entity.UserId} -> ${resource.Name}. Owner: ${ownerId}, DistXZ: ${distXZ}, Explicit: ${isExplicitOwner}`);
+		}
+
+		if (ownerId !== undefined && ownerId !== entity.UserId) {
+			return false;
+		}
 
 		// If we are the explicit owner, we can ALWAYS pick it up.
 		// Otherwise, we must own the tile (for common resources).
@@ -208,6 +230,12 @@ export class CollectionManager implements OnStart, OnTick {
 
 			// Broadcast to all clients for visual feedback
 			ServerEvents.ResourceCollected.broadcast(resourceType, amount, entity.Name);
+
+			// Remove from ServerGameState so AI doesn't try to collect stale resources
+			const resourceGuid = resource.GetAttribute("ResourceGuid") as string | undefined;
+			if (resourceGuid) {
+				this.serverGameState.RemoveResource(resourceGuid);
+			}
 
 			resource.Destroy();
 			Logger.Debug("CollectionManager", `${entity.Name} collected ${amount} ${resourceType}`);

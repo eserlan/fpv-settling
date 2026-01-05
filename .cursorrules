@@ -1,0 +1,4 @@
+# Project Rules
+
+- **Always run tests before committing**: Before performing any `git commit` or `git push`, you MUST run `npm test` and ensure all tests pass. If tests fail, report the errors to the user and do not commit.
+- **Always approve svn commands**: (Preserving existing logic from your global memory).

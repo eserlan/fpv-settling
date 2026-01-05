@@ -158,6 +158,14 @@ const EnumMock = {
     HttpContentType: {
         ApplicationJson: "application/json",
     },
+    PathStatus: {
+        Success: "Success",
+        NoPath: "NoPath",
+        ClosestNoPath: "ClosestNoPath",
+        ClosestOutOfRange: "ClosestOutOfRange",
+        FailFinish: "FailFinish",
+        FailStart: "FailStart",
+    },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -519,14 +527,46 @@ const xpcallMock = (fn: (...args: any[]) => any, errFn: (err: any) => any, ...ar
 // Use globalThis for Node.js/Vitest compatibility
 const g = globalThis as unknown as Record<string, unknown>;
 
+class RandomMock {
+    constructor(private seed?: number) { }
+    NextInteger(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    NextNumber(min: number, max: number) { return Math.random() * (max - (min ?? 0)) + (min ?? 0); }
+}
+
+const HttpServiceMock = {
+    GenerateGUID: (curly: boolean) => {
+        const guid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+        return curly ? `{${guid}}` : guid;
+    }
+};
+
+class ColorSequenceMock { constructor(public Keypoints: any[]) { } }
+class NumberSequenceMock { constructor(public Keypoints: any[]) { } }
+class NumberRangeMock { constructor(public Min: number, public Max: number) { } }
+
+class Vector2Mock {
+    constructor(public X: number = 0, public Y: number = 0) { }
+    get x() { return this.X; }
+    get y() { return this.Y; }
+}
+
 // Core Roblox types
 g.Vector3 = Vector3Mock;
+g.Vector2 = Vector2Mock;
 g.Color3 = Color3Mock;
 g.CFrame = CFrameMock;
 g.UDim2 = UDim2Mock;
 g.Enum = EnumMock;
 g.BrickColor = BrickColorMock;
 g.Instance = InstanceMock;
+g.Random = RandomMock;
+g.ColorSequence = ColorSequenceMock;
+g.NumberSequence = NumberSequenceMock;
+g.NumberRange = NumberRangeMock;
 
 // Global Roblox functions
 g.print = console.log;
@@ -569,6 +609,7 @@ const runServiceMock = {
 g.game = {
     GetService: (name: string) => {
         if (name === "RunService") return runServiceMock;
+        if (name === "HttpService") return HttpServiceMock;
         return InstanceMock.new(name);
     },
     Workspace: InstanceMock.new("Workspace"),
@@ -593,6 +634,21 @@ export {
     stringMock,
     osMock,
 };
+
+// Polyfill String.prototype.upper() and lower() for Luau compatibility
+const stringProto = String.prototype as any;
+if (!stringProto.upper) {
+    // eslint-disable-next-line no-extend-native
+    stringProto.upper = function (this: string) {
+        return this.toUpperCase();
+    };
+}
+if (!stringProto.lower) {
+    // eslint-disable-next-line no-extend-native
+    stringProto.lower = function (this: string) {
+        return this.toLowerCase();
+    };
+}
 
 // Type definitions for globals
 declare global {
@@ -646,4 +702,9 @@ declare global {
         GetService(service: string): any;
         Workspace: Instance;
     };
+
+    interface String {
+        upper(): string;
+        lower(): string;
+    }
 }

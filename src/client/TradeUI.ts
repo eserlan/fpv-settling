@@ -7,6 +7,7 @@ import PortTypes, { DEFAULT_TRADE_RATIO } from "shared/PortTypes";
 import { MarketOffer, ResourceDict } from "shared/MarketTypes";
 import { ResourceType } from "shared/TradeMath";
 import * as Logger from "shared/Logger";
+import { MakeDraggable } from "./UIUtils";
 
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
@@ -57,6 +58,8 @@ const createTradeUI = () => {
 	title.Font = Enum.Font.GothamBold;
 	title.TextSize = 24;
 	title.Parent = tradeFrame;
+
+	MakeDraggable(tradeFrame, title);
 
 	// Close Button
 	const closeButton = new Instance("TextButton");

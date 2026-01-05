@@ -8,6 +8,7 @@ const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
 
 import * as Logger from "shared/Logger";
 import { ClientEvents } from "./ClientEvents";
+import { MakeDraggable } from "./UIUtils";
 
 const InventoryUI = {} as Record<string, unknown>;
 
@@ -40,6 +41,8 @@ inventoryFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40);
 inventoryFrame.BackgroundTransparency = 0.3;
 inventoryFrame.BorderSizePixel = 0;
 inventoryFrame.Parent = screenGui;
+
+MakeDraggable(inventoryFrame);
 
 const inventoryCorner = new Instance("UICorner");
 inventoryCorner.CornerRadius = new UDim(0, 12);

@@ -8,6 +8,7 @@ const Players = game.GetService("Players");
 import Blueprints from "shared/Blueprints";
 import * as Logger from "shared/Logger";
 import { ClientEvents } from "./ClientEvents";
+import { MakeDraggable } from "./UIUtils";
 
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
@@ -71,6 +72,8 @@ titleBar.Size = new UDim2(1, 0, 0, 50);
 titleBar.BackgroundColor3 = Color3.fromRGB(50, 50, 65);
 titleBar.BorderSizePixel = 0;
 titleBar.Parent = mainFrame;
+
+MakeDraggable(mainFrame, titleBar);
 
 const titleCorner = new Instance("UICorner");
 titleCorner.CornerRadius = new UDim(0, 16);

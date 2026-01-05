@@ -8,6 +8,8 @@ export default defineConfig({
       client: resolve(__dirname, './src/client'),
       server: resolve(__dirname, './src/server'),
       "@flamework/networking": resolve(__dirname, './tests/mocks/networking.ts'),
+      "@flamework/core": resolve(__dirname, './tests/mocks/flamework-core.ts'),
+      "@rbxts/services": resolve(__dirname, './tests/mocks/rbxts-services.ts'),
     },
   },
   test: {

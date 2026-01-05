@@ -145,6 +145,24 @@ createActionButton("ForcePulse", "⚡ Force Dice Roll", () => {
 	ClientEvents.DevEvent.fire("ForcePulse");
 });
 
+const setVisualState = (obj: Instance, visible: boolean) => {
+	if (obj.IsA("BasePart")) {
+		obj.Transparency = visible ? 0 : 1;
+		// Store natural state if not already stored
+		let naturalCollide = obj.GetAttribute("NaturalCanCollide") as boolean | undefined;
+		if (naturalCollide === undefined) {
+			naturalCollide = obj.CanCollide;
+			obj.SetAttribute("NaturalCanCollide", naturalCollide);
+		}
+		obj.CanCollide = visible ? naturalCollide : false;
+	} else if (obj.IsA("Decal") || obj.IsA("Texture")) {
+		obj.Transparency = visible ? 0 : 1;
+	}
+	for (const child of obj.GetChildren()) {
+		setVisualState(child, visible);
+	}
+};
+
 // ========== ACTION: Toggle Terrain ==========
 createSectionLabel("Visual Controls");
 
@@ -155,18 +173,20 @@ createToggleButton("ShowTerrain", "🌲 Show Dominating Terrain", true, (state) 
 	for (const hex of map.GetChildren()) {
 		for (const asset of hex.GetChildren()) {
 			if (asset.GetAttribute("IsDominatingTerrain") === true) {
-				const setTransparency = (obj: Instance, transparency: number) => {
-					if (obj.IsA("BasePart")) {
-						obj.Transparency = transparency;
-					} else if (obj.IsA("Decal") || obj.IsA("Texture")) {
-						obj.Transparency = transparency;
-					}
-					for (const child of obj.GetChildren()) {
-						setTransparency(child, transparency);
-					}
-				};
-				setTransparency(asset, state ? 0 : 1);
+				setVisualState(asset, state);
 			}
+		}
+	}
+});
+
+createToggleButton("ShowBuildings", "🏠 Show Buildings", true, (state) => {
+	const folders = ["Buildings", "Towns"];
+	for (const folderName of folders) {
+		const folder = game.Workspace.FindFirstChild(folderName);
+		if (!folder) continue;
+
+		for (const building of folder.GetChildren()) {
+			setVisualState(building, state);
 		}
 	}
 });

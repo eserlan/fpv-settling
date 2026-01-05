@@ -4,7 +4,7 @@ const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
 
 import ResourceManager = require("../ResourceManager");
-import BuildingManager = require("../BuildingManager");
+import { BuildingManager } from "./BuildingManager";
 import NPCManager = require("../NPCManager");
 import ResearchManager = require("../ResearchManager");
 import PortManager = require("../PortManager");
@@ -20,7 +20,11 @@ import type { PlayerData } from "../PlayerData";
 import type { GameState } from "../GameState";
 import * as Logger from "shared/Logger";
 import { ServerEvents } from "../ServerEvents";
+import { ServerGameState } from "./ServerGameState";
 import { AIPlayer } from "../AIPlayer";
+import { AIPathfinder } from "../services/AI/AIPathfinder";
+import { AIStrategist } from "../services/AI/AIStrategist";
+import { AIEconomy } from "../services/AI/AIEconomy";
 import type { GameEntity } from "shared/GameEntity";
 import { NetworkUtils } from "../NetworkUtils";
 import { SkillLevel } from "shared/GameTypes";
@@ -53,6 +57,8 @@ export class GameService implements OnStart, GameState {
 		private tileOwnershipManager: TileOwnershipManager,
 		private lobbyGenerator: LobbyGeneratorService,
 		private marketManager: MarketManager,
+		private serverGameState: ServerGameState,
+		private buildingManager: BuildingManager,
 	) { }
 
 	onStart() {
@@ -96,9 +102,7 @@ export class GameService implements OnStart, GameState {
 	public StartRoomGame(entities: { userId: number, name: string, isAI: boolean, skill?: SkillLevel }[]) {
 		if (this.isGameStarted) {
 			Logger.Warn("GameManager", "Game already in progress. Resetting state for new room...");
-			// Ideally we'd have multiple instances, but for now we reset.
 			this.isGameStarted = false;
-			// Clear existing units/buildings? (Out of scope for this simple refactor)
 		}
 
 		this.isGameStarted = true;
@@ -118,7 +122,10 @@ export class GameService implements OnStart, GameState {
 		// Setup players and AI
 		for (const e of entities) {
 			if (e.isAI) {
-				const aiPlayer = new AIPlayer(e.userId, e.name, e.skill ?? "Intermediate");
+				const strategist = new AIStrategist(e.userId, e.name);
+				const economy = new AIEconomy(e.userId, e.name);
+				const pathfinder = new AIPathfinder();
+				const aiPlayer = new AIPlayer(e.userId, e.name, e.skill ?? "Intermediate", { strategist, economy, pathfinder });
 				const color = this.getNextColor(); // AI gets a color too
 				this.initializePlayerData(aiPlayer, color);
 				aiPlayer.Spawn(new Vector3(math.random(-50, 50), 150, math.random(-50, 50)));
@@ -205,7 +212,11 @@ export class GameService implements OnStart, GameState {
 			const skill = skills[math.random(0, skills.size() - 1)]; // Random skill
 			const aiName = `AI_${skill}_${i}`;
 
-			const aiPlayer = new AIPlayer(aiId, aiName, skill);
+			const strategist = new AIStrategist(aiId, aiName);
+			const economy = new AIEconomy(aiId, aiName);
+			const pathfinder = new AIPathfinder();
+			const aiPlayer = new AIPlayer(aiId, aiName, skill, { strategist, economy, pathfinder });
+
 			const color = this.getNextColor();
 			this.initializePlayerData(aiPlayer, color);
 
@@ -215,7 +226,6 @@ export class GameService implements OnStart, GameState {
 
 	private initializePlayerData(entity: GameEntity, color: Color3) {
 		const resourceManager = new ResourceManager(entity);
-		const buildingManager = new BuildingManager(entity, color, resourceManager, this.mapGenerator, this.tileOwnershipManager);
 		const npcManager = new NPCManager(entity, resourceManager);
 		const researchManager = new ResearchManager(entity, resourceManager);
 		const portManager = new PortManager(entity, resourceManager);
@@ -228,19 +238,18 @@ export class GameService implements OnStart, GameState {
 			portManager.SetPortLocations(this.mapGenerator.GetPortLocations());
 		}
 
-		buildingManager.SetPortManager(portManager);
-
 		this.PlayerData[entity.UserId] = {
 			Player: entity,
 			ResourceManager: resourceManager,
-			BuildingManager: buildingManager,
+			Buildings: [],
+			BuildingsInProgress: [],
+			Towns: [],
 			NPCManager: npcManager,
 			ResearchManager: researchManager,
 			PortManager: portManager,
 			TileOwnershipManager: this.tileOwnershipManager,
 			GameTime: 0,
 			PulseTimer: 0,
-			Towns: [],
 			NeedsFirstTown: true,
 			Score: 0,
 			Color: color,
@@ -311,7 +320,7 @@ export class GameService implements OnStart, GameState {
 		for (const [userId, playerData] of pairs(this.PlayerData)) {
 			playerData.GameTime += deltaTime;
 			playerData.PulseTimer = pulseTimer;
-			playerData.BuildingManager.UpdateBuildings(deltaTime);
+			this.buildingManager.UpdateBuildings(playerData, deltaTime);
 			playerData.NPCManager.UpdateNPCs(deltaTime);
 			playerData.ResearchManager.UpdateResearch(deltaTime);
 
@@ -322,7 +331,7 @@ export class GameService implements OnStart, GameState {
 			// Update AI Logic
 			const entity = playerData.Player;
 			if (!typeIs(entity, "Instance")) { // Is AI
-				(entity as AIPlayer).Update(deltaTime, playerData, this.mapGenerator, this.marketManager);
+				(entity as AIPlayer).Update(deltaTime, playerData, this.mapGenerator, this.marketManager, this.serverGameState, this.buildingManager);
 			}
 		}
 
@@ -332,7 +341,7 @@ export class GameService implements OnStart, GameState {
 		const scores: { userId: number; name: string; score: number }[] = [];
 
 		for (const [userId, playerData] of pairs(this.PlayerData)) {
-			const buildingScore = playerData.BuildingManager.GetScore();
+			const buildingScore = this.buildingManager.GetScore(playerData);
 			const researchScore = playerData.ResearchManager.GetScore();
 			const currentScore = buildingScore + researchScore;
 
@@ -392,7 +401,7 @@ export class GameService implements OnStart, GameState {
 					// Double check it's STILL this AI's turn after the delay
 					const checkCurrent = this.setupSequence[this.currentSetupIndex];
 					if (checkCurrent && checkCurrent.userId === ai.UserId && this.isSetupPhase) {
-						ai.HandleSetupTurn(checkCurrent.step, this.mapGenerator, this);
+						ai.HandleSetupTurn(checkCurrent.step, this.mapGenerator, this, this.serverGameState, this.buildingManager);
 					} else {
 						Logger.Warn("GameManager", `AI ${ai.Name} attempted setup turn but it's no longer their turn or phase ended.`);
 					}
@@ -415,7 +424,7 @@ export class GameService implements OnStart, GameState {
 		}
 
 		// Place for free
-		const [success, err] = playerData.BuildingManager.StartBuilding(buildingType, position, true);
+		const [success, err] = this.buildingManager.StartBuilding(playerData, buildingType, position, true);
 		if (success) {
 			if (buildingType === "Town") {
 				this.lastPlacedTownPos = position;
@@ -436,7 +445,7 @@ export class GameService implements OnStart, GameState {
 				task.defer(() => {
 					const check = this.setupSequence[this.currentSetupIndex];
 					if (check && check.userId === userId && this.isSetupPhase) {
-						ai.HandleSetupTurn(check.step, this.mapGenerator, this);
+						ai.HandleSetupTurn(check.step, this.mapGenerator, this, this.serverGameState, this.buildingManager);
 					}
 				});
 			}

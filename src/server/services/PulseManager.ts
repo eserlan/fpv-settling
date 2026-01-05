@@ -9,6 +9,7 @@ import * as Logger from "shared/Logger";
 import { RobberManager } from "./RobberManager";
 import { TileOwnershipManager } from "./TileOwnershipManager";
 import type { GameState } from "../GameState";
+import { ServerGameState } from "./ServerGameState";
 
 const PULSE_INTERVAL = 60;
 const DICE_ROLL_DURATION = 3;
@@ -27,7 +28,7 @@ export class PulseManager implements OnStart, OnTick {
 
 	private rng = new Random();
 
-	constructor(private robberManager: RobberManager, private tileOwnershipManager: TileOwnershipManager) { }
+	constructor(private robberManager: RobberManager, private tileOwnershipManager: TileOwnershipManager, private serverGameState: ServerGameState) { }
 
 	onStart() {
 		Logger.Info("PulseManager", "Initialized - Waiting for players to place towns...");
@@ -148,6 +149,7 @@ export class PulseManager implements OnStart, OnTick {
 					const number = numbers[numberIndex] ?? numbers[0];
 					this.tileNumbers[key] = number;
 					tile.PrimaryPart.SetAttribute("DiceNumber", number);
+					this.serverGameState.UpdateTileDice(q, r, number);
 
 					const labelGui = tile.PrimaryPart.FindFirstChild("TileLabel");
 					if (labelGui && labelGui.IsA("BillboardGui")) {
@@ -257,9 +259,10 @@ export class PulseManager implements OnStart, OnTick {
 		const dist = math.random(5, 20);
 		const spawnPos = tilePos.add(new Vector3(math.cos(angle) * dist, 50, math.sin(angle) * dist));
 
+		const guid = `Res_${game.GetService("HttpService").GenerateGUID(false)}`;
 		const resource = new Instance("Part");
-		resource.Name = `Resource_${resourceKey}`;
-		resource.Size = new Vector3(3, 3, 3);
+		resource.Name = guid;
+		resource.SetAttribute("ResourceGuid", guid);
 		resource.Position = spawnPos;
 		resource.Color = resourceData.Color;
 		resource.Material = Enum.Material.Neon; // Glow!
@@ -324,14 +327,17 @@ export class PulseManager implements OnStart, OnTick {
 
 		// Notify clients about the new resource
 		ServerEvents.ResourceSpawned.broadcast(resourceKey, spawnPos, tileQ, tileR);
+
+		this.serverGameState.RegisterResource(guid, resourceKey, ownerUserId, spawnPos);
+		Logger.Info("PulseManager", `Registered resource ${resourceKey} for owner ${ownerUserId} (GUID: ${guid})`);
 	}
 
 
 	public StartGame() {
 		this.gameStarted = true;
-		this.pulseTimer = PULSE_INTERVAL;
-		Logger.Info("PulseManager", "Pulse Phase Started!");
-		ServerEvents.TimerEvent.broadcast(math.floor(this.pulseTimer));
+		this.pulseTimer = 0; // Trigger immediate first pulse after setup
+		Logger.Info("PulseManager", "Pulse Phase Started with immediate roll!");
+		ServerEvents.TimerEvent.broadcast(0);
 	}
 
 	public SetGameManager(gm: GameState) {
