@@ -26,6 +26,7 @@ let lastBlueprintSelectionTime = 0;
 let isGameStarted = false;
 let isMySetupTurn = false;
 let currentSetupStep: "Town1" | "Road1" | "Town2" | "Road2" | undefined;
+let lastSetupTownVertexKey: string | undefined;
 
 // Camera Focus for free placement view
 let cameraFocusPart: Part | undefined;
@@ -368,12 +369,18 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 
 		return false;
 	} else if (blueprint.PlacementType === "edge") {
-		// During setup turn, we are more lenient with road checks to avoid replication lag issues
-		if (isMySetupTurn) return true;
-
-		// Roads MUST connect to a town or road you own
 		const v1 = marker.GetAttribute("Vertex1") as string | undefined;
 		const v2 = marker.GetAttribute("Vertex2") as string | undefined;
+
+		// During setup turn, if we just placed a town, allow the road to connect to it 
+		// even if the town object hasn't technically replicated to the client yet.
+		if (isMySetupTurn && lastSetupTownVertexKey !== undefined) {
+			if (v1 === lastSetupTownVertexKey || v2 === lastSetupTownVertexKey) {
+				return true;
+			}
+		}
+
+		// Roads MUST connect to a town or road you own
 
 		// Check for owned town at either vertex endpoint
 		const folders = ["Towns", "Buildings"];
@@ -766,6 +773,11 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 			if (isMySetupTurn) {
 				ClientEvents.SetupPlacement.fire(selectedBlueprint, currentVertex.Position);
 				Logger.Info("PlayerController", `[${player.Name}] Finalized setup placement for ${selectedBlueprint}`);
+
+				if (selectedBlueprint === "Town") {
+					lastSetupTownVertexKey = snapKey;
+				}
+
 				isMySetupTurn = false; // Reset locally to avoid double fire
 			} else {
 				ClientEvents.PlaceFoundation.fire(selectedBlueprint, currentVertex.Position, rotation, snapKey ?? "");

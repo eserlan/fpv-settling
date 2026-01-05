@@ -156,6 +156,11 @@ class BuildingManager {
 				finalPosition = nearestEdge.Position;
 				const [rx, ry, rz] = nearestEdge.CFrame.ToEulerAnglesXYZ();
 				finalRotation = new Vector3(math.deg(rx), math.deg(ry), math.deg(rz));
+
+				// CONNECTION RULE: Roads must connect to a town/city or another road OWNED by the player
+				if (!this.IsEdgeConnectedToNetwork(nearestEdge, this.Player.UserId)) {
+					return $tuple(false, "Road must be connected to one of your towns or roads");
+				}
 			} else {
 				return $tuple(false, "Could not find valid edge for road");
 			}
@@ -230,6 +235,11 @@ class BuildingManager {
 			if (edge) {
 				const landCount = (edge.GetAttribute("AdjacentLandTileCount") as number) ?? 0;
 				if (landCount === 0) return $tuple(false, "Cannot build on the open sea!");
+
+				// CONNECTION RULE: Roads must connect to a town/city or another road OWNED by the player
+				if (!this.IsEdgeConnectedToNetwork(edge, this.Player.UserId)) {
+					return $tuple(false, "Road must be connected to one of your towns or roads");
+				}
 			}
 		} else if (blueprint.PlacementType === "3-way") {
 			const [nearestVertex, dist] = this.mapGenerator.FindNearestVertex(position);
@@ -596,6 +606,56 @@ class BuildingManager {
 					for (const building of buildingsFolder.GetChildren()) {
 						if (building.IsA("Model") && building.GetAttribute("Key") === edgeKey) {
 							if (building.GetAttribute("OwnerId") === ownerId) {
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private IsEdgeConnectedToNetwork(edge: BasePart, ownerId: number): boolean {
+		const v1 = edge.GetAttribute("Vertex1") as string;
+		const v2 = edge.GetAttribute("Vertex2") as string;
+		if (!v1 || !v2) return false;
+
+		// 1. Check for owned town at either vertex endpoint
+		const townFolders = ["Towns", "Buildings"];
+		for (const folderName of townFolders) {
+			const folder = game.Workspace.FindFirstChild(folderName);
+			if (folder) {
+				for (const model of folder.GetChildren()) {
+					if (model.IsA("Model")) {
+						const base = model.FindFirstChild("FoundationBase") ?? model.PrimaryPart;
+						if (base && base.IsA("BasePart") && base.GetAttribute("OwnerId") === ownerId) {
+							// Only count actual towns or city/town foundations
+							const name = model.Name.lower();
+							const townKey = base.GetAttribute("Key") as string;
+							const matchesType = name.find("town") !== undefined || name.find("city") !== undefined;
+							if (matchesType && (townKey === v1 || townKey === v2)) {
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		const buildingsFolder = game.Workspace.FindFirstChild("Buildings");
+		if (buildingsFolder) {
+			for (const model of buildingsFolder.GetChildren()) {
+				if (model.IsA("Model") && model.Name.lower().find("road") !== undefined) {
+					const base = model.FindFirstChild("FoundationBase") ?? model.PrimaryPart;
+					if (base && base.IsA("BasePart") && base.GetAttribute("OwnerId") === ownerId) {
+						const roadKey = base.GetAttribute("Key") as string;
+						if (roadKey) {
+							const parts = string.split(roadKey, ":");
+							const roadV1 = parts[0];
+							const roadV2 = parts[1];
+							if (roadV1 === v1 || roadV1 === v2 || roadV2 === v1 || roadV2 === v2) {
 								return true;
 							}
 						}
