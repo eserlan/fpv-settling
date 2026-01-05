@@ -130,9 +130,13 @@ const refreshBuildingList = () => {
 				const [foundFoundation] = buildingName.find("foundation");
 				if (foundFoundation !== undefined) continue;
 
+				const [foundTown] = buildingName.find("town");
 				const [foundCity] = buildingName.find("city");
-				const isCity = foundCity !== undefined;
 
+				// Only show Towns and Cities
+				if (foundTown === undefined && foundCity === undefined) continue;
+
+				const isCity = foundCity !== undefined;
 				const icon = isCity ? "🏙️" : "🏠";
 
 				const btn = new Instance("TextButton");
