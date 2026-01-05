@@ -263,6 +263,7 @@ export class PulseManager implements OnStart, OnTick {
 		const resource = new Instance("Part");
 		resource.Name = guid;
 		resource.SetAttribute("ResourceGuid", guid);
+		resource.Size = new Vector3(2, 2, 2); // Square box
 		resource.Position = spawnPos;
 		resource.Color = resourceData.Color;
 		resource.Material = Enum.Material.Neon; // Glow!

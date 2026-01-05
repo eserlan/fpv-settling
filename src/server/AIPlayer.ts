@@ -114,9 +114,9 @@ export class AIPlayer implements AIPlayerInterface {
 
 		const head = new Instance("Part");
 		head.Name = "Head";
-		head.Size = new Vector3(1.2 * SCALE, 1.2 * SCALE, 1.2 * SCALE);
+		head.Size = new Vector3(1.2 * SCALE, 1.2 * SCALE, 1.2 * SCALE); // Square head
 		head.Position = torso.Position.add(new Vector3(0, 1.6 * SCALE, 0));
-		head.Color = Color3.fromRGB(245, 205, 170);
+		head.Color = bodyColor; // Same as body color
 		head.CanCollide = false;
 		head.Parent = model;
 
@@ -126,8 +126,35 @@ export class AIPlayer implements AIPlayerInterface {
 		face.Face = Enum.NormalId.Front;
 		face.Parent = head;
 
-		// Arms/Legs omitted for brevity in this refactor step, assuming standard r6-like setup is fine 
-		// or copy exact block if visual fidelity is critical. 
+		// Limbs
+		const leftArm = new Instance("Part");
+		leftArm.Name = "Left Arm";
+		leftArm.Size = new Vector3(1 * SCALE, 2 * SCALE, 1 * SCALE);
+		leftArm.Position = torso.Position.add(new Vector3(-1.5 * SCALE, 0, 0));
+		leftArm.Color = bodyColor;
+		leftArm.Parent = model;
+
+		const rightArm = new Instance("Part");
+		rightArm.Name = "Right Arm";
+		rightArm.Size = new Vector3(1 * SCALE, 2 * SCALE, 1 * SCALE);
+		rightArm.Position = torso.Position.add(new Vector3(1.5 * SCALE, 0, 0));
+		rightArm.Color = bodyColor;
+		rightArm.Parent = model;
+
+		const leftLeg = new Instance("Part");
+		leftLeg.Name = "Left Leg";
+		leftLeg.Size = new Vector3(1 * SCALE, 2 * SCALE, 1 * SCALE);
+		leftLeg.Position = torso.Position.add(new Vector3(-0.5 * SCALE, -2 * SCALE, 0));
+		leftLeg.Color = bodyColor;
+		leftLeg.Parent = model;
+
+		const rightLeg = new Instance("Part");
+		rightLeg.Name = "Right Leg";
+		rightLeg.Size = new Vector3(1 * SCALE, 2 * SCALE, 1 * SCALE);
+		rightLeg.Position = torso.Position.add(new Vector3(0.5 * SCALE, -2 * SCALE, 0));
+		rightLeg.Color = bodyColor;
+		rightLeg.Parent = model;
+
 		// I will copy the weld/collision logic to ensure it works.
 		const weldTo = (part: BasePart) => {
 			const weld = new Instance("WeldConstraint");
@@ -137,10 +164,18 @@ export class AIPlayer implements AIPlayerInterface {
 		};
 		weldTo(root);
 		weldTo(head);
+		weldTo(leftArm);
+		weldTo(rightArm);
+		weldTo(leftLeg);
+		weldTo(rightLeg);
 
-		// Collision Group
+		// Handle collisions
 		for (const part of model.GetDescendants()) {
-			if (part.IsA("BasePart")) part.CollisionGroup = "SelectableAI";
+			if (part.IsA("BasePart")) {
+				part.CollisionGroup = "SelectableAI";
+				part.Anchored = false;
+				part.CanCollide = (part.Name === "Torso"); // Only torso collides with world for basic setup
+			}
 		}
 
 		const humanoid = new Instance("Humanoid");

@@ -53,7 +53,7 @@ export class BuildingManager {
 			}
 		} else if (buildingTypeData.IsRoad) {
 			const [nearestEdge, dist] = this.mapGenerator.FindNearestEdge(position);
-			if (nearestEdge && dist < 20) {
+			if (nearestEdge && dist < 30) { // Increased from 20 to be more lenient
 				const edgeKey = nearestEdge.GetAttribute("Key") as string;
 
 				const validation = validateRoadPlacement(this.serverGameState, playerData.Player.UserId, edgeKey, false);

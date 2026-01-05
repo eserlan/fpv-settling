@@ -178,13 +178,9 @@ export class AIStrategist {
                 const validation = validateRoadPlacement(gameState, this.userId, key, isSetupTurn, lastSetupTownKey);
                 if (!validation.valid) continue;
 
-                const v1 = gameState.GetVertex(edge.Vertex1)?.Position ?? new Vector3();
-                const v2 = gameState.GetVertex(edge.Vertex2)?.Position ?? new Vector3();
-                const center = v1.add(v2).div(2);
-
                 // Prefer edges with higher adjacent land tile count (better connected)
                 let score = edge.AdjacentLandTileCount * 100 + math.random(1, 50);
-                candidates.push({ pos: center, score });
+                candidates.push({ pos: edge.Center, score });
             }
         } else {
             // Non-setup: sample random edges for expansion
@@ -199,16 +195,11 @@ export class AIStrategist {
 
                 let score = math.random(1, 100);
                 if (targetTownPos) {
-                    const v1 = gameState.GetVertex(edge.Vertex1)?.Position ?? new Vector3();
-                    const v2 = gameState.GetVertex(edge.Vertex2)?.Position ?? new Vector3();
-                    const center = v1.add(v2).div(2);
-
-                    const dist = center.sub(targetTownPos).Magnitude;
+                    const dist = edge.Center.sub(targetTownPos).Magnitude;
                     score += (1000 - dist);
-                    candidates.push({ pos: center, score });
+                    candidates.push({ pos: edge.Center, score });
                 } else {
-                    const v1 = gameState.GetVertex(edge.Vertex1)?.Position ?? new Vector3();
-                    candidates.push({ pos: v1, score });
+                    candidates.push({ pos: edge.Center, score });
                 }
             }
         }
