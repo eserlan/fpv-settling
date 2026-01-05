@@ -22,7 +22,7 @@ class ResearchManager {
 	}
 
 	// Start researching a technology
-	StartResearch(techName: string) {
+	StartResearch(techName: string): LuaTuple<[boolean, string]> {
 		const tech = TechTree[techName];
 		if (!tech) {
 			Logger.Warn("ResearchManager", `[${this.Player.Name}] Invalid technology: ${techName}`);

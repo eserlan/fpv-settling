@@ -93,7 +93,6 @@ export class LobbyService implements OnStart {
                 const prompt = startButton.FindFirstChildOfClass("ProximityPrompt");
                 if (prompt) {
                     prompt.Triggered.Connect((player) => {
-                        const roomId = prompt.GetAttribute("RoomId") as number;
                         this.StartGame(roomId);
                     });
                 }
@@ -104,7 +103,6 @@ export class LobbyService implements OnStart {
                 const prompt = aiButton.FindFirstChildOfClass("ProximityPrompt");
                 if (prompt) {
                     prompt.Triggered.Connect((player) => {
-                        const roomId = prompt.GetAttribute("RoomId") as number;
                         const skills: SkillLevel[] = ["Beginner", "Intermediate", "Expert"];
                         this.AddAI(roomId, skills[math.random(0, skills.size() - 1)]);
                     });
@@ -165,10 +163,10 @@ export class LobbyService implements OnStart {
 
         // Mix it up to create varied "Roblox-style" usernames
         const roll = math.random(1, 4);
-        if (roll === 1) return `${dec}${root}${suf} `;
-        if (roll === 2) return `${des}${root}${suf} `;
-        if (roll === 3) return `${dec}${des}${root} `;
-        return `${des}${root} `;
+        if (roll === 1) return `${dec}${root}${suf}`;
+        if (roll === 2) return `${des}${root}${suf}`;
+        if (roll === 3) return `${dec}${des}${root}`;
+        return `${des}${root}`;
     }
 
     public AddAI(roomId: number, skill: SkillLevel) {
@@ -186,6 +184,7 @@ export class LobbyService implements OnStart {
         });
 
         this.UpdateRoomDisplay(roomId);
+        Logger.Info("LobbyService", `Added AI ${room.players[room.players.size() - 1].name} to Room ${roomId}`);
     }
 
     public RemoveAI(roomId: number, aiUserId: number) {
@@ -219,7 +218,7 @@ export class LobbyService implements OnStart {
 
         const lobby = Workspace.FindFirstChild("Lobby");
         const roomsFolder = lobby?.FindFirstChild("Rooms");
-        const roomModel = roomsFolder?.FindFirstChild(`Room_${roomId} `);
+        const roomModel = roomsFolder?.FindFirstChild(`Room_${roomId}`);
 
         const labelPart = roomModel?.FindFirstChild("LabelPart");
         const display = labelPart?.FindFirstChild("Display") as SurfaceGui;
@@ -274,7 +273,7 @@ export class LobbyService implements OnStart {
             } else {
                 room.players.forEach((p, idx) => {
                     const row = new Instance("Frame");
-                    row.Name = `PlayerRow_${p.userId} `;
+                    row.Name = `PlayerRow_${p.userId}`;
                     row.Size = new UDim2(1, 0, 0, 50);
                     row.BackgroundTransparency = 1;
                     row.LayoutOrder = idx;
@@ -283,7 +282,7 @@ export class LobbyService implements OnStart {
                     const nameLabel = new Instance("TextLabel");
                     nameLabel.Size = new UDim2(0.8, 0, 1, 0);
                     const participantType = p.isAI ? `[AI ${p.skill}]` : "[Player]";
-                    nameLabel.Text = `${participantType} ${p.name} `;
+                    nameLabel.Text = `${participantType} ${p.name}`;
                     nameLabel.TextColor3 = new Color3(1, 1, 1);
                     nameLabel.TextSize = 32;
                     nameLabel.Font = Enum.Font.Gotham;

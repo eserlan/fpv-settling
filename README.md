@@ -9,12 +9,12 @@ A first-person view Roblox game inspired by The Settlers, featuring resource man
 - **Resource Management**: Gather and manage five key resources:
   - **Wood**: Basic building material from forests
   - **Brick**: Construction material from hills
-  - **Wheat**: Grain from fields for settlements
+  - **Wheat**: Grain from fields for towns
   - **Wool**: From pastures for trading
   - **Ore**: Iron ore from mountains for advanced construction
 
 ### ⚓ Port Trading System
-Trade resources at advantageous rates by building settlements on port intersections:
+Trade resources at advantageous rates by building towns on port intersections:
 - **Bank Trading (4:1)**: Available to all players - trade 4 of any resource for 1 of any other
 - **Generic Ports (3:1)**: Trade 3 of any resource for 1 of any other (marked with ❓)
 - **Specialized Ports (2:1)**: Trade 2 of a specific resource for 1 of any other
@@ -24,20 +24,20 @@ Trade resources at advantageous rates by building settlements on port intersecti
   - Ore Port (⛏): 2 Ore → 1 of any resource
   - Wool Port (🧶): 2 Wool → 1 of any resource
 - **Harbor Master Bonus**: Own 3+ ports to unlock special abilities and recognition
-- **Port Control**: Build settlements on coastal intersections marked by port icons to gain trading advantages
+- **Port Control**: Build towns on coastal intersections marked by port icons to gain trading advantages
 
 ### 🏗️ Building System
-Build and manage your settlement with various structures:
-- **Roads**: Connect settlements and increase travel speed
+Build and manage your town with various structures:
+- **Roads**: Connect towns and increase travel speed
 - **Houses**: Provide housing for workers
 - **Storage**: Store resources safely with increased capacity
 - **Barracks**: Train and house guards for defense
 - **Workshops**: Research new technologies
 
 ### 👷 NPC Management
-Hire and maintain helpers to expand your settlement:
+Hire and maintain helpers to expand your town:
 - **Workers**: Gather resources and construct buildings
-- **Guards**: Defend your settlement from threats
+- **Guards**: Defend your town from threats
 
 Each NPC requires:
 - Initial hiring cost (Gold + Food)

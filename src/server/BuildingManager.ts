@@ -21,7 +21,7 @@ type BuildingRecord = {
 	Completed?: boolean;
 	Data?: unknown;
 	Blueprint?: import("shared/Blueprints").BlueprintInfo;
-	IsSettlement?: boolean;
+	IsTown?: boolean;
 	IsFoundation?: boolean;
 	RequiredResources?: Record<string, number>;
 	DepositedResources?: Record<string, number>;
@@ -31,68 +31,104 @@ type BuildingRecord = {
 
 class BuildingManager {
 	Player: GameEntity;
+	PlayerColor: Color3;
 	ResourceManager: import("./ResourceManager");
 	PortManager?: import("./PortManager");
 	Buildings: BuildingRecord[];
-	Settlements: BuildingRecord[];
+	Towns: BuildingRecord[];
 	BuildingInProgress: BuildingRecord[];
-	HasPlacedFirstSettlement: boolean;
+	HasPlacedFirstTown: boolean;
 	FoundationsById?: Record<number, BuildingRecord>;
 
 	constructor(
 		player: GameEntity,
+		playerColor: Color3,
 		resourceManager: import("./ResourceManager"),
 		private mapGenerator: MapGenerator,
 		private tileOwnershipManager: TileOwnershipManager,
 	) {
 		this.Player = player;
+		this.PlayerColor = playerColor;
 		this.ResourceManager = resourceManager;
 		this.Buildings = [];
-		this.Settlements = [];
+		this.Towns = [];
 		this.BuildingInProgress = [];
-		this.HasPlacedFirstSettlement = false;
+		this.HasPlacedFirstTown = false;
 	}
 
 	SetPortManager(portManager: import("./PortManager")) {
 		this.PortManager = portManager;
 	}
 
-	StartBuilding(buildingType: string, position: Vector3) {
+	StartBuilding(buildingType: string, position: Vector3, isFree = false): LuaTuple<[boolean, any]> {
 		const buildingTypeData = BuildingTypes[buildingType];
 		if (!buildingTypeData) return $tuple(false, "Invalid building type");
+
+
 
 		let finalPosition = position;
 		let finalRotation: Vector3 | undefined;
 		let snapKey: string | undefined;
 
-		if (buildingTypeData.IsSettlement) {
+		if (buildingTypeData.IsTown) {
 			const [nearestVertex, dist] = this.mapGenerator.FindNearestVertex(position);
 			if (nearestVertex && dist < 15) {
 				const adjCount = (nearestVertex.GetAttribute("AdjacentTileCount") as number) ?? 0;
-				if (adjCount < 2) return $tuple(false, "Invalid settlement location (must touch 2+ hexes)");
+				if (adjCount < 2) return $tuple(false, "Invalid town location (must touch 2+ hexes)");
+
+				const adjLandCount = (nearestVertex.GetAttribute("AdjacentLandTileCount") as number) ?? 0;
+				if (adjLandCount === 0) return $tuple(false, "Cannot build in the open sea!");
 
 				snapKey = nearestVertex.GetAttribute("Key") as string;
 
 				// Check if occupied
-				const folder = game.Workspace.FindFirstChild("Settlements");
+				const folder = game.Workspace.FindFirstChild("Towns");
+				let existingTown: Model | undefined;
+
 				if (folder) {
 					for (const s of folder.GetChildren()) {
 						if (s.IsA("Model") && s.GetAttribute("Key") === snapKey) {
-							return $tuple(false, "Settlement already exists here");
+							existingTown = s as Model;
+							break;
+						}
+					}
+				}
+
+				if (buildingTypeData.RequiresTown) {
+					if (!existingTown) return $tuple(false, "No town found at this location to upgrade");
+
+					const ownerId = existingTown.GetAttribute("OwnerId") as number | undefined;
+					if (ownerId !== this.Player.UserId) {
+						return $tuple(false, "You don't own the town at this location");
+					}
+
+					const existingType = existingTown.Name.lower();
+					if (existingType.find("city")[0] !== undefined) {
+						return $tuple(false, "This town is already a city");
+					}
+				} else if (existingTown) {
+					return $tuple(false, "Town already exists here");
+				}
+
+				if (!buildingTypeData.RequiresTown) {
+					// DISTANCE RULE: Towns must be at least 2 edges apart from ALL other towns
+					const MIN_TOWN_DISTANCE = 50;
+					if (folder) {
+						for (const s of folder.GetChildren()) {
+							if (s.IsA("Model") && s.PrimaryPart) {
+								const dist = nearestVertex.Position.sub(s.PrimaryPart.Position).Magnitude;
+								if (dist < MIN_TOWN_DISTANCE) {
+									const ownerName = s.GetAttribute("OwnerName") as string ?? "another player";
+									return $tuple(false, `Too close to existing town (must be 2+ edges apart)`);
+								}
+							}
 						}
 					}
 
-					// DISTANCE RULE: Settlements must be at least 2 edges apart from ALL other settlements
-					// In our hex grid, that's approximately 50 studs minimum distance
-					const MIN_SETTLEMENT_DISTANCE = 50;
-					for (const s of folder.GetChildren()) {
-						if (s.IsA("Model") && s.PrimaryPart) {
-							const dist = nearestVertex.Position.sub(s.PrimaryPart.Position).Magnitude;
-							if (dist < MIN_SETTLEMENT_DISTANCE) {
-								const ownerName = s.GetAttribute("OwnerName") as string ?? "another player";
-								Logger.Warn("BuildingManager", `${this.Player.Name} tried to build too close to ${ownerName}'s settlement (${math.floor(dist)} studs)`);
-								return $tuple(false, `Too close to existing settlement (must be 2+ edges apart)`);
-							}
+					// CONNECTION RULE: After first 2 towns, must be connected to a road
+					if (this.Towns.size() >= 2) {
+						if (!this.IsConnectedToRoad(nearestVertex, this.Player.UserId)) {
+							return $tuple(false, "Town must be connected to one of your roads");
 						}
 					}
 				}
@@ -102,6 +138,9 @@ class BuildingManager {
 		} else if (buildingTypeData.IsRoad) {
 			const [nearestEdge, dist] = this.mapGenerator.FindNearestEdge(position);
 			if (nearestEdge && dist < 20) {
+				const adjLandCount = (nearestEdge.GetAttribute("AdjacentLandTileCount") as number) ?? 0;
+				if (adjLandCount === 0) return $tuple(false, "Cannot build in the open sea!");
+
 				snapKey = nearestEdge.GetAttribute("Key") as string;
 
 				// Check if occupied
@@ -122,14 +161,16 @@ class BuildingManager {
 			}
 		}
 
-		// Always check and deduct resources
-		if (!this.ResourceManager.HasResources(buildingTypeData.Cost)) {
-			Logger.Warn("BuildingManager", `${this.Player.Name} doesn't have resources for ${buildingType}`);
-			return $tuple(false, "Not enough resources");
-		}
-		Logger.Info("BuildingManager", `${this.Player.Name} paying for ${buildingType}: ${HttpService.JSONEncode(buildingTypeData.Cost)}`);
-		for (const [resourceType, amount] of pairs(buildingTypeData.Cost)) {
-			this.ResourceManager.RemoveResource(resourceType, amount);
+		// Always check and deduct resources (unless free)
+		if (!isFree) {
+			if (!this.ResourceManager.HasResources(buildingTypeData.Cost)) {
+				Logger.Warn("BuildingManager", `${this.Player.Name} doesn't have resources for ${buildingType}`);
+				return $tuple(false, "Not enough resources");
+			}
+			Logger.Info("BuildingManager", `${this.Player.Name} paying for ${buildingType}: ${HttpService.JSONEncode(buildingTypeData.Cost)}`);
+			for (const [resourceType, amount] of pairs(buildingTypeData.Cost)) {
+				this.ResourceManager.RemoveResource(resourceType, amount);
+			}
 		}
 
 		const buildingId = this.Buildings.size() + 1;
@@ -142,7 +183,7 @@ class BuildingManager {
 			BuildTime: buildingTypeData.BuildTime,
 			Completed: false,
 			Data: buildingTypeData,
-			IsSettlement: buildingTypeData.IsSettlement,
+			IsTown: buildingTypeData.IsTown,
 			OwnerId: this.Player.UserId,
 			SnapKey: snapKey,
 		};
@@ -156,8 +197,8 @@ class BuildingManager {
 			NetworkUtils.FireClient(this.Player, ServerEvents.ConstructionStarted, buildingId, buildingType, finalPosition);
 		}
 
-		if (buildingTypeData.IsSettlement && !this.HasPlacedFirstSettlement) {
-			this.HasPlacedFirstSettlement = true;
+		if (buildingTypeData.IsTown && !this.HasPlacedFirstTown) {
+			this.HasPlacedFirstTown = true;
 		}
 		return $tuple(true, buildingId);
 	}
@@ -175,7 +216,7 @@ class BuildingManager {
 			SnapKey: snapKey,
 			Blueprint: blueprint,
 			IsFoundation: true,
-			IsSettlement: blueprint.ClaimsTiles || blueprintName === "Settlement",
+			IsTown: blueprint.ClaimsTiles || blueprintName === "Town",
 			RequiredResources: {},
 			DepositedResources: {},
 			Progress: 0,
@@ -183,11 +224,34 @@ class BuildingManager {
 			OwnerId: this.Player.UserId,
 		};
 
-		if (foundation.IsSettlement) {
+		if (blueprint.PlacementType === "edge" && snapKey) {
+			const edgeFolder = game.Workspace.FindFirstChild("Edges");
+			const edge = edgeFolder?.FindFirstChild(snapKey) as BasePart;
+			if (edge) {
+				const landCount = (edge.GetAttribute("AdjacentLandTileCount") as number) ?? 0;
+				if (landCount === 0) return $tuple(false, "Cannot build on the open sea!");
+			}
+		} else if (blueprint.PlacementType === "3-way") {
+			const [nearestVertex, dist] = this.mapGenerator.FindNearestVertex(position);
+			if (nearestVertex) {
+				const landCount = (nearestVertex.GetAttribute("AdjacentLandTileCount") as number) ?? 0;
+				if (landCount === 0) return $tuple(false, "Cannot build in the open sea!");
+			}
+		}
+
+		if (foundation.IsTown) {
 			const [nearestVertex, dist] = this.mapGenerator.FindNearestVertex(position);
 			if (nearestVertex && dist < 15) {
 				const adjCount = (nearestVertex.GetAttribute("AdjacentTileCount") as number) ?? 0;
-				if (adjCount >= 2) foundation.Position = nearestVertex.Position;
+				if (adjCount >= 2) {
+					// CONNECTION RULE: After first 2 towns, must be connected to a road
+					if (this.Towns.size() >= 2) {
+						if (!this.IsConnectedToRoad(nearestVertex, this.Player.UserId)) {
+							return $tuple(false, "Town must be connected to one of your roads");
+						}
+					}
+					foundation.Position = nearestVertex.Position;
+				}
 			}
 		}
 
@@ -201,7 +265,7 @@ class BuildingManager {
 		this.FoundationsById = this.FoundationsById ?? {};
 		this.FoundationsById[foundationId] = foundation;
 
-		if (blueprintName === "Settlement" && !this.HasPlacedFirstSettlement) this.HasPlacedFirstSettlement = true;
+		if (blueprintName === "Town" && !this.HasPlacedFirstTown) this.HasPlacedFirstTown = true;
 		NetworkUtils.FireClient(this.Player, ServerEvents.FoundationPlaced, foundationId, blueprintName, position, foundation.RequiredResources ?? {});
 		return $tuple(true, foundationId);
 	}
@@ -241,8 +305,7 @@ class BuildingManager {
 		if (!basePart || !basePart.IsA("BasePart")) return;
 
 		basePart.Transparency = 0.7 - foundation.Progress * 0.5;
-		const greenAmount = math.floor(200 + foundation.Progress * 55);
-		basePart.Color = Color3.fromRGB(100, greenAmount, 100 + (1 - foundation.Progress) * 155);
+		// Removed color shift to preserve player identity
 
 		const progressBar = foundation.Model.FindFirstChild("ProgressBar");
 		if (progressBar && progressBar.IsA("BasePart")) {
@@ -294,9 +357,15 @@ class BuildingManager {
 		part.Anchored = true;
 		part.CanCollide = false;
 		part.Transparency = 0.7;
-		part.Color = Color3.fromRGB(100, 200, 255);
+		part.Color = this.PlayerColor;
 		part.Material = Enum.Material.ForceField;
+		part.CollisionGroup = "Obstacles";
 		part.Parent = model;
+
+		// Add PathfindingModifier to ignore for pathing
+		const modifier = new Instance("PathfindingModifier");
+		modifier.PassThrough = true;
+		modifier.Parent = part;
 
 		const progressBg = new Instance("Part");
 		progressBg.Name = "ProgressBar";
@@ -344,7 +413,7 @@ class BuildingManager {
 		}
 		resourceLabel.Text = resourceText;
 
-		const folderName = foundation.IsSettlement ? "Settlements" : "Buildings";
+		const folderName = foundation.IsTown ? "Towns" : "Buildings";
 		const folder = (game.Workspace.FindFirstChild(folderName) as Folder) ?? new Instance("Folder", game.Workspace);
 		folder.Name = folderName;
 		model.Parent = folder;
@@ -375,11 +444,37 @@ class BuildingManager {
 		}
 		Logger.Info("BuildingManager", `[${this.Player.Name}] Completed building ${building.Type} (ID: ${building.Id})`);
 		this.CreateBuildingModel(building);
-		if (building.IsSettlement) {
-			const settlementId = `${this.Player.UserId}_${building.Id}`;
-			const claimedTiles = this.tileOwnershipManager.ClaimTilesNearSettlement(this.Player, building.Position, settlementId);
-			this.Settlements.push(building);
-			if (this.PortManager) this.PortManager.ClaimPort(building.Position, settlementId);
+		if (building.IsTown) {
+			// If this is a City, replace the old Town record
+			if (building.Type === "City") {
+				const existingIndex = this.Towns.findIndex(t => t.SnapKey === building.SnapKey && t.Type === "Town");
+				if (existingIndex !== -1) {
+					const oldTown = this.Towns[existingIndex];
+					if (oldTown.Model) oldTown.Model.Destroy();
+					this.Towns.remove(existingIndex);
+
+					// Also remove from general buildings list
+					const bIndex = this.Buildings.findIndex(b => b.SnapKey === building.SnapKey && b.Type === "Town");
+					if (bIndex !== -1) this.Buildings.remove(bIndex);
+				}
+
+				// Also must remove the physical Town from workspace
+				const folder = game.Workspace.FindFirstChild("Towns");
+				if (folder) {
+					for (const s of folder.GetChildren()) {
+						if (s.IsA("Model") && s.GetAttribute("Key") === building.SnapKey) {
+							if (s.Name.lower().find("city")[0] === undefined) { // Don't delete self!
+								s.Destroy();
+							}
+						}
+					}
+				}
+			}
+
+			const townId = `${this.Player.UserId}_${building.Id}`;
+			const claimedTiles = this.tileOwnershipManager.ClaimTilesNearTown(this.Player, building.Position, townId);
+			this.Towns.push(building);
+			if (this.PortManager) this.PortManager.ClaimPort(building.Position, townId);
 		}
 		NetworkUtils.FireClient(this.Player, ServerEvents.ConstructionCompleted, building.Id, building.Type);
 	}
@@ -397,9 +492,11 @@ class BuildingManager {
 		part.Size = size;
 		part.CFrame = baseCFrame.mul(new CFrame(0, size.Y / 2, 0));
 		part.Anchored = true;
+		part.CollisionGroup = "Obstacles";
 		part.Parent = model;
+		part.Color = this.PlayerColor;
 
-		if (building.Type === "Settlement") {
+		if (building.Type === "Town") {
 			part.Size = new Vector3(5, 4, 5);
 			part.CFrame = baseCFrame.mul(new CFrame(0, 2, 0));
 			part.Color = Color3.fromRGB(220, 200, 160);
@@ -407,13 +504,13 @@ class BuildingManager {
 			roof1.Size = new Vector3(6, 2.5, 3);
 			roof1.CFrame = baseCFrame.mul(new CFrame(0, 5.25, -1.5));
 			roof1.Anchored = true;
-			roof1.Color = Color3.fromRGB(139, 69, 19);
+			roof1.Color = this.PlayerColor;
 			roof1.Parent = model;
 			const roof2 = new Instance("WedgePart");
 			roof2.Size = new Vector3(6, 2.5, 3);
 			roof2.CFrame = baseCFrame.mul(new CFrame(0, 5.25, 1.5)).mul(CFrame.Angles(0, math.pi, 0));
 			roof2.Anchored = true;
-			roof2.Color = Color3.fromRGB(139, 69, 19);
+			roof2.Color = this.PlayerColor;
 			roof2.Parent = model;
 			const door = new Instance("Part");
 			door.Size = new Vector3(1.2, 2.5, 0.3);
@@ -424,11 +521,21 @@ class BuildingManager {
 		} else if (building.Type === "Road") {
 			part.Size = new Vector3(37, 0.5, 3);
 			part.CFrame = baseCFrame;
-			part.Color = Color3.fromRGB(200, 200, 200);
+			part.Color = this.PlayerColor;
 			part.Material = Enum.Material.Concrete;
 		}
 
-		const folderName = building.IsSettlement ? "Settlements" : "Buildings";
+		// Ensure ALL parts of the building are in the Obstacles group and ignored by pathfinding
+		for (const p of model.GetDescendants()) {
+			if (p.IsA("BasePart")) {
+				p.CollisionGroup = "Obstacles";
+				const modifier = new Instance("PathfindingModifier");
+				modifier.PassThrough = true;
+				modifier.Parent = p;
+			}
+		}
+
+		const folderName = building.IsTown ? "Towns" : "Buildings";
 		const folder = (game.Workspace.FindFirstChild(folderName) as Folder) ?? new Instance("Folder", game.Workspace);
 		folder.Name = folderName;
 		model.Parent = folder;
@@ -442,31 +549,64 @@ class BuildingManager {
 		part.SetAttribute("OwnerId", building.OwnerId ?? this.Player.UserId);
 
 		// Add owner label above the building
-		const ownerBillboard = new Instance("BillboardGui");
-		ownerBillboard.Name = "OwnerLabel";
-		ownerBillboard.Size = new UDim2(0, 100, 0, 30);
-		ownerBillboard.StudsOffset = new Vector3(0, size.Y + 2, 0);
-		ownerBillboard.AlwaysOnTop = true;
-		ownerBillboard.Adornee = part;
-		ownerBillboard.Parent = part;
+		// Add owner label ONLY for Towns (Roads are just colored)
+		if (building.Type === "Town" || building.Type === "City") {
+			const ownerBillboard = new Instance("BillboardGui");
+			ownerBillboard.Name = "OwnerLabel";
+			ownerBillboard.Size = new UDim2(0, 100, 0, 30);
+			ownerBillboard.StudsOffset = new Vector3(0, size.Y + 2, 0);
+			ownerBillboard.AlwaysOnTop = true;
+			ownerBillboard.Adornee = part;
+			ownerBillboard.Parent = part;
 
-		const ownerText = new Instance("TextLabel");
-		ownerText.Name = "OwnerName";
-		ownerText.Size = new UDim2(1, 0, 1, 0);
-		ownerText.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
-		ownerText.BackgroundTransparency = 0.3;
-		ownerText.TextColor3 = new Color3(1, 1, 1);
-		ownerText.TextScaled = true;
-		ownerText.Font = Enum.Font.GothamBold;
-		ownerText.Text = this.Player.Name;
-		ownerText.Parent = ownerBillboard;
+			const ownerText = new Instance("TextLabel");
+			ownerText.Name = "OwnerName";
+			ownerText.Size = new UDim2(1, 0, 1, 0);
+			ownerText.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
+			ownerText.BackgroundTransparency = 0.3;
+			ownerText.TextColor3 = new Color3(1, 1, 1);
+			ownerText.TextScaled = true;
+			ownerText.Font = Enum.Font.GothamBold;
+			ownerText.Text = this.Player.Name;
+			ownerText.Parent = ownerBillboard;
+		}
 
 		return model;
 	}
 
 	GetBuildings() { return this.Buildings; }
-	GetSettlements() { return this.Settlements; }
+	GetTowns() { return this.Towns; }
 	GetBuildingsInProgress() { return this.BuildingInProgress; }
+
+	private IsConnectedToRoad(vertex: BasePart, ownerId: number): boolean {
+		const vertexKey = vertex.GetAttribute("Key") as string;
+		if (!vertexKey) return false;
+
+		const edgeFolder = game.Workspace.FindFirstChild("Edges");
+		const buildingsFolder = game.Workspace.FindFirstChild("Buildings");
+		if (!edgeFolder || !buildingsFolder) return false;
+
+		// Find all edges touching this vertex
+		for (const edge of edgeFolder.GetChildren()) {
+			if (edge.IsA("BasePart")) {
+				if (edge.GetAttribute("Vertex1") === vertexKey || edge.GetAttribute("Vertex2") === vertexKey) {
+					const edgeKey = edge.GetAttribute("Key") as string;
+
+					// Check if there's a road owned by the player on this edge
+					for (const building of buildingsFolder.GetChildren()) {
+						if (building.IsA("Model") && building.GetAttribute("Key") === edgeKey) {
+							if (building.GetAttribute("OwnerId") === ownerId) {
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
 	GetScore(): number {
 		let total = 0;
 		for (const b of this.Buildings) {

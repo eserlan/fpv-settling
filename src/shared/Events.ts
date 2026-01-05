@@ -1,5 +1,6 @@
 import { Networking } from "@flamework/networking";
 import { SkillLevel } from "./GameTypes";
+import { MarketOffer, ResourceDict } from "./MarketTypes";
 
 // ============================================================================
 // SERVER EVENTS (Client → Server)
@@ -13,6 +14,10 @@ interface GameActionEvents {
     HireNPC(npcType: string, position: Vector3): void;
     StartResearch(techName: string): void;
     ExecuteTrade(giveResource: string, receiveResource: string, amount: number): void;
+    SetupPlacement(buildingType: string, position: Vector3): void;
+    PostMarketOffer(giveResources: ResourceDict, wantType: string, wantAmount: number): void;
+    AcceptMarketOffer(offerId: string): void;
+    CancelMarketOffer(offerId: string): void;
 }
 
 /** Lobby events - Room management before game starts */
@@ -61,6 +66,7 @@ export interface RoomState {
 /** Lifecycle events - Game state & player presence */
 interface LifecycleEvents {
     RoomUpdate(roomId: number, room: RoomState): void;
+    SetupTurnUpdate(userId: number, step: "Town1" | "Road1" | "Town2" | "Road2"): void;
     GameStart(): void;
     PlayerJoined(userId: number, name: string, isAI: boolean): void;
     PlayerLeft(userId: number, name: string): void;
@@ -119,6 +125,7 @@ interface TradeEvents {
         receiveAmount: number,
         ratio: number,
     ): void;
+    MarketUpdate(offers: MarketOffer[]): void;
 }
 
 /** Score events - Points & leaderboard */

@@ -7,7 +7,7 @@ import { ServerEvents } from "../ServerEvents";
 type TileOwnershipRecord = {
 	playerUserId: number;
 	playerName: string;
-	settlementId: string;
+	townId: string;
 	claimedAt: number;
 };
 
@@ -30,7 +30,7 @@ export class TileOwnershipManager implements OnStart {
 		return false;
 	}
 
-	public ClaimTile(player: GameEntity, tileQ: number, tileR: number, settlementId: string) {
+	public ClaimTile(player: GameEntity, tileQ: number, tileR: number, townId: string) {
 		const key = TileKey.makeTileKey(tileQ, tileR);
 		if (!this.tileOwnership[key]) {
 			this.tileOwnership[key] = [];
@@ -39,19 +39,19 @@ export class TileOwnershipManager implements OnStart {
 		// Check if already claimed by this player
 		const records = this.tileOwnership[key]!;
 		for (const record of records) {
-			if (record.playerUserId === player.UserId && record.settlementId === settlementId) {
-				return true; // Already claimed by this specific settlement
+			if (record.playerUserId === player.UserId && record.townId === townId) {
+				return true; // Already claimed by this specific town
 			}
 		}
 
 		records.push({
 			playerUserId: player.UserId,
 			playerName: player.Name,
-			settlementId,
+			townId,
 			claimedAt: os.time(),
 		});
 
-		Logger.Info("TileOwnership", `${player.Name} (Settlement: ${settlementId}) claimed part of tile ${key}. Total owners: ${records.size()}`);
+		Logger.Info("TileOwnership", `${player.Name} (Town: ${townId}) claimed part of tile ${key}. Total owners: ${records.size()}`);
 
 		// Notify clients about the tile ownership change
 		ServerEvents.TileOwnershipChanged.broadcast(tileQ, tileR, player.UserId, player.Name);
@@ -59,14 +59,14 @@ export class TileOwnershipManager implements OnStart {
 		return true;
 	}
 
-	public ReleaseTile(tileQ: number, tileR: number, settlementId?: string) {
+	public ReleaseTile(tileQ: number, tileR: number, townId?: string) {
 		const key = TileKey.makeTileKey(tileQ, tileR);
 		if (!this.tileOwnership[key]) return;
 
-		if (settlementId) {
+		if (townId) {
 			const records = this.tileOwnership[key]!;
 			for (let i = records.size(); i >= 1; i--) {
-				if (records[i - 1].settlementId === settlementId) {
+				if (records[i - 1].townId === townId) {
 					records.remove(i - 1);
 				}
 			}
@@ -77,7 +77,7 @@ export class TileOwnershipManager implements OnStart {
 			delete this.tileOwnership[key];
 		}
 
-		Logger.Info("TileOwnership", `Tile ${key} released (Settlement: ${settlementId ?? "All"})`);
+		Logger.Info("TileOwnership", `Tile ${key} released (Town: ${townId ?? "All"})`);
 	}
 
 	public GetPlayerTiles(player: GameEntity) {
@@ -95,7 +95,7 @@ export class TileOwnershipManager implements OnStart {
 		return tiles;
 	}
 
-	public ClaimTilesNearSettlement(player: GameEntity, settlementPosition: Vector3, settlementId: string) {
+	public ClaimTilesNearTown(player: GameEntity, townPosition: Vector3, townId: string) {
 		const claimedTiles = new Array<{ Q: number; R: number }>();
 		const vertexFolder = game.Workspace.FindFirstChild("Vertices");
 		if (!vertexFolder) return claimedTiles;
@@ -105,7 +105,7 @@ export class TileOwnershipManager implements OnStart {
 
 		for (const vertex of vertexFolder.GetChildren()) {
 			if (vertex.IsA("BasePart")) {
-				const dist = vertex.Position.sub(settlementPosition).Magnitude;
+				const dist = vertex.Position.sub(townPosition).Magnitude;
 				if (dist < closestDist) {
 					closestDist = dist;
 					closestVertex = vertex;
@@ -120,7 +120,7 @@ export class TileOwnershipManager implements OnStart {
 			const q = closestVertex.GetAttribute(`Tile${i}Q`) as number | undefined;
 			const r = closestVertex.GetAttribute(`Tile${i}R`) as number | undefined;
 			if (q !== undefined && r !== undefined) {
-				if (this.ClaimTile(player, q, r, settlementId)) claimedTiles.push({ Q: q, R: r });
+				if (this.ClaimTile(player, q, r, townId)) claimedTiles.push({ Q: q, R: r });
 			}
 		}
 		return claimedTiles;

@@ -21,79 +21,121 @@ ClientEvents.GameStart.connect(() => {
 
 // Note: Resource display removed - using InventoryUI at bottom center instead
 
-// Building Menu
-const buildingFrame = new Instance("Frame");
-buildingFrame.Name = "BuildingMenu";
-buildingFrame.Size = new UDim2(0, 250, 0, 300);
-buildingFrame.Position = new UDim2(1, -260, 0, 10);
-buildingFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40);
-buildingFrame.BackgroundTransparency = 0.3;
-buildingFrame.BorderSizePixel = 2;
-buildingFrame.BorderColor3 = Color3.fromRGB(200, 200, 200);
-buildingFrame.Parent = screenGui;
+// Management Menu (Sidebar)
+const mainSidebar = new Instance("Frame");
+mainSidebar.Name = "ManagementMenu";
+mainSidebar.Size = new UDim2(0, 250, 0, 400);
+mainSidebar.Position = new UDim2(1, -260, 0, 10);
+mainSidebar.BackgroundColor3 = Color3.fromRGB(40, 40, 40);
+mainSidebar.BackgroundTransparency = 0.3;
+mainSidebar.BorderSizePixel = 2;
+mainSidebar.BorderColor3 = Color3.fromRGB(200, 200, 200);
+mainSidebar.Parent = screenGui;
 
-const buildingTitle = new Instance("TextLabel");
-buildingTitle.Name = "Title";
-buildingTitle.Size = new UDim2(1, 0, 0, 30);
-buildingTitle.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
-buildingTitle.BorderSizePixel = 0;
-buildingTitle.Text = "Buildings";
-buildingTitle.TextColor3 = Color3.fromRGB(255, 255, 255);
-buildingTitle.Font = Enum.Font.SourceSansBold;
-buildingTitle.TextSize = 20;
-buildingTitle.Parent = buildingFrame;
+const menuTitle = new Instance("TextLabel");
+menuTitle.Name = "Title";
+menuTitle.Size = new UDim2(1, 0, 0, 30);
+menuTitle.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
+menuTitle.BorderSizePixel = 0;
+menuTitle.Text = "Your Assets";
+menuTitle.TextColor3 = Color3.fromRGB(255, 255, 255);
+menuTitle.Font = Enum.Font.GothamBold;
+menuTitle.TextSize = 18;
+menuTitle.Parent = mainSidebar;
 
-// Building List Content
+// Tabs
+const tabFrame = new Instance("Frame");
+tabFrame.Name = "Tabs";
+tabFrame.Size = new UDim2(1, 0, 0, 35);
+tabFrame.Position = new UDim2(0, 0, 0, 30);
+tabFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20);
+tabFrame.BackgroundTransparency = 0.5;
+tabFrame.BorderSizePixel = 0;
+tabFrame.Parent = mainSidebar;
+
+let currentTab: "Buildings" | "Resources" = "Buildings";
+
+const createTabBtn = (name: string, pos: number) => {
+	const btn = new Instance("TextButton");
+	btn.Name = name + "Tab";
+	btn.Size = new UDim2(0.5, 0, 1, 0);
+	btn.Position = new UDim2(pos, 0, 0, 0);
+	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50);
+	btn.Text = name;
+	btn.TextColor3 = new Color3(1, 1, 1);
+	btn.Font = Enum.Font.GothamBold;
+	btn.TextSize = 14;
+	btn.Parent = tabFrame;
+	return btn;
+};
+
+const buildingTabBtn = createTabBtn("Buildings", 0);
+const resourceTabBtn = createTabBtn("Resources", 0.5);
+
+// Container for lists
+const listContainer = new Instance("Frame");
+listContainer.Name = "ListContainer";
+listContainer.Size = new UDim2(1, 0, 1, -100);
+listContainer.Position = new UDim2(0, 0, 0, 65);
+listContainer.BackgroundTransparency = 1;
+listContainer.Parent = mainSidebar;
+
 const buildingList = new Instance("ScrollingFrame");
-buildingList.Name = "List";
-buildingList.Size = new UDim2(1, -10, 1, -80);
-buildingList.Position = new UDim2(0, 5, 0, 35);
+buildingList.Name = "BuildingList";
+buildingList.Size = new UDim2(1, -10, 1, 0);
+buildingList.Position = new UDim2(0, 5, 0, 0);
 buildingList.BackgroundTransparency = 1;
-buildingList.CanvasSize = new UDim2(0, 0, 0, 0); // Automatic
-buildingList.ScrollBarThickness = 4;
-buildingList.Parent = buildingFrame;
+buildingList.AutomaticCanvasSize = Enum.AutomaticSize.Y;
+buildingList.CanvasSize = new UDim2(0, 0, 0, 0);
+buildingList.ScrollBarThickness = 6;
+buildingList.Visible = true;
+buildingList.Parent = listContainer;
+
+const resourceList = new Instance("ScrollingFrame");
+resourceList.Name = "ResourceList";
+resourceList.Size = new UDim2(1, -10, 1, 0);
+resourceList.Position = new UDim2(0, 5, 0, 0);
+resourceList.BackgroundTransparency = 1;
+resourceList.AutomaticCanvasSize = Enum.AutomaticSize.Y;
+resourceList.CanvasSize = new UDim2(0, 0, 0, 0);
+resourceList.ScrollBarThickness = 6;
+resourceList.Visible = false;
+resourceList.Parent = listContainer;
 
 // Function to refresh the building list
 const refreshBuildingList = () => {
 	buildingList.ClearAllChildren();
 
-	// Create fresh layout each time
 	const listLayout = new Instance("UIListLayout");
 	listLayout.Padding = new UDim(0, 5);
 	listLayout.SortOrder = Enum.SortOrder.LayoutOrder;
 	listLayout.Parent = buildingList;
 
-	const foldersToCheck = ["Settlements", "Buildings"];
+	const foldersToCheck = ["Towns", "Buildings"];
 	let itemCount = 0;
-	let debugInfo = "";
 
 	for (const folderName of foldersToCheck) {
 		const folder = game.Workspace.FindFirstChild(folderName);
-		if (!folder) {
-			debugInfo += `${folderName}: NOT FOUND, `;
-			continue;
-		}
-		const childCount = folder.GetChildren().size();
-		debugInfo += `${folderName}: ${childCount} children, `;
+		if (!folder) continue;
 
 		for (const building of folder.GetChildren()) {
 			if (building.IsA("Model")) {
 				const ownerId = building.GetAttribute("OwnerId") as number | undefined;
+				if (ownerId !== player.UserId) continue; // Only show OUR buildings
 
-				const icon = folderName === "Settlements" ? "🏠" : "🛤️";
+				const buildingName = building.Name.lower();
+				const [foundFoundation] = buildingName.find("foundation");
+				if (foundFoundation !== undefined) continue;
+
+				const [foundCity] = buildingName.find("city");
+				const isCity = foundCity !== undefined;
+
+				const icon = isCity ? "🏙️" : "🏠";
+
 				const btn = new Instance("TextButton");
 				btn.Name = building.Name;
-				btn.Size = new UDim2(1, -5, 0, 30);
-
-				// Color based on ownership
-				if (ownerId === player.UserId) {
-					btn.BackgroundColor3 = Color3.fromRGB(60, 100, 60); // Green = yours
-				} else if (ownerId !== undefined) {
-					btn.BackgroundColor3 = Color3.fromRGB(100, 60, 60); // Red = other player
-				} else {
-					btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80); // Grey = unknown owner
-				}
-
+				btn.Size = new UDim2(1, -10, 0, 35);
+				btn.BackgroundColor3 = Color3.fromRGB(60, 100, 60);
 				btn.Text = `${icon} ${building.Name}`;
 				btn.TextColor3 = new Color3(1, 1, 1);
 				btn.Font = Enum.Font.GothamBold;
@@ -108,55 +150,98 @@ const refreshBuildingList = () => {
 				btn.MouseButton1Click.Connect(() => {
 					const camera = game.Workspace.CurrentCamera;
 					if (camera && building.PrimaryPart) {
-						// Get the building position and size
 						const buildingPos = building.PrimaryPart.Position;
-						const boundingBox = building.GetExtentsSize();
-
-						// Calculate offset distance based on building size (ensure we're outside)
-						const maxDimension = math.max(boundingBox.X, boundingBox.Y, boundingBox.Z);
-						const offsetDistance = math.max(30, maxDimension * 1.5);
-
-						// Position camera at an angle behind/above the building
-						const offsetVector = new Vector3(offsetDistance * 0.7, offsetDistance * 0.5, offsetDistance * 0.7);
-						const cameraPos = buildingPos.add(offsetVector);
-
-						// Set camera to Scriptable mode so we can control it freely
 						camera.CameraType = Enum.CameraType.Scriptable;
-
-						// Create the target CFrame looking at the building
-						const targetCFrame = CFrame.lookAt(cameraPos, buildingPos);
-
-						// Smoothly tween the camera to the new position
-						const TweenService = game.GetService("TweenService");
-						const tweenInfo = new TweenInfo(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
-						const tween = TweenService.Create(camera, tweenInfo, { CFrame: targetCFrame });
-						tween.Play();
-
-						Logger.Info("Camera", `Focused on ${building.Name} (third-person view)`);
+						const targetCFrame = CFrame.lookAt(buildingPos.add(new Vector3(30, 20, 30)), buildingPos);
+						game.GetService("TweenService").Create(camera, new TweenInfo(0.5), { CFrame: targetCFrame }).Play();
 					}
 				});
 			}
 		}
 	}
 
-	// Show placeholder if no buildings
 	if (itemCount === 0) {
 		const placeholder = new Instance("TextLabel");
-		placeholder.Name = "Placeholder";
-		placeholder.Size = new UDim2(1, -10, 0, 80);
+		placeholder.Size = new UDim2(1, -10, 0, 50);
 		placeholder.BackgroundTransparency = 1;
-		placeholder.Text = `No buildings yet.\n${debugInfo}\nBuild a settlement first!`;
+		placeholder.Text = "No buildings found.";
 		placeholder.TextColor3 = Color3.fromRGB(150, 150, 150);
 		placeholder.Font = Enum.Font.Gotham;
 		placeholder.TextSize = 12;
-		placeholder.TextWrapped = true;
 		placeholder.Parent = buildingList;
 	}
-
-	// Update title with count
-	buildingTitle.Text = `Buildings (${itemCount})`;
-	buildingList.CanvasSize = new UDim2(0, 0, 0, math.max(itemCount * 35, 80));
 };
+
+const refreshResourceList = () => {
+	resourceList.ClearAllChildren();
+
+	const listLayout = new Instance("UIListLayout");
+	listLayout.Padding = new UDim(0, 5);
+	listLayout.SortOrder = Enum.SortOrder.LayoutOrder;
+	listLayout.Parent = resourceList;
+
+	const resourcesFolder = game.Workspace.FindFirstChild("Resources");
+	let itemCount = 0;
+
+	if (resourcesFolder) {
+		for (const res of resourcesFolder.GetChildren()) {
+			if (res.IsA("BasePart")) {
+				const ownerId = res.GetAttribute("OwnerId") as number | undefined;
+				if (ownerId !== player.UserId) continue; // Only show OUR resources
+
+				const resType = res.GetAttribute("ResourceType") as string ?? "Resource";
+				const icons: Record<string, string> = { Wood: "🌲", Brick: "🧱", Wheat: "🌾", Ore: "⛏", Wool: "🧶" };
+				const icon = icons[resType] ?? "📦";
+
+				const btn = new Instance("TextButton");
+				btn.Name = res.Name;
+				btn.Size = new UDim2(1, -10, 0, 35);
+				btn.BackgroundColor3 = Color3.fromRGB(60, 60, 100);
+				btn.Text = `${icon} ${resType}`;
+				btn.TextColor3 = new Color3(1, 1, 1);
+				btn.Font = Enum.Font.GothamBold;
+				btn.TextSize = 14;
+				btn.Parent = resourceList;
+				itemCount++;
+
+				const corner = new Instance("UICorner");
+				corner.CornerRadius = new UDim(0, 4);
+				corner.Parent = btn;
+
+				btn.MouseButton1Click.Connect(() => {
+					const camera = game.Workspace.CurrentCamera;
+					if (camera) {
+						camera.CameraType = Enum.CameraType.Scriptable;
+						const targetCFrame = CFrame.lookAt(res.Position.add(new Vector3(15, 15, 15)), res.Position);
+						game.GetService("TweenService").Create(camera, new TweenInfo(0.5), { CFrame: targetCFrame }).Play();
+					}
+				});
+			}
+		}
+	}
+
+	if (itemCount === 0) {
+		const placeholder = new Instance("TextLabel");
+		placeholder.Size = new UDim2(1, -10, 0, 50);
+		placeholder.BackgroundTransparency = 1;
+		placeholder.Text = "No dropped resources.";
+		placeholder.TextColor3 = Color3.fromRGB(150, 150, 150);
+		placeholder.Font = Enum.Font.Gotham;
+		placeholder.TextSize = 12;
+		placeholder.Parent = resourceList;
+	}
+};
+
+const updateTabs = () => {
+	buildingTabBtn.BackgroundColor3 = currentTab === "Buildings" ? Color3.fromRGB(80, 80, 80) : Color3.fromRGB(40, 40, 40);
+	resourceTabBtn.BackgroundColor3 = currentTab === "Resources" ? Color3.fromRGB(80, 80, 80) : Color3.fromRGB(40, 40, 40);
+	buildingList.Visible = currentTab === "Buildings";
+	resourceList.Visible = currentTab === "Resources";
+};
+
+buildingTabBtn.MouseButton1Click.Connect(() => { currentTab = "Buildings"; updateTabs(); });
+resourceTabBtn.MouseButton1Click.Connect(() => { currentTab = "Resources"; updateTabs(); });
+updateTabs();
 
 const resetCamBtn = new Instance("TextButton");
 resetCamBtn.Name = "ResetCamera";
@@ -167,7 +252,7 @@ resetCamBtn.Text = "Reset Focus";
 resetCamBtn.TextColor3 = new Color3(1, 1, 1);
 resetCamBtn.Font = Enum.Font.GothamBold;
 resetCamBtn.TextSize = 14;
-resetCamBtn.Parent = buildingFrame;
+resetCamBtn.Parent = mainSidebar;
 
 const btnCorner = new Instance("UICorner");
 btnCorner.CornerRadius = new UDim(0, 4);
@@ -189,7 +274,8 @@ resetCamBtn.MouseButton1Click.Connect(() => {
 task.spawn(() => {
 	while (true) {
 		refreshBuildingList();
-		task.wait(3); // Refresh every 3s
+		refreshResourceList();
+		task.wait(2); // Slightly faster refresh
 	}
 });
 
@@ -203,7 +289,7 @@ const setupFolderListeners = (folderName: string) => {
 	}
 };
 
-task.spawn(() => setupFolderListeners("Settlements"));
+task.spawn(() => setupFolderListeners("Towns"));
 task.spawn(() => setupFolderListeners("Buildings"));
 
 // Help text

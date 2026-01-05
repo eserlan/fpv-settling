@@ -44,6 +44,12 @@ const TileTypes: Record<string, TileInfo> = {
 		Color: Color3.fromHex("#EDC9AF"), // Desert Sand
 		Frequency: 1,
 	},
+	Sea: {
+		Name: "Sea",
+		Resource: undefined,
+		Color: Color3.fromHex("#1E90FF"), // Dodger Blue (Ocean)
+		Frequency: 0, // Not randomly placed - used for map border
+	},
 };
 
 export type { TileInfo };

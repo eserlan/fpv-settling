@@ -24,7 +24,7 @@ import DiceMath, {
     getMatchingTiles,
     shouldProduceResources,
     calculateTileValue,
-    calculateSettlementValue,
+    calculateTownValue,
     getNumberHeat,
     calculateRollVariance,
 } from "../../src/shared/DiceMath";
@@ -222,9 +222,9 @@ describe("DiceMath", () => {
             expect(calculateTileValue(7)).toBe(0); // Robber
         });
 
-        it("should calculate settlement value", () => {
-            // Settlement touching 6, 8, and 9
-            const value = calculateSettlementValue([6, 8, 9]);
+        it("should calculate town value", () => {
+            // Town touching 6, 8, and 9
+            const value = calculateTownValue([6, 8, 9]);
             expect(value).toBe(5 + 5 + 4); // 14
         });
 
@@ -254,7 +254,7 @@ describe("DiceMath", () => {
             expect(DiceMath.ROBBER_NUMBER).toBe(7);
             expect(DiceMath.isValidDiceRoll).toBeDefined();
             expect(DiceMath.getProbabilityPercent).toBeDefined();
-            expect(DiceMath.calculateSettlementValue).toBeDefined();
+            expect(DiceMath.calculateTownValue).toBeDefined();
         });
     });
 });

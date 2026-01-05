@@ -37,38 +37,40 @@ const mockPlayer = {
 } as unknown as Player;
 
 describe("ResourceManager", () => {
-    it("should initialize with starting resources", () => {
+    it("should initialize with 0 resources", () => {
         const rm = new ResourceManager(mockPlayer);
-        expect(rm.GetResource("Wood")).toBe(2);
-        expect(rm.GetResource("Brick")).toBe(2);
-        expect(rm.GetResource("Wheat")).toBe(1);
-        expect(rm.GetResource("Wool")).toBe(1);
+        expect(rm.GetResource("Wood")).toBe(0);
+        expect(rm.GetResource("Brick")).toBe(0);
+        expect(rm.GetResource("Wheat")).toBe(0);
+        expect(rm.GetResource("Wool")).toBe(0);
         expect(rm.GetResource("Ore")).toBe(0);
     });
 
     it("should add resources", () => {
         const rm = new ResourceManager(mockPlayer);
         rm.AddResource("Wood", 5);
-        expect(rm.GetResource("Wood")).toBe(7);
+        expect(rm.GetResource("Wood")).toBe(5);
     });
 
     it("should respect max stack when adding", () => {
         const rm = new ResourceManager(mockPlayer);
         // Max stack is 50 in ResourceMath/ResourceTypes
         const added = rm.AddResource("Wood", 60);
-        expect(added).toBe(48); // 2 + 48 = 50
+        expect(added).toBe(50);
         expect(rm.GetResource("Wood")).toBe(50);
     });
 
     it("should remove resources", () => {
         const rm = new ResourceManager(mockPlayer);
+        rm.AddResource("Wood", 5);
         const success = rm.RemoveResource("Wood", 1);
         expect(success).toBe(true);
-        expect(rm.GetResource("Wood")).toBe(1);
+        expect(rm.GetResource("Wood")).toBe(4);
     });
 
     it("should return false when removing more than available", () => {
         const rm = new ResourceManager(mockPlayer);
+        rm.AddResource("Wood", 2);
         const success = rm.RemoveResource("Wood", 10);
         expect(success).toBe(false);
         expect(rm.GetResource("Wood")).toBe(2);
@@ -76,18 +78,28 @@ describe("ResourceManager", () => {
 
     it("should check if player has enough resources", () => {
         const rm = new ResourceManager(mockPlayer);
+        rm.AddResource("Wood", 2);
+        rm.AddResource("Brick", 1);
         expect(rm.HasResources({ Wood: 2, Brick: 1 })).toBe(true);
         expect(rm.HasResources({ Wood: 3 })).toBe(false);
     });
 
     it("should calculate total resource count", () => {
         const rm = new ResourceManager(mockPlayer);
+        rm.AddResource("Wood", 2);
+        rm.AddResource("Brick", 2);
+        rm.AddResource("Wheat", 1);
+        rm.AddResource("Wool", 1);
         // 2 + 2 + 1 + 1 = 6
         expect(rm.GetTotalResourceCount()).toBe(6);
     });
 
     it("should remove random resources", () => {
         const rm = new ResourceManager(mockPlayer);
+        rm.AddResource("Wood", 2);
+        rm.AddResource("Brick", 2);
+        rm.AddResource("Wheat", 1);
+        rm.AddResource("Wool", 1);
         // Starting with 6: 2 Wood, 2 Brick, 1 Wheat, 1 Wool
         const removed = rm.RemoveRandomResources(3);
         expect(removed.length).toBe(3);

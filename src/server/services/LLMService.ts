@@ -4,7 +4,7 @@ import * as Logger from "shared/Logger";
 import { SECRETS } from "../Secrets";
 
 export interface AIAction {
-	action: "BUILD_SETTLEMENT" | "BUILD_ROAD" | "BUILD_CITY" | "END_TURN" | "TRADE" | "WAIT";
+	action: "BUILD_TOWN" | "BUILD_ROAD" | "BUILD_CITY" | "END_TURN" | "TRADE" | "WAIT";
 	target?: string;
 	resource_give?: string;
 	resource_receive?: string;
@@ -78,8 +78,8 @@ export class LLMService {
 		// Much more aggressive when gateway isn't available
 		const roll = math.random();
 		if (roll < 0.7) {
-			Logger.Info("LLMService", `[${playerName}] Mock: Building settlement`);
-			return { action: "BUILD_SETTLEMENT", reason: "Mock: Building settlement (gateway offline)" };
+			Logger.Info("LLMService", `[${playerName}] Mock: Building town`);
+			return { action: "BUILD_TOWN", reason: "Mock: Building town (gateway offline)" };
 		}
 		if (roll < 0.9) {
 			Logger.Info("LLMService", `[${playerName}] Mock: Building road`);

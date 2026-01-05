@@ -18,18 +18,18 @@ describe("Blueprints", () => {
 	describe("Buildings", () => {
 		it("should have all 3 building types defined", () => {
 			expect(Blueprints.Buildings).toBeDefined();
-			expect(Blueprints.Buildings["Settlement"]).toBeDefined();
+			expect(Blueprints.Buildings["Town"]).toBeDefined();
 			expect(Blueprints.Buildings["City"]).toBeDefined();
 			expect(Blueprints.Buildings["Road"]).toBeDefined();
 		});
 
-		it("should have valid Settlement properties", () => {
-			const settlement = Blueprints.Buildings["Settlement"];
-			expect(settlement.Name).toBe("Settlement");
-			expect(settlement.Icon).toBe("🏠");
-			expect(settlement.PlacementType).toBe("3-way");
-			expect(settlement.ClaimsTiles).toBe(true);
-			expect(settlement.FirstIsFree).toBe(true);
+		it("should have valid Town properties", () => {
+			const town = Blueprints.Buildings["Town"];
+			expect(town.Name).toBe("Town");
+			expect(town.Icon).toBe("🏠");
+			expect(town.PlacementType).toBe("3-way");
+			expect(town.ClaimsTiles).toBe(true);
+			expect(town.FirstIsFree).toBe(true);
 		});
 
 		it("should have valid City properties", () => {
@@ -37,7 +37,7 @@ describe("Blueprints", () => {
 			expect(city.Name).toBe("City");
 			expect(city.Icon).toBe("🏰");
 			expect(city.PlacementType).toBe("upgrade");
-			expect(city.RequiresExisting).toBe("Settlement");
+			expect(city.RequiresExisting).toBe("Town");
 			expect(city.ProductionMultiplier).toBe(2);
 		});
 
@@ -50,7 +50,7 @@ describe("Blueprints", () => {
 		});
 
 		it("should have Size as Vector3 for all buildings", () => {
-			for (const name of ["Settlement", "City", "Road"]) {
+			for (const name of ["Town", "City", "Road"]) {
 				const building = Blueprints.Buildings[name];
 				expect(building.Size).toBeDefined();
 				expect(building.Size.x).toBeDefined();
@@ -65,8 +65,8 @@ describe("Blueprints", () => {
 	// ═══════════════════════════════════════════════════════════════════════════════
 
 	describe("Building Costs", () => {
-		it("should have correct Settlement cost (1 of each basic)", () => {
-			const cost = Blueprints.Buildings["Settlement"].Cost;
+		it("should have correct Town cost (1 of each basic)", () => {
+			const cost = Blueprints.Buildings["Town"].Cost;
 			expect(cost.Wood).toBe(1);
 			expect(cost.Brick).toBe(1);
 			expect(cost.Wheat).toBe(1);
@@ -104,8 +104,8 @@ describe("Blueprints", () => {
 			expect(costString).toContain("🧱1");
 		});
 
-		it("should return correct cost string for Settlement", () => {
-			const costString = Blueprints.GetCostString("Settlement");
+		it("should return correct cost string for Town", () => {
+			const costString = Blueprints.GetCostString("Town");
 			expect(costString).toContain("🌲1");
 			expect(costString).toContain("🧱1");
 			expect(costString).toContain("🌾1");
@@ -156,17 +156,17 @@ describe("Blueprints", () => {
 			});
 		});
 
-		describe("Settlement affordability", () => {
+		describe("Town affordability", () => {
 			it("should return true with all 4 resources", () => {
 				const resources = { Wood: 1, Brick: 1, Wheat: 1, Wool: 1 };
-				expect(Blueprints.CanAfford(resources, "Settlement")).toBe(true);
+				expect(Blueprints.CanAfford(resources, "Town")).toBe(true);
 			});
 
 			it("should return false if missing any resource", () => {
-				expect(Blueprints.CanAfford({ Brick: 1, Wheat: 1, Wool: 1 }, "Settlement")).toBe(false);
-				expect(Blueprints.CanAfford({ Wood: 1, Wheat: 1, Wool: 1 }, "Settlement")).toBe(false);
-				expect(Blueprints.CanAfford({ Wood: 1, Brick: 1, Wool: 1 }, "Settlement")).toBe(false);
-				expect(Blueprints.CanAfford({ Wood: 1, Brick: 1, Wheat: 1 }, "Settlement")).toBe(false);
+				expect(Blueprints.CanAfford({ Brick: 1, Wheat: 1, Wool: 1 }, "Town")).toBe(false);
+				expect(Blueprints.CanAfford({ Wood: 1, Wheat: 1, Wool: 1 }, "Town")).toBe(false);
+				expect(Blueprints.CanAfford({ Wood: 1, Brick: 1, Wool: 1 }, "Town")).toBe(false);
+				expect(Blueprints.CanAfford({ Wood: 1, Brick: 1, Wheat: 1 }, "Town")).toBe(false);
 			});
 		});
 
@@ -195,7 +195,7 @@ describe("Blueprints", () => {
 
 			it("should return false for empty resources", () => {
 				expect(Blueprints.CanAfford({}, "Road")).toBe(false);
-				expect(Blueprints.CanAfford({}, "Settlement")).toBe(false);
+				expect(Blueprints.CanAfford({}, "Town")).toBe(false);
 				expect(Blueprints.CanAfford({}, "City")).toBe(false);
 			});
 		});
@@ -213,7 +213,7 @@ describe("Blueprints", () => {
 
 		it("should contain all expected names", () => {
 			const names = Blueprints.GetBlueprintNames();
-			expect(names).toContain("Settlement");
+			expect(names).toContain("Town");
 			expect(names).toContain("City");
 			expect(names).toContain("Road");
 		});

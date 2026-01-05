@@ -14,7 +14,7 @@ RESPONSE_SCHEMA = {
   "properties": {
     "action": {
       "type": "STRING",
-      "enum": ["BUILD_SETTLEMENT", "BUILD_ROAD", "BUILD_CITY", "END_TURN", "TRADE", "WAIT"]
+      "enum": ["BUILD_TOWN", "BUILD_ROAD", "BUILD_CITY", "END_TURN", "TRADE", "WAIT"]
     },
     "target": {
       "type": "STRING"

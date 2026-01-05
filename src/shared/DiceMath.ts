@@ -230,9 +230,9 @@ export const calculateTileValue = (tileNumber: number): number => {
 };
 
 /**
- * Calculate the combined value of multiple tiles (e.g., for a settlement)
+ * Calculate the combined value of multiple tiles (e.g., for a town)
  */
-export const calculateSettlementValue = (tileNumbers: number[]): number => {
+export const calculateTownValue = (tileNumbers: number[]): number => {
     let total = 0;
     for (const num of tileNumbers) {
         total += calculateTileValue(num);
@@ -311,7 +311,7 @@ export default {
 
     // Statistics
     calculateTileValue,
-    calculateSettlementValue,
+    calculateTownValue,
     getNumberHeat,
     calculateRollVariance,
 };

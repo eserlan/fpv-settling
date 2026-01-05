@@ -10,7 +10,8 @@ export interface PlayerData {
 	TileOwnershipManager: import("./services/TileOwnershipManager").TileOwnershipManager;
 	GameTime: number;
 	PulseTimer: number;
-	Settlements: unknown[];
-	NeedsFirstSettlement: boolean;
+	Towns: unknown[];
+	NeedsFirstTown: boolean;
 	Score: number;
+	Color: Color3;
 }

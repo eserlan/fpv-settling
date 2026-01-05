@@ -1,6 +1,7 @@
 // Client-side Pulse UI - Hologram Dice and Timer Display
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
 const Players = game.GetService("Players");
+const UserInputService = game.GetService("UserInputService");
 
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
@@ -89,12 +90,23 @@ readyStatusLabel.Parent = screenGui;
 
 let isReady = false;
 
-readyButton.MouseButton1Click.Connect(() => {
+const setReady = () => {
 	if (isReady) return;
+	if (!readyButton.Visible) return; // Can't ready if button isn't shown
+
 	isReady = true;
 	readyButton.Text = "WAITING...";
 	readyButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100);
 	ClientEvents.ReadyForPulse.fire();
+};
+
+readyButton.MouseButton1Click.Connect(setReady);
+
+UserInputService.InputBegan.Connect((input, gameProcessed) => {
+	if (gameProcessed) return;
+	if (input.KeyCode === Enum.KeyCode.R) {
+		setReady();
+	}
 });
 
 ClientEvents.PulseVotesUpdate.connect((ready, total) => {
@@ -105,8 +117,9 @@ ClientEvents.PulseVotesUpdate.connect((ready, total) => {
 // Dice result display (center, appears during roll)
 const diceFrame = new Instance("Frame");
 diceFrame.Name = "DiceFrame";
-diceFrame.Size = new UDim2(0, 300, 0, 200);
-diceFrame.Position = new UDim2(0.5, -150, 0.3, 0);
+diceFrame.Size = new UDim2(0, 280, 0, 130);
+diceFrame.Position = new UDim2(0, 10, 1, -160);
+diceFrame.AnchorPoint = new Vector2(0, 1);
 diceFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 80);
 diceFrame.BackgroundTransparency = 0.2;
 diceFrame.BorderSizePixel = 0;
@@ -114,7 +127,7 @@ diceFrame.Visible = false;
 diceFrame.Parent = screenGui;
 
 const diceCorner = new Instance("UICorner");
-diceCorner.CornerRadius = new UDim(0, 20);
+diceCorner.CornerRadius = new UDim(0, 12);
 diceCorner.Parent = diceFrame;
 
 const pulseTitle = new Instance("TextLabel");
@@ -141,8 +154,8 @@ diceDisplay.Parent = diceFrame;
 
 const resultLabel = new Instance("TextLabel");
 resultLabel.Name = "ResultLabel";
-resultLabel.Size = new UDim2(1, 0, 0.25, 0);
-resultLabel.Position = new UDim2(0, 0, 0.75, 0);
+resultLabel.Size = new UDim2(1, -20, 0.25, 0);
+resultLabel.Position = new UDim2(0, 10, 0.7, 0);
 resultLabel.BackgroundTransparency = 1;
 resultLabel.TextColor3 = Color3.fromRGB(150, 255, 150);
 resultLabel.TextScaled = true;
@@ -153,10 +166,10 @@ resultLabel.Parent = diceFrame;
 // Handle timer updates
 ClientEvents.TimerEvent.connect((seconds) => {
 	if (seconds === -1) {
-		// Waiting for all players to place settlements
-		countdownLabel.Text = "Place Settlement!";
-		countdownLabel.TextColor3 = Color3.fromRGB(255, 255, 100);
-		timerLabel.Text = "🏠 Build First";
+		// Waiting for all players to place towns
+		countdownLabel.Text = "Waiting for Placement...";
+		countdownLabel.TextColor3 = Color3.fromRGB(200, 200, 255);
+		timerLabel.Text = "🏠 Initial Placement";
 		readyButton.Visible = false;
 	} else {
 		timerLabel.Text = "⏱️ Next Pulse";

@@ -32,11 +32,7 @@ describe("NPCManager", () => {
 
     it("should fail to hire NPC without resources", () => {
         const rm = new ResourceManager(mockPlayer);
-        // Clear resources
-        rm.RemoveResource("Wood", 2);
-        rm.RemoveResource("Brick", 2);
-        rm.RemoveResource("Wheat", 1);
-        rm.RemoveResource("Wool", 1);
+        // Inventory is empty by default now
 
         const nm = new NPCManager(mockPlayer, rm);
         const [success, error] = nm.HireNPC("Worker");
@@ -57,7 +53,7 @@ describe("NPCManager", () => {
         expect(success).toBe(true);
         expect(npcId).toBe(1);
         expect(nm.GetNPCs().length).toBe(1);
-        expect(rm.GetResource("Wheat")).toBe(1); // 1 (start) + 2 (added) - 2 (cost) = 1
+        expect(rm.GetResource("Wheat")).toBe(0); // 0 (start) + 2 (added) - 2 (cost) = 0
         expect(rm.GetResource("Ore")).toBe(0);   // 0 (start) + 1 (added) - 1 (cost) = 0
     });
 
@@ -67,12 +63,12 @@ describe("NPCManager", () => {
         rm.AddResource("Ore", 1);
 
         const nm = new NPCManager(mockPlayer, rm);
-        nm.HireNPC("Worker"); // Deducts 2 Wheat, 1 Ore. Wheat: 1+10 - 2 = 9.
+        nm.HireNPC("Worker"); // Deducts 2 Wheat, 1 Ore. Wheat: 10 - 2 = 8.
 
         // Maintenance for worker is 1 wheat/min. For 5 mins = 5 wheat.
         const success = nm.PayMaintenance(5);
         expect(success).toBe(true);
-        expect(rm.GetResource("Wheat")).toBe(4); // 9 - 5 = 4
+        expect(rm.GetResource("Wheat")).toBe(3); // 8 - 5 = 3
     });
 
     it("should return false for maintenance if out of food", () => {
@@ -80,7 +76,7 @@ describe("NPCManager", () => {
         rm.AddResource("Wheat", 2);
         rm.AddResource("Ore", 1);
         const nm = new NPCManager(mockPlayer, rm);
-        nm.HireNPC("Worker"); // Wheat remains: 1 + 2 - 2 = 1.
+        nm.HireNPC("Worker"); // Wheat remains: 0 + 2 - 2 = 0.
 
         // Maintenance for worker is 1 wheat/min. For 2 mins = 2 wheat.
         const success = nm.PayMaintenance(2);

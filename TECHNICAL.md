@@ -1,8 +1,8 @@
-# FPV Settling - Technical Overview
+# FPV Settler - Technical Overview
 
 ## Architecture
 
-This document provides a technical overview of the FPV Settling game architecture.
+This document provides a technical overview of the FPV Settler game architecture.
 
 ## System Components
 
@@ -10,13 +10,13 @@ This document provides a technical overview of the FPV Settling game architectur
 
 **Location**: `src/server/ResourceManager.ts`, `src/shared/ResourceTypes.ts`
 
-**Purpose**: Manages player resources (Wood, Stone, Food, Gold)
+**Purpose**: Manages player resources (Wood, Brick, Wheat, Wool, Ore)
 
 **Key Features**:
 - Resource type definitions with max stack sizes
 - Add/remove resource operations with overflow protection
 - Resource requirement validation
-- Starting resources (50 Wood, 30 Stone, 20 Food, 100 Gold)
+- Starting resources: 0 (Players must gather from tiles)
 
 **API**:
 
@@ -35,11 +35,9 @@ manager:GetResource(type) -- Get specific resource amount
 **Purpose**: Handles building construction and placement
 
 **Building Types**:
-- **Road**: Fast travel paths (5 Wood, 10 Stone, 5s build)
-- **House**: Worker housing (50 Wood, 30 Stone, 30s build)
-- **Storage**: Resource storage (30 Wood, 20 Stone, 20s build)
-- **Barracks**: Guard quarters (40 Wood, 50 Stone, 100 Gold, 40s build)
-- **Workshop**: Research facility (60 Wood, 40 Stone, 150 Gold, 50s build)
+- **Road**: Connects buildings (1 Wood, 1 Brick)
+- **Town**: Claims nearby tiles (1 Wood, 1 Brick, 1 Wheat, 1 Wool)
+- **City**: Upgrade from Town for double resources (2 Wheat, 3 Ore)
 
 **Construction Flow**:
 1. Player initiates building
@@ -65,14 +63,14 @@ manager:GetBuildings() -- Get completed buildings
 **Purpose**: Manages worker and guard NPCs
 
 **NPC Types**:
-- **Worker**: Resource gatherers (50 Gold, 10 Food to hire)
+- **Worker**: Resource gatherers (2 Wheat, 1 Ore)
   - Gather rate: 5 resources/min
-  - Maintenance: 1 Food/min
+  - Maintenance: 1 Wheat/min
   - Health: 50, Speed: 16
   
-- **Guard**: Settlement defenders (100 Gold, 15 Food to hire)
+- **Guard**: Town defenders (3 Wheat, 2 Ore)
   - Damage: 10, Range: 20, Detection: 50
-  - Maintenance: 2 Food/min
+  - Maintenance: 2 Wheat/min
   - Health: 100, Speed: 18
 
 **NPC Lifecycle**:
@@ -99,12 +97,9 @@ manager:FireNPC(id) -- Remove NPC
 **Purpose**: Technology research and upgrades
 
 **Technologies**:
-- **Improved Tools**: +25% gather speed (100 Gold, 60s)
-- **Stone Work**: Unlock stone buildings (150 Gold, 50 Stone, 90s)
-- **Agriculture**: +50% food production (120 Gold, 30 Wood, 75s)
-- **Military**: +30% guard effectiveness (200 Gold, 120s)
-- **Advanced Engineering**: -20% building costs (250 Gold, 100 Stone, 150s)
-- **Trading**: Unlock trading posts (180 Gold, 90s)
+- **Tools**: +25% gather speed
+- **Agriculture**: +50% production
+- **Military**: +30% combat stats
 
 **Research Flow**:
 1. Check prerequisites met
@@ -112,16 +107,6 @@ manager:FireNPC(id) -- Remove NPC
 3. Deduct resources
 4. Progress over time
 5. Apply modifiers on completion
-
-**API**:
-
-```lua
-ResearchManager.new(player, resourceManager)
-manager:StartResearch(techName) -- Begin research
-manager:UpdateResearch(deltaTime) -- Progress research
-manager:HasResearched(techName) -- Check completion
-manager:GetModifier(effectType) -- Get cumulative modifier
-```
 
 ### 5. Game Manager
 
@@ -131,21 +116,9 @@ manager:GetModifier(effectType) -- Get cumulative modifier
 
 **Responsibilities**:
 - Initialize player managers on join
-- Run main game loop (Heartbeat)
+- Run main game loop (Pulse cycle)
 - Update all systems each frame
-- Handle maintenance payments every 60 seconds
 - Configure first-person camera for players
-
-**Game Loop**:
-```lua
-Every frame:
-  - Update building construction progress
-  - Update NPC AI behaviors
-  - Update research progress
-  
-Every 60 seconds:
-  - Pay NPC maintenance costs
-```
 
 ### 6. Client Systems
 
@@ -156,10 +129,9 @@ Every 60 seconds:
 
 **Features**:
 - Mouse-look first-person camera
-- WASD movement (inherited from Roblox humanoid)
+- WASD movement
 - Building mode toggle (B key)
-- Hire commands (H for worker, G for guard)
-- Camera pitch/yaw with mouse sensitivity
+- Interaction with buildings (E key)
 
 #### UI Manager
 **Location**: `src/client/UIManager.ts`
@@ -167,123 +139,30 @@ Every 60 seconds:
 **Purpose**: User interface display
 
 **UI Elements**:
-- Resource display (top-left)
-- Building menu (top-right)
-- Help/controls (bottom-center)
+- Resource display
+- Building menu
+- Pulse timer and dice results
 
 ## Data Flow
 
 ### Resource Transaction Flow
-
 ```
 Player Action → Server Validation → Resource Check → 
-Transaction Execute → Update State → (Future: Notify Client)
+Transaction Execute → Update State → Notify Client
 ```
 
 ### Building Construction Flow
-
 ```
 Place Request → Cost Check → Deduct Resources → 
 Queue Building → Update Progress → Complete → Spawn Model
 ```
 
-### NPC Hiring Flow
-
-```
-Hire Request → Cost Check → Deduct Resources → 
-Create NPC → Spawn Model → Add to Management
-```
-
-### Research Flow
-
-```
-Research Request → Prerequisite Check → Cost Check → 
-Deduct Resources → Progress Over Time → Complete → Apply Effects
-```
-
-## Future Enhancements
-
-### Immediate Priorities
-1. **RemoteEvents**: Implement client-server communication
-   - Client requests actions via RemoteEvents
-   - Server validates and updates state
-   - Server fires events to update client UI
-
-2. **Building Placement**: 
-   - Visual preview on client
-   - Collision detection
-   - Snap to grid
-   - Rotation controls
-
-3. **Resource Gathering**:
-   - Resource nodes in world
-   - Worker pathfinding to nodes
-   - Gather animation and feedback
-
-### Architecture Improvements
-
-1. **Event System**: 
-   ```lua
-   Events/
-     BuildingCompleted.ts
-     ResourceChanged.ts
-     NPCHired.ts
-   ```
-
-2. **Data Persistence**:
-   - Save player progress
-   - DataStoreService integration
-   - Async load on join
-
-3. **Networking Layer**:
-   ```lua
-   Shared/
-     Network/
-      Events.ts
-      Requests.ts
-   ```
-
 ## Performance Considerations
-
-- Buildings update only during construction
-- NPC AI updates can be throttled (every few frames)
-- Resource UI updates on change, not every frame
-- Use object pooling for NPC models
-- Spatial partitioning for NPC detection
-
-## Testing Checklist
-
-When testing new features:
-- [ ] Test with 0 resources
-- [ ] Test with maximum resources
-- [ ] Test concurrent actions
-- [ ] Test player leaving during action
-- [ ] Test with multiple players (future)
-- [ ] Check for memory leaks
-- [ ] Profile performance impact
-
-## Code Standards
-
-- All server-side validation
-- Client is untrusted
-- Clear error messages
-- Descriptive variable names
-- Comment complex logic
-- Use type checking where helpful
+- Throttled AI updates
+- Client-side prediction for movement
+- Efficient hexagonal math
 
 ## Rojo Project Structure
-
-The `default.project.json` maps:
 - `src/shared/` → `ReplicatedStorage.Shared`
 - `src/server/` → `ServerScriptService.Server`
 - `src/client/` → `StarterPlayer.StarterPlayerScripts.Client`
-
-## Dependencies
-
-Currently using only Roblox built-in services:
-- `Players` - Player management
-- `RunService` - Game loop
-- `UserInputService` - Input handling
-- `Workspace` - Game world
-
-No external packages required (intentionally kept simple).

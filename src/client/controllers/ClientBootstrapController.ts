@@ -37,6 +37,7 @@ export class ClientBootstrapController implements OnStart {
 		Logger.Info("Client", "Welcome to FPV Settling!");
 		Logger.Info("Client", "Press B to open Blueprint Book");
 		Logger.Info("Client", "Press T to open Trade Menu");
+		Logger.Info("Client", "Press R to toggle Ready status");
 		Logger.Info("Client", "Press Alt+C to open dev panel");
 		Logger.Info("Client", "===========================================");
 	}

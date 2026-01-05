@@ -32,7 +32,7 @@ class NPCManager {
 	}
 
 	// Hire a new NPC
-	HireNPC(npcType: string, position?: Vector3) {
+	HireNPC(npcType: string, position?: Vector3): LuaTuple<[boolean, any]> {
 		const npcInfo = NPCTypes[npcType];
 		if (!npcInfo) {
 			Logger.Warn("NPCManager", `[${this.Player.Name}] Invalid NPC type: ${npcType}`);
@@ -113,6 +113,13 @@ class NPCManager {
 		humanoid.Health = npc.Health;
 		humanoid.WalkSpeed = npc.Data.Speed;
 		humanoid.Parent = model;
+
+		// Assign collision group
+		for (const part of model.GetDescendants()) {
+			if (part.IsA("BasePart")) {
+				part.CollisionGroup = "SelectableAI";
+			}
+		}
 
 		model.Parent = game.Workspace;
 		model.PrimaryPart = torso;

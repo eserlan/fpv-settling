@@ -59,42 +59,109 @@ export class RobberManager implements OnStart {
 		const model = new Instance("Model");
 		model.Name = "Robber";
 
-		const part = new Instance("Part");
-		part.Name = "Body";
-		part.Size = new Vector3(4, 8, 4);
-		part.Shape = Enum.PartType.Cylinder;
-		part.Color = Color3.fromRGB(50, 50, 50);
-		part.Material = Enum.Material.Slate;
-		part.Anchored = true;
-		part.CanCollide = false;
-		part.CFrame = new CFrame(0, 0, 0).mul(CFrame.Angles(0, 0, math.rad(90)));
-		part.Parent = model;
+		const SCALE = 1.6; // Slightly larger than players
+		const bodyColor = Color3.fromRGB(0, 0, 0); // Pure black
 
+		// HumanoidRootPart - this will be our primary part and anchored
+		const root = new Instance("Part");
+		root.Name = "HumanoidRootPart";
+		root.Size = new Vector3(2 * SCALE, 2 * SCALE, 1 * SCALE);
+		root.Transparency = 1;
+		root.CanCollide = false;
+		root.Anchored = true;
+		root.Parent = model;
+
+		// Torso
+		const torso = new Instance("Part");
+		torso.Name = "Torso";
+		torso.Size = new Vector3(2 * SCALE, 2 * SCALE, 1 * SCALE);
+		torso.Color = bodyColor;
+		torso.Material = Enum.Material.Slate;
+		torso.CanCollide = false;
+		torso.Anchored = false;
+		torso.Parent = model;
+
+		// Head
+		const head = new Instance("Part");
+		head.Name = "Head";
+		head.Size = new Vector3(1.2 * SCALE, 1.2 * SCALE, 1.2 * SCALE);
+		head.Color = bodyColor;
+		head.CanCollide = false;
+		head.Anchored = false;
+		head.Parent = model;
+
+		// Evil Face
+		const face = new Instance("Decal");
+		face.Name = "face";
+		face.Texture = "rbxassetid://7074749"; // Evil grin
+		face.Face = Enum.NormalId.Front;
+		face.Parent = head;
+
+		// Arms and Legs
+		const limbParts: Part[] = [];
+		const names = ["Left Arm", "Right Arm", "Left Leg", "Right Leg"];
+		const armLegSize = new Vector3(1 * SCALE, 2 * SCALE, 1 * SCALE);
+
+		for (const name of names) {
+			const p = new Instance("Part");
+			p.Name = name;
+			p.Size = armLegSize;
+			p.Color = bodyColor;
+			p.CanCollide = false;
+			p.Anchored = false;
+			p.Parent = model;
+			limbParts.push(p);
+		}
+
+		// Initial relative positioning
+		torso.CFrame = new CFrame(0, 0, 0);
+		root.CFrame = torso.CFrame;
+		head.CFrame = torso.CFrame.mul(new CFrame(0, 1.6 * SCALE, 0));
+		(model.FindFirstChild("Left Arm") as BasePart).CFrame = torso.CFrame.mul(new CFrame(-1.5 * SCALE, 0, 0));
+		(model.FindFirstChild("Right Arm") as BasePart).CFrame = torso.CFrame.mul(new CFrame(1.5 * SCALE, 0, 0));
+		(model.FindFirstChild("Left Leg") as BasePart).CFrame = torso.CFrame.mul(new CFrame(-0.5 * SCALE, -2 * SCALE, 0));
+		(model.FindFirstChild("Right Leg") as BasePart).CFrame = torso.CFrame.mul(new CFrame(0.5 * SCALE, -2 * SCALE, 0));
+
+		// Weld all parts to Root
+		const weldParts = (p1: BasePart) => {
+			const weld = new Instance("WeldConstraint");
+			weld.Part0 = root;
+			weld.Part1 = p1;
+			weld.Parent = root;
+		};
+		weldParts(torso);
+		weldParts(head);
+		for (const p of limbParts) weldParts(p);
+
+		// Smoke effect on torso
 		const emitter = new Instance("ParticleEmitter");
 		emitter.Texture = "rbxassetid://243098098";
-		emitter.Color = new ColorSequence(Color3.fromRGB(20, 20, 20));
-		emitter.Size = new NumberSequence([new NumberSequenceKeypoint(0, 5), new NumberSequenceKeypoint(1, 10)]);
-		emitter.Transparency = new NumberSequence([new NumberSequenceKeypoint(0, 0.5), new NumberSequenceKeypoint(1, 1)]);
+		emitter.Color = new ColorSequence(Color3.fromRGB(10, 10, 10));
+		emitter.Size = new NumberSequence([new NumberSequenceKeypoint(0, 5), new NumberSequenceKeypoint(1, 12)]);
+		emitter.Transparency = new NumberSequence([new NumberSequenceKeypoint(0, 0.3), new NumberSequenceKeypoint(1, 1)]);
 		emitter.Rate = 20;
-		emitter.Lifetime = new NumberRange(2, 4);
-		emitter.Parent = part;
+		emitter.Lifetime = new NumberRange(1, 2.5);
+		emitter.Speed = new NumberRange(2, 5);
+		emitter.Parent = torso;
 
+		// Label
 		const billboard = new Instance("BillboardGui");
-		billboard.Size = new UDim2(0, 100, 0, 50);
-		billboard.StudsOffset = new Vector3(0, 6, 0);
+		billboard.Size = new UDim2(0, 150, 0, 60);
+		billboard.StudsOffset = new Vector3(0, 8, 0);
 		billboard.AlwaysOnTop = true;
-		billboard.Parent = part;
+		billboard.Parent = head;
 
 		const label = new Instance("TextLabel");
 		label.Size = new UDim2(1, 0, 1, 0);
 		label.BackgroundTransparency = 1;
-		label.Text = "☠️ ROBBER";
-		label.TextColor3 = Color3.fromRGB(200, 50, 50);
+		label.Text = "😈 THE ROBBER";
+		label.TextColor3 = Color3.fromRGB(255, 30, 30);
 		label.Font = Enum.Font.GothamBlack;
-		label.TextSize = 20;
+		label.TextSize = 24;
+		label.TextStrokeTransparency = 0;
 		label.Parent = billboard;
 
-		model.PrimaryPart = part;
+		model.PrimaryPart = root;
 		model.Parent = Workspace;
 		this.RobberModel = model;
 	}
@@ -122,13 +189,14 @@ export class RobberManager implements OnStart {
 
 		if (!this.RobberModel || !this.RobberModel.PrimaryPart) return;
 
-		const endCFrame = new CFrame(targetPos.add(new Vector3(0, 5, 0))).mul(CFrame.Angles(0, 0, math.rad(90)));
+		// Position slightly floating above the tile
+		const endCFrame = new CFrame(targetPos.add(new Vector3(0, 12, 0))).mul(CFrame.Angles(0, math.pi, 0));
 
 		if (instant) {
-			this.RobberModel.SetPrimaryPartCFrame(endCFrame);
+			this.RobberModel.PivotTo(endCFrame);
 		} else {
 			const info = new TweenInfo(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
-			const tween = TweenService.Create(this.RobberModel.PrimaryPart, info, { CFrame: endCFrame });
+			const tween = TweenService.Create(this.RobberModel.PrimaryPart as BasePart, info, { CFrame: endCFrame });
 			tween.Play();
 		}
 
@@ -153,21 +221,30 @@ export class RobberManager implements OnStart {
 	public OnSevenRolled(gameState: GameState) {
 		Logger.Info("RobberManager", "7 Rolled! Executing Robber Logic...");
 
+		// 1. DISCARD PENALTY (The "Mass Theft")
+		// Anyone holding 8 or more resource cards must discard half (rounded down).
 		for (const [userId, playerData] of pairs(gameState.PlayerData)) {
 			const total = playerData.ResourceManager.GetTotalResourceCount();
-			if (total > 7) {
+			if (total >= 8) {
 				const toRemove = math.floor(total / 2);
 				playerData.ResourceManager.RemoveRandomResources(toRemove);
-				NetworkUtils.Broadcast(ServerEvents.SystemMessageEvent, `🏴‍☠️ [${playerData.Player.Name}] Robber Penalty! ${playerData.Player.Name} lost ${toRemove} resources.`);
+				NetworkUtils.Broadcast(
+					ServerEvents.SystemMessageEvent,
+					`🏴‍☠️ [THE ROBBER] ${playerData.Player.Name} was caught with ${total} cards! The Robber snatched away ${toRemove} resources!`,
+				);
 			}
 		}
 
-		let leader: typeof gameState.PlayerData[number] | undefined;
+		// 2. TARGETED THEFT
+		// Find the leader to move the robber to their best tile (Automated logic)
+		let leader: (typeof gameState.PlayerData)[number] | undefined;
 		let maxVP = -1;
 
 		for (const [userId, playerData] of pairs(gameState.PlayerData)) {
 			let vp = 0;
-			for (const b of playerData.BuildingManager.GetSettlements()) vp += (b.Type === "City" ? 2 : 1);
+			// VP from towns and cities
+			for (const b of playerData.BuildingManager.GetTowns()) vp += b.Type === "City" ? 2 : 1;
+			// VP from largest army/longest road could be added here if implemented
 			if (vp > maxVP) {
 				maxVP = vp;
 				leader = playerData;
@@ -175,10 +252,11 @@ export class RobberManager implements OnStart {
 		}
 
 		if (!leader) {
-			Logger.Warn("RobberManager", "No leader found, Robber stays put.");
+			Logger.Warn("RobberManager", "No players found, Robber stays put.");
 			return;
 		}
 
+		// Identify where the Robber should go (best tile of the leader)
 		const ownedTileKeys = this.tileOwnershipManager.GetPlayerTiles(leader.Player);
 		let bestTile: { q: number; r: number; score: number } | undefined;
 		const mapFolder = Workspace.FindFirstChild("Map");
@@ -197,19 +275,54 @@ export class RobberManager implements OnStart {
 				}
 				if (diceNumber === 0) continue;
 
+				// Score based on probability (6/8 are best)
 				let score = 1;
 				if (diceNumber === 6 || diceNumber === 8) score = 10;
 				else if (diceNumber === 5 || diceNumber === 9) score = 5;
 
+				// Avoid staying on the same tile if possible
 				if (q === this.State.currentQ && r === this.State.currentR) score -= 100;
+
 				if (!bestTile || score > bestTile.score) bestTile = { q, r, score };
 			}
 		}
 
 		if (bestTile) {
 			this.MoveRobber(bestTile.q, bestTile.r);
-			NetworkUtils.Broadcast(ServerEvents.SystemMessageEvent, `🏴‍☠️ The Robber blocked ${leader.Player.Name}'s tile!`);
-			leader.ResourceManager.RemoveRandomResources(1);
+			NetworkUtils.Broadcast(ServerEvents.SystemMessageEvent, `🏴‍☠️ The Robber has moved to block a high-value tile!`);
+
+			// Identify all potential victims on this tile
+			const owners = this.tileOwnershipManager.GetTileOwners(bestTile.q, bestTile.r);
+			const uniqueVictimIds = new Set<number>();
+			for (const owner of owners) {
+				uniqueVictimIds.add(owner.playerUserId);
+			}
+
+			// Convert Set to array to pick randomly
+			const victimsList: number[] = [];
+			for (const id of uniqueVictimIds) {
+				const victimData = gameState.PlayerData[id];
+				if (victimData && victimData.ResourceManager.GetTotalResourceCount() > 0) {
+					victimsList.push(id);
+				}
+			}
+
+			if (victimsList.size() > 0) {
+				const randomVictimId = victimsList[math.random(0, victimsList.size() - 1)];
+				const victim = gameState.PlayerData[randomVictimId];
+
+				if (victim) {
+					const stolen = victim.ResourceManager.RemoveRandomResources(1);
+					if (stolen.size() > 0) {
+						const resourceName = stolen[0];
+						NetworkUtils.Broadcast(
+							ServerEvents.SystemMessageEvent,
+							`🏴‍☠️ The Robber pillaged ${victim.Player.Name} and stole a resource!`,
+						);
+						Logger.Info("RobberManager", `Stole ${resourceName} from ${victim.Player.Name}`);
+					}
+				}
+			}
 		}
 	}
 }

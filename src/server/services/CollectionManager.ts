@@ -9,7 +9,7 @@ import HexMath from "shared/HexMath";
 import type { GameEntity } from "shared/GameEntity";
 
 const COLLECTION_RANGE = 8;
-const COLLECTION_COOLDOWN = 0.5;
+const COLLECTION_COOLDOWN = 0.5; // Reverted to original pace for visual feedback
 
 @Service({})
 export class CollectionManager implements OnStart, OnTick {
@@ -23,6 +23,8 @@ export class CollectionManager implements OnStart, OnTick {
 		Logger.Info("CollectionManager", "Initialized");
 	}
 
+	private unjamTimer = 0;
+
 	onTick(deltaTime: number) {
 		for (const [userId, cooldown] of this.playerCooldowns) {
 			if (cooldown > 0) this.playerCooldowns.set(userId, cooldown - deltaTime);
@@ -31,22 +33,93 @@ export class CollectionManager implements OnStart, OnTick {
 		const resourcesFolder = game.Workspace.FindFirstChild("Resources");
 		if (!resourcesFolder) return;
 
-		for (const entity of this.registeredEntities) {
-			const character = typeIs(entity, "Instance") ? (entity as Player).Character : (entity as import("../AIPlayer").AIPlayer).Character;
-			if (!character) continue;
+		this.unjamTimer += deltaTime;
+		const shouldUnjam = this.unjamTimer >= 0.5;
+		if (shouldUnjam) this.unjamTimer = 0;
 
-			const rootPart = character.FindFirstChild("HumanoidRootPart") ?? character.PrimaryPart;
-			if (!rootPart || !rootPart.IsA("BasePart")) continue;
+		const resources = resourcesFolder.GetChildren();
+		for (const resource of resources) {
+			if (resource.IsA("BasePart")) {
+				if (shouldUnjam) {
+					this.CheckObstacleOverlap(resource);
+				}
 
-			const playerPos = rootPart.Position;
-			for (const resource of resourcesFolder.GetChildren()) {
-				if (resource.IsA("BasePart")) {
+				for (const entity of this.registeredEntities) {
+					const character = typeIs(entity, "Instance") ? (entity as Player).Character : (entity as import("../AIPlayer").AIPlayer).Character;
+					if (!character) continue;
+
+					const rootPart = character.FindFirstChild("HumanoidRootPart") ?? character.PrimaryPart;
+					if (!rootPart || !rootPart.IsA("BasePart")) continue;
+
+					const playerPos = rootPart.Position;
 					const distance = playerPos.sub(resource.Position).Magnitude;
 					if (distance <= COLLECTION_RANGE) {
 						this.TryCollect(entity, resource);
 					}
 				}
 			}
+		}
+	}
+
+	private CheckObstacleOverlap(resource: BasePart) {
+		const params = new OverlapParams();
+		const map = game.Workspace.FindFirstChild("Map");
+		const buildings = game.Workspace.FindFirstChild("Buildings");
+		const towns = game.Workspace.FindFirstChild("Towns");
+
+		const filters: Instance[] = [];
+		if (map) filters.push(map);
+		if (buildings) filters.push(buildings);
+		if (towns) filters.push(towns);
+
+		if (filters.size() === 0) return;
+
+		params.FilterDescendantsInstances = filters;
+		params.FilterType = Enum.RaycastFilterType.Include;
+		params.MaxParts = 1; // We only need to know IF it overlaps
+
+		let overlaps = game.Workspace.GetPartsInPart(resource, params);
+		if (overlaps.size() > 0) {
+			const tileQ = resource.GetAttribute("TileQ") as number;
+			const tileR = resource.GetAttribute("TileR") as number;
+			if (tileQ === undefined || tileR === undefined) return;
+
+			const tilePos = HexMath.axialToWorld(tileQ, tileR);
+			const tileCenter = new Vector3(tilePos.x, resource.Position.Y, tilePos.z);
+
+			// Direction from tile center to resource
+			let pushDir = resource.Position.sub(tileCenter);
+			pushDir = new Vector3(pushDir.X, 0, pushDir.Z); // Horizontal only
+
+			if (pushDir.Magnitude < 0.1) {
+				// Exactly at center? Push in random direction
+				const angle = math.random() * math.pi * 2;
+				pushDir = new Vector3(math.cos(angle), 0, math.sin(angle));
+			} else {
+				pushDir = pushDir.Unit;
+			}
+
+			// Push it out until no longer overlapping or max attempts reached
+			let attempts = 0;
+			const stepSize = 2;
+			while (attempts < 40) {
+				const nextPos = resource.Position.add(pushDir.mul(stepSize));
+
+				// Ensure the next position is still within the same tile
+				const nextAxial = HexMath.worldToAxial(nextPos.X, nextPos.Z);
+				if (nextAxial.q !== tileQ || nextAxial.r !== tileR) {
+					break; // Stop at boundary
+				}
+
+				resource.Position = nextPos;
+				overlaps = game.Workspace.GetPartsInPart(resource, params);
+				if (overlaps.size() === 0) break;
+				attempts++;
+			}
+
+			// Reset velocity so it doesn't fly away
+			resource.AssemblyLinearVelocity = new Vector3(0, 0, 0);
+			resource.AssemblyAngularVelocity = new Vector3(0, 0, 0);
 		}
 	}
 
@@ -116,9 +189,18 @@ export class CollectionManager implements OnStart, OnTick {
 		const amount = (resource.GetAttribute("Amount") as number | undefined) ?? 1;
 		if (!resourceType) return false;
 
-		const currentAxial = HexMath.worldToAxial(resource.Position.X, resource.Position.Z);
-		const ownsTile = this.tileOwnershipManager.PlayerOwnsTile(entity, currentAxial.q, currentAxial.r);
-		if (!ownsTile) return false;
+		const ownerId = resource.GetAttribute("OwnerId") as number | undefined;
+		const isExplicitOwner = (ownerId !== undefined && ownerId === entity.UserId);
+
+		if (ownerId !== undefined && ownerId !== entity.UserId) return false;
+
+		// If we are the explicit owner, we can ALWAYS pick it up.
+		// Otherwise, we must own the tile (for common resources).
+		if (!isExplicitOwner) {
+			const currentAxial = HexMath.worldToAxial(resource.Position.X, resource.Position.Z);
+			const ownsTile = this.tileOwnershipManager.PlayerOwnsTile(entity, currentAxial.q, currentAxial.r);
+			if (!ownsTile) return false;
+		}
 
 		if (this.AddResource(entity, resourceType, amount)) {
 			this.playerCooldowns.set(userId, COLLECTION_COOLDOWN);

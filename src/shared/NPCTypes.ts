@@ -30,7 +30,7 @@ const NPCTypes: Record<string, NPCInfo> = {
 	},
 	Guard: {
 		Name: "Guard",
-		Description: "Defends settlements from threats",
+		Description: "Defends towns from threats",
 		HireCost: {
 			Wheat: 3,
 			Ore: 2,

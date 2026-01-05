@@ -6,6 +6,9 @@ import * as HexMath from "shared/HexMath";
 import * as Logger from "shared/Logger";
 import { RobberManager } from "./RobberManager";
 
+const PhysicsService = game.GetService("PhysicsService");
+const Players = game.GetService("Players");
+
 const HEX_SIZE = HexMath.HEX_SIZE;
 const HEIGHT = HexMath.HEX_HEIGHT;
 
@@ -28,7 +31,29 @@ export class MapGenerator implements OnStart {
 	private rng = new Random();
 
 	onStart() {
-		// Initialization if needed
+		// Set up collision groups for resource dropping
+		pcall(() => {
+			PhysicsService.RegisterCollisionGroup("Resources");
+			PhysicsService.RegisterCollisionGroup("TileRims");
+			PhysicsService.RegisterCollisionGroup("SelectableAI");
+			PhysicsService.RegisterCollisionGroup("Obstacles");
+
+			// TileRims should only collide with Resources
+			PhysicsService.CollisionGroupSetCollidable("TileRims", "Default", false);
+			PhysicsService.CollisionGroupSetCollidable("TileRims", "Resources", true);
+			PhysicsService.CollisionGroupSetCollidable("TileRims", "SelectableAI", false); // AI ignores rims
+
+			// SelectableAI (AI + NPCs)
+			PhysicsService.CollisionGroupSetCollidable("SelectableAI", "SelectableAI", false); // Walk through each other
+			PhysicsService.CollisionGroupSetCollidable("SelectableAI", "Resources", false);    // Walk through resources
+			PhysicsService.CollisionGroupSetCollidable("SelectableAI", "Obstacles", false);    // Walk through obstacles
+			PhysicsService.CollisionGroupSetCollidable("SelectableAI", "Default", true);       // Walk on ground
+			// Note: They will collide with players (Default) by default unless we move players to a group
+
+			// Obstacles
+			PhysicsService.CollisionGroupSetCollidable("Obstacles", "Default", true); // Players collide with obstacles
+			PhysicsService.CollisionGroupSetCollidable("Obstacles", "Resources", false); // Resources pass through obstacles to land on ground
+		});
 	}
 
 	private createHexagon(name: string, position: Vector3, color: Color3, material?: Enum.Material) {
@@ -143,6 +168,38 @@ export class MapGenerator implements OnStart {
 		diceLabel.Parent = billboard;
 	}
 
+	private addDropRim(hex: Model, position: Vector3) {
+		const rimCount = 6;
+		const rimHeight = 20;
+		const rimThickness = 2;
+		const radius = HEX_SIZE - 2; // Slightly inside to ensure it catches rolls
+
+		const rimFolder = new Instance("Folder");
+		rimFolder.Name = "PhysicsBorders";
+		rimFolder.Parent = hex;
+
+		for (let i = 0; i < rimCount; i++) {
+			const angle = (math.pi / 3) * i + (math.pi / 6);
+			const nextAngle = (math.pi / 3) * (i + 1) + (math.pi / 6);
+
+			const p1 = new Vector3(math.cos(angle) * radius, 0, math.sin(angle) * radius);
+			const p2 = new Vector3(math.cos(nextAngle) * radius, 0, math.sin(nextAngle) * radius);
+
+			const midPoint = p1.add(p2).div(2);
+			const dist = p1.sub(p2).Magnitude;
+
+			const rim = new Instance("Part");
+			rim.Name = "TileRim";
+			rim.Size = new Vector3(rimThickness, rimHeight, dist);
+			rim.CFrame = CFrame.lookAt(position.add(midPoint).add(new Vector3(0, rimHeight / 2 + HEIGHT, 0)), position.add(p2).add(new Vector3(0, rimHeight / 2 + HEIGHT, 0)));
+			rim.Transparency = 1;
+			rim.Anchored = true;
+			rim.CanCollide = true;
+			rim.CollisionGroup = "TileRims";
+			rim.Parent = rimFolder;
+		}
+	}
+
 	private createExactTilePool() {
 		const pool = new Array<string>();
 		const tiles = TileTypes as unknown as Record<string, unknown>;
@@ -227,21 +284,42 @@ export class MapGenerator implements OnStart {
 				// IMMEDIATELY anchor all parts after cloning - before physics can ever touch them
 				// This is critical: physics evaluates on the next frame after parenting,
 				// so we must anchor before ANY other operations
-				const anchorAllParts = (obj: Instance) => {
+				const anchorAllParts = (obj: Instance, canCollide = false, isObstacleAsset = false) => {
 					if (obj.IsA("BasePart")) {
 						obj.Anchored = true;
-						obj.CanCollide = false;
+						obj.CanCollide = canCollide;
+						if (isObstacleAsset) obj.CollisionGroup = "Obstacles";
 					}
 					for (const child of obj.GetDescendants()) {
 						if (child.IsA("BasePart")) {
 							(child as BasePart).Anchored = true;
-							(child as BasePart).CanCollide = false;
+							(child as BasePart).CanCollide = canCollide;
+							if (isObstacleAsset) (child as BasePart).CollisionGroup = "Obstacles";
 						}
 					}
 				};
 
+				const isObstacle = string.find(assetPath, "Tree")[0] !== undefined ||
+					string.find(assetPath, "Rock")[0] !== undefined ||
+					string.find(assetPath, "Hill")[0] !== undefined;
+
 				// Anchor immediately after clone
-				anchorAllParts(clone);
+				anchorAllParts(clone, isObstacle, isObstacle);
+
+				if (isObstacle) {
+					for (const p of clone.GetDescendants()) {
+						if (p.IsA("BasePart")) {
+							const modifier = new Instance("PathfindingModifier");
+							modifier.PassThrough = true;
+							modifier.Parent = p;
+						}
+					}
+					if (clone.IsA("BasePart")) {
+						const modifier = new Instance("PathfindingModifier");
+						modifier.PassThrough = true;
+						modifier.Parent = clone;
+					}
+				}
 
 				// Now scale and position (parts are already anchored, so no physics issues)
 				if (clone.IsA("Model")) {
@@ -285,7 +363,7 @@ export class MapGenerator implements OnStart {
 				clone.Parent = parent;
 
 				// Final safety pass - re-anchor everything just in case ScaleTo or other operations reset anything
-				anchorAllParts(clone);
+				anchorAllParts(clone, isObstacle, isObstacle);
 
 				return clone;
 			} else {
@@ -311,6 +389,9 @@ export class MapGenerator implements OnStart {
 				const hex = this.createHexagon(`Tile_${q}_${r}`, worldPos, tileData.Color, material);
 				hex.Parent = mapFolder;
 				this.addLabel(hex as Model, tileData.Name);
+				if (tileData.Name !== "Desert") {
+					this.addDropRim(hex as Model, worldPos);
+				}
 
 				if (hex.PrimaryPart) {
 					hex.PrimaryPart.SetAttribute("TileType", tileData.Name);
@@ -320,11 +401,29 @@ export class MapGenerator implements OnStart {
 				}
 
 				if (tileData.Name === "Forest") {
-					for (let i = 1; i <= this.rng.NextInteger(2, 3); i += 1) {
-						const angle = math.rad(this.rng.NextNumber(0, 360));
-						const dist = this.rng.NextNumber(8, 25);
-						const pos = worldPos.add(new Vector3(math.cos(angle) * dist, baseY, math.sin(angle) * dist));
+					const treePositions: Vector3[] = [];
+					const numTrees = this.rng.NextInteger(1, 2);
+					for (let i = 1; i <= numTrees; i += 1) {
+						let pos = worldPos;
+						let tooClose = true;
+						let attempts = 0;
 
+						while (tooClose && attempts < 10) {
+							const angle = math.rad(this.rng.NextNumber(0, 360));
+							const dist = this.rng.NextNumber(12, 30);
+							pos = worldPos.add(new Vector3(math.cos(angle) * dist, baseY, math.sin(angle) * dist));
+
+							tooClose = false;
+							for (const otherPos of treePositions) {
+								if (pos.sub(otherPos).Magnitude < 18) {
+									tooClose = true;
+									break;
+								}
+							}
+							attempts++;
+						}
+
+						treePositions.push(pos);
 						const treeIndex = this.rng.NextInteger(1, 4);
 						// Tree2 is uniquely huge in the source assets compared to others
 						const treeScale = (treeIndex === 2) ? 0.02 : 1;
@@ -371,13 +470,48 @@ export class MapGenerator implements OnStart {
 						const angle = math.rad(math.random(0, 360));
 						const dist = math.random(0, 20);
 						const pos = worldPos.add(new Vector3(math.cos(angle) * dist, baseY, math.sin(angle) * dist));
-						placeAsset(`Rocks/Rock${math.random(1, 4)}`, hex, pos, 5);
+						placeAsset(`Rocks/Rock${math.random(1, 4)}`, hex, pos, 2.5);
 					}
 				}
 
 				tileIndex += 1;
 			}
 		}
+
+		// Create two rings of sea tiles outside the game map
+		const seaTileData = TileTypes["Sea"];
+		let seaTileCount = 0;
+		for (let seaRing = 1; seaRing <= 2; seaRing++) {
+			const currentRing = rings + seaRing;
+			for (let q = -currentRing; q <= currentRing; q += 1) {
+				const r1 = math.max(-currentRing, -q - currentRing);
+				const r2 = math.min(currentRing, -q + currentRing);
+
+				for (let r = r1; r <= r2; r += 1) {
+					// Skip tiles that are inside the game map
+					const distFromCenter = math.max(math.abs(q), math.abs(r), math.abs(-q - r));
+					if (distFromCenter <= rings) continue;
+
+					const worldPos = this.axialToWorld(q, r);
+					const seaPos = worldPos.add(new Vector3(0, -1, 0)); // Lowered slightly
+
+					// First ring around island is lighter blue
+					const col = seaRing === 1 ? Color3.fromHex("#4DA6FF") : seaTileData.Color;
+					const hex = this.createHexagon(`Sea_${q}_${r}`, seaPos, col, Enum.Material.Water);
+					hex.Parent = mapFolder;
+					seaTileCount += 1;
+
+					if (hex.PrimaryPart) {
+						hex.PrimaryPart.SetAttribute("TileType", seaTileData.Name);
+						hex.PrimaryPart.SetAttribute("Resource", "");
+						hex.PrimaryPart.SetAttribute("Q", q);
+						hex.PrimaryPart.SetAttribute("R", r);
+						hex.PrimaryPart.SetAttribute("IsSea", true);
+					}
+				}
+			}
+		}
+		Logger.Info("MapGenerator", `Created ${seaTileCount} sea tiles in ${2} outer rings.`);
 
 		this.CreateVerticesAndEdges(mapFolder);
 		this.CreatePorts();
@@ -400,6 +534,7 @@ export class MapGenerator implements OnStart {
 				const center = tile.PrimaryPart.Position;
 				const q = tile.PrimaryPart.GetAttribute("Q") as number;
 				const r = tile.PrimaryPart.GetAttribute("R") as number;
+				const isSea = tile.PrimaryPart.GetAttribute("IsSea") === true;
 
 				const tileVertexKeys = new Array<string>();
 				const verticesArr = HexMath.getHexVertices(center.X, center.Z, HEX_SIZE);
@@ -461,10 +596,18 @@ export class MapGenerator implements OnStart {
 			marker.CanCollide = false;
 			marker.Transparency = 1;
 			marker.Parent = vertexFolder;
-
 			marker.SetAttribute("VertexId", vertexId);
 			marker.SetAttribute("Key", key);
 			marker.SetAttribute("AdjacentTileCount", data.AdjacentTiles.size());
+
+			// Count ONLY land tiles
+			let landTileCount = 0;
+			for (const tile of data.AdjacentTiles) {
+				const tileObj = mapFolder.FindFirstChild(`Tile_${tile.Q}_${tile.R}`);
+				if (tileObj) landTileCount += 1;
+			}
+			marker.SetAttribute("AdjacentLandTileCount", landTileCount);
+
 
 			for (let i = 0; i < data.AdjacentTiles.size(); i += 1) {
 				const tile = data.AdjacentTiles[i];
@@ -496,6 +639,15 @@ export class MapGenerator implements OnStart {
 			marker.SetAttribute("Vertex1", vKeys[0]);
 			marker.SetAttribute("Vertex2", vKeys[1]);
 			marker.SetAttribute("AdjacentTileCount", data.AdjacentTiles.size());
+
+			// Count ONLY land tiles to identify coastal edges for ports
+			let landTileCount = 0;
+			for (const tile of data.AdjacentTiles) {
+				const tileObj = mapFolder.FindFirstChild(`Tile_${tile.Q}_${tile.R}`);
+				if (tileObj) landTileCount += 1;
+			}
+			marker.SetAttribute("AdjacentLandTileCount", landTileCount);
+
 			edgeId += 1;
 		}
 	}
@@ -503,7 +655,8 @@ export class MapGenerator implements OnStart {
 	private CreatePorts() {
 		const edgeFolder = game.Workspace.FindFirstChild("Edges");
 		const vertexFolder = game.Workspace.FindFirstChild("Vertices");
-		if (!edgeFolder || !vertexFolder) return;
+		const mapFolder = game.Workspace.FindFirstChild("Map") as Folder;
+		if (!edgeFolder || !vertexFolder || !mapFolder) return;
 
 		const portFolder = (game.Workspace.FindFirstChild("Ports") as Folder) ?? new Instance("Folder", game.Workspace);
 		portFolder.Name = "Ports";
@@ -519,8 +672,12 @@ export class MapGenerator implements OnStart {
 
 		const coastalEdges: BasePart[] = [];
 		for (const edge of edgeFolder.GetChildren()) {
-			if (edge.IsA("BasePart") && (edge.GetAttribute("AdjacentTileCount") as number) === 1) {
-				coastalEdges.push(edge);
+			if (edge.IsA("BasePart")) {
+				// A coastal edge is one with exactly one LAND tile neighbor
+				const landTileCount = edge.GetAttribute("AdjacentLandTileCount") as number;
+				if (landTileCount === 1) {
+					coastalEdges.push(edge);
+				}
 			}
 		}
 
@@ -582,7 +739,7 @@ export class MapGenerator implements OnStart {
 
 			const billboard = new Instance("BillboardGui");
 			billboard.Name = "PortLabel";
-			billboard.Size = new UDim2(0, 150, 0, 60);
+			billboard.Size = new UDim2(0, 60, 0, 60);
 			billboard.StudsOffset = new Vector3(0, 4, 0);
 			billboard.AlwaysOnTop = true;
 			billboard.Adornee = portMarker;
@@ -678,5 +835,22 @@ export class MapGenerator implements OnStart {
 		}
 
 		return vertexFolder.FindFirstChild(id) as BasePart;
+	}
+
+	public GetAdjacentTilesToVertex(vertex: BasePart): Model[] {
+		const tiles: Model[] = [];
+		const mapFolder = game.Workspace.FindFirstChild("Map");
+		if (!mapFolder) return tiles;
+
+		const adjCount = (vertex.GetAttribute("AdjacentTileCount") as number) ?? 0;
+		for (let i = 1; i <= adjCount; i++) {
+			const q = vertex.GetAttribute(`Tile${i}Q`) as number;
+			const r = vertex.GetAttribute(`Tile${i}R`) as number;
+			const tile = mapFolder.FindFirstChild(`Tile_${q}_${r}`);
+			if (tile && tile.IsA("Model")) {
+				tiles.push(tile);
+			}
+		}
+		return tiles;
 	}
 }

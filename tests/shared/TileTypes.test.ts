@@ -16,12 +16,12 @@ describe("TileTypes", () => {
 	// ═══════════════════════════════════════════════════════════════════════════════
 
 	describe("Structure", () => {
-		it("should have exactly 6 tile types", () => {
-			expect(Object.keys(TileTypes).length).toBe(6);
+		it("should have exactly 7 tile types", () => {
+			expect(Object.keys(TileTypes).length).toBe(7);
 		});
 
 		it("should have all expected tile types", () => {
-			const expectedTypes = ["Forest", "Fields", "Pasture", "Hills", "Mountains", "Desert"];
+			const expectedTypes = ["Forest", "Fields", "Pasture", "Hills", "Mountains", "Desert", "Sea"];
 			for (const type of expectedTypes) {
 				expect(TileTypes[type]).toBeDefined();
 			}
@@ -151,6 +151,24 @@ describe("TileTypes", () => {
 		});
 	});
 
+	describe("Sea", () => {
+		it("should have correct name", () => {
+			expect(TileTypes.Sea.Name).toBe("Sea");
+		});
+
+		it("should produce NO resource", () => {
+			expect(TileTypes.Sea.Resource).toBeUndefined();
+		});
+
+		it("should have frequency of 0 (not randomly placed)", () => {
+			expect(TileTypes.Sea.Frequency).toBe(0);
+		});
+
+		it("should have a Color", () => {
+			expect(TileTypes.Sea.Color).toBeDefined();
+		});
+	});
+
 	// ═══════════════════════════════════════════════════════════════════════════════
 	// RESOURCES
 	// ═══════════════════════════════════════════════════════════════════════════════
@@ -195,8 +213,15 @@ describe("TileTypes", () => {
 	// ═══════════════════════════════════════════════════════════════════════════════
 
 	describe("Frequency", () => {
-		it("should have positive frequencies for all tiles", () => {
+		it("should have non-negative frequencies for all tiles", () => {
 			for (const key in TileTypes) {
+				expect(TileTypes[key].Frequency).toBeGreaterThanOrEqual(0);
+			}
+		});
+
+		it("should have positive frequencies for all land tiles", () => {
+			const landTiles = ["Forest", "Fields", "Pasture", "Hills", "Mountains", "Desert"];
+			for (const key of landTiles) {
 				expect(TileTypes[key].Frequency).toBeGreaterThan(0);
 			}
 		});

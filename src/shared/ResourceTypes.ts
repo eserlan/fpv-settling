@@ -21,7 +21,7 @@ const Resources: Record<string, ResourceInfo> = {
 		Material: Enum.Material.Brick,
 		TileType: "Hills",
 		MaxStack: 50,
-		BuildingCost: { Settlement: 1, Road: 1 },
+		BuildingCost: { Town: 1, Road: 1 },
 	},
 	Wood: {
 		Name: "Wood",
@@ -31,17 +31,17 @@ const Resources: Record<string, ResourceInfo> = {
 		Material: Enum.Material.Wood,
 		TileType: "Forest",
 		MaxStack: 50,
-		BuildingCost: { Settlement: 1, Road: 1 },
+		BuildingCost: { Town: 1, Road: 1 },
 	},
 	Wheat: {
 		Name: "Wheat",
 		Icon: "🌾",
-		Description: "Grain for settlements and cities",
+		Description: "Grain for towns",
 		Color: Color3.fromRGB(218, 165, 32),
 		Material: Enum.Material.Grass,
 		TileType: "Fields",
 		MaxStack: 50,
-		BuildingCost: { Settlement: 1, City: 2 },
+		BuildingCost: { Town: 1, City: 2 },
 	},
 	Ore: {
 		Name: "Ore",
@@ -56,12 +56,12 @@ const Resources: Record<string, ResourceInfo> = {
 	Wool: {
 		Name: "Wool",
 		Icon: "🧶",
-		Description: "Wool from sheep for settlements",
+		Description: "Wool from sheep for towns",
 		Color: Color3.fromRGB(245, 245, 245),
 		Material: Enum.Material.SmoothPlastic,
 		TileType: "Pasture",
 		MaxStack: 50,
-		BuildingCost: { Settlement: 1 },
+		BuildingCost: { Town: 1 },
 	},
 };
 

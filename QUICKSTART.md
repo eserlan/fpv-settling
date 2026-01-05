@@ -61,46 +61,37 @@ Press **F5** to start the game. You should see:
 ## Your First Actions
 
 1. **Check your resources** (top-left UI)
-   - Starting: 50 Wood, 30 Stone, 20 Food, 100 Gold
+   - Starting: 0 (Gather from tiles!)
 
 2. **Hire a worker** (Press H)
-   - Cost: 50 Gold, 10 Food
+   - Cost: 2 Wheat, 1 Ore
    - Workers gather resources
 
 3. **Build a road** (Press B, then click)
-   - Cost: 5 Wood, 10 Stone
-   - Takes 5 seconds to build
+   - Cost: 1 Wood, 1 Brick
+   - Instant build
 
-4. **Research technology** (Press R - once implemented)
-   - Unlock upgrades and new buildings
+4. **Build a town** (Press B, then click)
+   - Cost: 1 Wood, 1 Brick, 1 Wheat, 1 Wool
+   - Instant build
 
 ## What's Next?
 
-- Read [SETUP.md](SETUP.md) for detailed development setup
+- Read [README.md](README.md) for full documentation
 - Check [TECHNICAL.md](TECHNICAL.md) for architecture details
-- See [CONTRIBUTING.md](CONTRIBUTING.md) to contribute
 
 ## Common Issues
 
 **"Rojo won't connect"**
 - Ensure `rojo serve` is running
-- Check port 34872 isn't blocked
 
 **"Can't see my code changes"**
 - Save your .ts files
 - Ensure `npm run watch` (roblox-ts) is running
-- Click "Sync In" in Rojo plugin
-- Check Output window for errors
-
-**"Script errors in Output"**
-- This is normal for initial alpha version
-- Most core systems work despite warnings
-- Full multiplayer integration coming soon
 
 ## Need Help?
 
 - 📖 [Full Documentation](README.md)
 - 🐛 [Report Issues](https://github.com/eserlan/fpv-settling/issues)
-- 💬 [Rojo Discord](https://discord.gg/rojo)
 
-Enjoy building your settlement! 🏰
+Enjoy building your town! 🏰

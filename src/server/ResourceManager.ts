@@ -21,13 +21,11 @@ class ResourceManager {
 			this.Resources[resourceName] = 0;
 		}
 
-		// Starting resources: enough for 1 settlement + 1 road
-		// Settlement: Wood 1, Brick 1, Wheat 1, Wool 1
-		// Road: Wood 1, Brick 1
-		this.Resources.Wood = 2;
-		this.Resources.Brick = 2;
-		this.Resources.Wheat = 1;
-		this.Resources.Wool = 1;
+		// Resources start at 0
+		this.Resources.Wood = 0;
+		this.Resources.Brick = 0;
+		this.Resources.Wheat = 0;
+		this.Resources.Wool = 0;
 		this.Resources.Ore = 0;
 	}
 

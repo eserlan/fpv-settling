@@ -1,11 +1,14 @@
 import type { AIPlayerInterface } from "shared/GameEntity";
 import type { PlayerData } from "./PlayerData";
-import { LLMService, AIAction } from "./services/LLMService";
-import { PROMPTS } from "./AIPrompts";
+import { AIAction } from "./services/LLMService"; // Keeping type, but not using service
 import { SkillLevel } from "shared/GameTypes";
 import * as Logger from "shared/Logger";
 import type { MapGenerator } from "./services/MapGenerator";
 import { ServerEvents } from "./ServerEvents";
+import type { GameState } from "./GameState";
+import type { MarketManager } from "./services/MarketManager";
+import { MarketOffer, ResourceDict } from "shared/MarketTypes";
+import { ResourceType } from "shared/TradeMath";
 
 const PathfindingService = game.GetService("PathfindingService");
 
@@ -15,6 +18,7 @@ export class AIPlayer implements AIPlayerInterface {
 	public Character?: Model;
 	public IsAI = true;
 	public Skill: SkillLevel;
+	private baseWalkSpeed: number = 20.8; // Default, will be set in Spawn
 
 	// AI Logic State
 	public State: "Idle" | "Thinking" | "Moving" | "Executing" | "MovingToResource" = "Idle";
@@ -24,6 +28,7 @@ export class AIPlayer implements AIPlayerInterface {
 	private lastPulsePhase: number = 1; // 0 for [60-30], 1 for [30-0]
 	private thoughtPending: boolean = false;
 	private taskQueue: Array<{ type: "BUILD" | "COLLECT", buildingType?: string, position: Vector3, part?: BasePart }> = [];
+	private failedTownSpots: Vector3[] = [];
 
 	// Pathfinding
 	private currentPath?: Path;
@@ -34,19 +39,15 @@ export class AIPlayer implements AIPlayerInterface {
 	private consecutiveStuckCount: number = 0;
 	private lastThoughtPendingTime?: number;
 	private spawnTime?: number;
-	private static readonly STARTUP_DELAY = 25; // Seconds to wait before AI starts acting
-
-	private llmService: LLMService;
+	private static readonly STARTUP_DELAY = 15; // Shorter startup delay
 
 	constructor(id: number, name: string, skill: SkillLevel = "Intermediate") {
 		this.UserId = id;
 		this.Name = name;
 		this.Skill = skill;
-		this.llmService = new LLMService();
 	}
 
 	public Kick(message?: string) {
-		// No-op for AI
 		Logger.Info("AIPlayer", `${this.Name} kicked: ${message}`);
 	}
 
@@ -155,10 +156,18 @@ export class AIPlayer implements AIPlayerInterface {
 		weldTo(leftLeg);
 		weldTo(rightLeg);
 
+		// Assign collision group to all parts
+		for (const part of model.GetDescendants()) {
+			if (part.IsA("BasePart")) {
+				part.CollisionGroup = "SelectableAI";
+			}
+		}
+
 		// Humanoid
 		const humanoid = new Instance("Humanoid");
 		humanoid.DisplayName = `[${this.Skill}] ${this.Name}`;
-		humanoid.WalkSpeed = 16 * SCALE;
+		this.baseWalkSpeed = 16 * SCALE;
+		humanoid.WalkSpeed = this.baseWalkSpeed;
 		humanoid.Parent = model;
 
 		model.PrimaryPart = root;
@@ -173,22 +182,27 @@ export class AIPlayer implements AIPlayerInterface {
 		if (!resourcesFolder) return undefined;
 
 		let nearest: BasePart | undefined;
-		let minDist = 200; // Max search distance for AI
+		let minDist = 3000; // Increased search distance for "all over the map"
 
-		// Get the list of tiles this player owns
 		const ownedTileKeys = playerData.TileOwnershipManager.GetPlayerTiles(playerData.Player);
 		const ownedSet = new Set<string>(ownedTileKeys);
 
 		for (const res of resourcesFolder.GetChildren()) {
 			if (res.IsA("BasePart")) {
-				const q = res.GetAttribute("TileQ") as number | undefined;
-				const r = res.GetAttribute("TileR") as number | undefined;
+				// 1. Check explicit OwnerId first
+				const ownerId = res.GetAttribute("OwnerId") as number | undefined;
+				if (ownerId !== undefined) {
+					if (ownerId !== this.UserId) continue;
+					// It's ours, skip tile check
+				} else {
+					// 2. Fallback to Tile ownership
+					const q = res.GetAttribute("TileQ") as number | undefined;
+					const r = res.GetAttribute("TileR") as number | undefined;
+					if (q === undefined || r === undefined) continue;
 
-				if (q === undefined || r === undefined) continue;
-
-				// Check if AI owns this tile using the proper key format
-				const tileKey = `${q}_${r}`;
-				if (!ownedSet.has(tileKey)) continue;
+					const tileKey = `${q}_${r}`;
+					if (!ownedSet.has(tileKey)) continue;
+				}
 
 				const dist = this.Character!.PrimaryPart!.Position.sub(res.Position).Magnitude;
 				if (dist < minDist) {
@@ -198,56 +212,46 @@ export class AIPlayer implements AIPlayerInterface {
 			}
 		}
 
+		if (!nearest && resourcesFolder.GetChildren().size() > 0) {
+			// Debug: if there are resources but none were ours
+			// Logger.Debug("AIPlayer", `${this.Name} found no owned resources among ${resourcesFolder.GetChildren().size()} items`);
+		}
+
 		return nearest;
 	}
 
-	public Update(deltaTime: number, playerData: PlayerData, mapGenerator: MapGenerator) {
+	public Update(deltaTime: number, playerData: PlayerData, mapGenerator: MapGenerator, marketManager: MarketManager) {
 		if (!this.Character || !this.Character.PrimaryPart) return;
 
-		// Startup delay: give human players time to orient
+		// Startup delay
 		if (!this.spawnTime) {
 			this.spawnTime = playerData.GameTime;
 		}
 		if (playerData.GameTime - this.spawnTime < AIPlayer.STARTUP_DELAY) {
-			return; // Still in grace period
+			return;
 		}
 
-		// 0. Detect Pulse Phase Transitions (must happen regardless of state)
+		// Pulse Logic: Force "Think" on phase change
 		const pulseTimer = playerData.PulseTimer;
 		if (pulseTimer !== -1) {
 			const currentPhase = pulseTimer > 30 ? 0 : 1;
 			if (currentPhase !== this.lastPulsePhase) {
 				this.lastPulsePhase = currentPhase;
 				this.thoughtPending = true;
-				const phaseName = currentPhase === 0 ? "Pulse Reset" : "Mid-Pulse";
-				Logger.Info("AIPlayer", `${this.Name} phase transition: ${phaseName} (pending thought, state=${this.State})`);
 			}
-		}
-
-		// Safety: If we have a pending thought but are stuck in a non-Idle state, force reset
-		if (this.thoughtPending && this.State !== "Idle" && this.State !== "Thinking") {
-			// Give the current action a few seconds to finish, then force unstick
-			if (!this.lastThoughtPendingTime) {
-				this.lastThoughtPendingTime = playerData.GameTime;
-			} else if (playerData.GameTime - this.lastThoughtPendingTime > 15) {
-				Logger.Warn("AIPlayer", `${this.Name} stuck in ${this.State} for 15s with pending thought, forcing Idle`);
-				this.CancelCurrentAction("Thought Timeout");
-				this.lastThoughtPendingTime = undefined;
-			}
-		} else {
-			this.lastThoughtPendingTime = undefined;
 		}
 
 		if (this.State === "Idle") {
-			// Priority 1: Strategic Thinking (Pulse synchronized or Initial)
-			if (this.thoughtPending || (playerData.NeedsFirstSettlement && this.taskQueue.size() === 0)) {
+			// Priority 1: Decide on next major action (Think)
+			if (this.thoughtPending || (pulseTimer !== -1 && playerData.NeedsFirstTown && this.taskQueue.size() === 0)) {
 				this.thoughtPending = false;
 				this.State = "Thinking";
-				this.Think(playerData, mapGenerator);
+				// Deterministic Think
+				this.DecideAction(playerData, mapGenerator, marketManager);
 				return;
 			}
 
-			// Priority 2: Process Task Queue (Strategic decisions from Think)
+			// Priority 2: Process Queue
 			if (this.taskQueue.size() > 0) {
 				const task = this.taskQueue.shift()!;
 				this.pendingAction = { type: task.buildingType ?? "", position: task.position, actionData: undefined };
@@ -256,29 +260,26 @@ export class AIPlayer implements AIPlayerInterface {
 				return;
 			}
 
-			// Priority 3: Collect nearby resources autonomously
+			// Priority 3: Opportunistic Resource Collection
 			const resource = this.FindNearestOwnedResource(playerData);
 			if (resource) {
 				this.pendingResource = resource;
 				this.State = "MovingToResource";
 				this.currentPath = undefined;
-				Logger.Info("AIPlayer", `${this.Name} → high-priority autonomous collection of ${resource.GetAttribute("ResourceType")}`);
 				return;
 			}
 		}
 
-		// Handle movement states (Both Resource and Build)
+		// Handle Movement
 		if (this.State === "MovingToResource" || this.State === "Moving") {
 			const targetPos = this.State === "MovingToResource" ? this.pendingResource?.Position : this.pendingAction?.position;
 
 			if (!targetPos || (this.State === "MovingToResource" && !this.pendingResource?.Parent)) {
-				// Resource was collected (destroyed) or lost - we're done!
 				if (this.State === "MovingToResource") {
-					Logger.Debug("AIPlayer", `${this.Name} resource collected or lost, going Idle`);
 					this.pendingResource = undefined;
 					this.State = "Idle";
 				} else {
-					this.CancelCurrentAction("Target lost or missing");
+					this.CancelCurrentAction("Target invalid");
 				}
 				return;
 			}
@@ -288,21 +289,15 @@ export class AIPlayer implements AIPlayerInterface {
 				this.FollowPath(humanoid, targetPos, playerData.GameTime);
 
 				const dist = this.Character.PrimaryPart.Position.sub(targetPos).Magnitude;
-				// Use different thresholds: closer for resources (need to touch), farther for builds
 				const arrivalThreshold = this.State === "MovingToResource" ? 5 : 12;
 
 				if (dist < arrivalThreshold) {
 					this.consecutiveStuckCount = 0;
 					if (this.State === "MovingToResource") {
-						// Don't immediately go Idle - wait for the resource to be collected (destroyed)
-						// The touch-based collection should trigger soon
-						// Just stop moving and let physics handle the pickup
 						this.currentPath = undefined;
-						// Keep checking - if resource is still here next frame, we'll keep waiting
-						// The check at line 206 will catch when it's finally collected
+						// Wait for pickup physics
 					} else {
 						this.State = "Executing";
-						Logger.Info("AIPlayer", `${this.Name} arrived at build site.`);
 						this.currentPath = undefined;
 					}
 				}
@@ -310,7 +305,7 @@ export class AIPlayer implements AIPlayerInterface {
 			return;
 		}
 
-		// Handle action execution
+		// Handle Execution
 		if (this.State === "Executing") {
 			if (this.pendingAction && this.pendingAction.type !== "") {
 				const { type: actionType, position } = this.pendingAction;
@@ -318,52 +313,100 @@ export class AIPlayer implements AIPlayerInterface {
 
 				if (success) {
 					Logger.Info("AIPlayer", `${this.Name} built ${actionType}!`);
-					if (playerData.NeedsFirstSettlement && actionType === "Settlement") {
-						playerData.NeedsFirstSettlement = false;
+					if (playerData.NeedsFirstTown && actionType === "Town") {
+						playerData.NeedsFirstTown = false;
 					}
 				} else {
 					Logger.Warn("AIPlayer", `${this.Name} failed to build ${actionType}: ${result}`);
+					if (actionType === "Town") {
+						this.failedTownSpots.push(position);
+					}
 				}
 
 				this.pendingAction = undefined;
 				this.State = "Idle";
 				return;
 			} else {
-				// Safety: Stuck in Executing with no valid action
-				Logger.Warn("AIPlayer", `${this.Name} stuck in Executing with no action, resetting to Idle`);
 				this.pendingAction = undefined;
 				this.State = "Idle";
 				return;
 			}
 		}
+
+		// Fake "Thinking" delay
+		if (this.State === "Thinking") {
+			this.State = "Idle"; // Instant think
+		}
 	}
 
-	public GetTaskQueueSize() {
-		return this.taskQueue.size();
+	public EvaluateMarketOffer(offer: MarketOffer, playerData: PlayerData, marketManager: MarketManager) {
+		if (offer.posterId === this.UserId) return;
+		if (this.State === "Thinking" || this.State === "Executing") return;
+
+		const resources = playerData.ResourceManager.Resources;
+		const have = resources[offer.wantType] ?? 0;
+
+		// Only evaluate if we have surplus of what they want
+		if (have > 2) {
+			// Reuse TryMarketTrade to re-evaluate all offers (includes the new one)
+			// This is simpler and ensures we pick the best one available right now
+			this.TryMarketTrade(playerData, marketManager);
+		}
 	}
+
+	public GetTaskQueueSize() { return this.taskQueue.size(); }
 
 	private CancelCurrentAction(reason: string) {
-		Logger.Warn("AIPlayer", `${this.Name} cancelling action: ${reason}`);
 		this.pendingAction = undefined;
 		this.pendingResource = undefined;
 		this.currentPath = undefined;
 		this.consecutiveStuckCount = 0;
 		this.State = "Idle";
-		// Clear queue if we are totally stuck, so we can re-evaluate on next pulse
 		if (reason === "Stuck" || reason === "Timeout") {
 			this.taskQueue = [];
 		}
 	}
 
+	public RecordFailedPlacement(pos: Vector3) {
+		this.failedTownSpots.push(pos);
+	}
+
 	private FollowPath(humanoid: Humanoid, targetPos: Vector3, gameTime: number) {
 		const myPos = this.Character!.PrimaryPart!.Position;
+		const totalDist = myPos.sub(targetPos).Magnitude;
 
-		// 1. Compute path if missing
+		// Dynamic Speed: Scaled aggressively for long distances to ensure quick map traversal
+		let multiplier = 1;
+		if (totalDist > 400) multiplier = 5.0;      // Extreme distance (e.g. across map)
+		else if (totalDist > 200) multiplier = 4.0; // Very far
+		else if (totalDist > 100) multiplier = 2.5; // Far
+		else if (totalDist > 50) multiplier = 1.8;  // Approaching
+		else if (totalDist > 25) multiplier = 1.3;  // Near
+
+		humanoid.WalkSpeed = this.baseWalkSpeed * multiplier;
+
+		// Direct movement for close targets
+		if (totalDist < 25) {
+			humanoid.MoveTo(targetPos);
+			this.currentPath = undefined;
+			if (totalDist < 10 && (this.consecutiveStuckCount > 0)) {
+				humanoid.Jump = true; // Small hop if struggling up close
+			}
+			return;
+		}
+
 		if (!this.currentPath) {
+			const isStuck = this.consecutiveStuckCount > 4;
+			const radius = isStuck ? 6 : 3;
+
 			const newPath = PathfindingService.CreatePath({
-				AgentRadius: 3, // Slightly larger for better clearance
+				AgentRadius: radius,
 				AgentHeight: 6,
 				AgentCanJump: true,
+				Costs: {
+					Water: math.huge,
+					Mud: 10,
+				}
 			});
 
 			const [success] = pcall(() => {
@@ -382,102 +425,494 @@ export class AIPlayer implements AIPlayerInterface {
 			this.lastCheckedPosition = myPos;
 		}
 
-		// 2. Active Stuck Detection (Is actually moving?)
-		if (gameTime - this.lastPositionTime > 3) {
+		// Stuck Checks
+		if (gameTime - this.lastPositionTime > 2) {
 			const travelled = this.lastCheckedPosition ? myPos.sub(this.lastCheckedPosition).Magnitude : 10;
-			if (travelled < 2) {
+			if (travelled < 3) {
 				this.consecutiveStuckCount++;
-				Logger.Warn("AIPlayer", `${this.Name} hasn't progressed much (${this.consecutiveStuckCount}/6), recomputing path...`);
-
-				if (this.consecutiveStuckCount >= 6) {
+				if (this.consecutiveStuckCount >= 8) {
 					this.CancelCurrentAction("Stuck");
-					this.consecutiveStuckCount = 0;
 					return;
 				}
-
-				this.currentPath = undefined; // Force recalculate
-				humanoid.Jump = true; // Try jumping out of it
-
-				// Nudge if really stuck
-				if (this.consecutiveStuckCount > 3) {
-					const nudge = new Vector3(math.random(-10, 10), 0, math.random(-10, 10));
-					humanoid.MoveTo(myPos.add(nudge));
-				}
-
+				this.currentPath = undefined;
+				humanoid.Jump = true;
+				const nudgeY = this.consecutiveStuckCount > 4 ? 10 : 0;
+				const nudgeDir = new Vector3(math.random(-15, 15), nudgeY, math.random(-15, 15));
+				humanoid.MoveTo(myPos.add(nudgeDir));
 				this.lastPositionTime = gameTime;
 				this.lastCheckedPosition = myPos;
 				return;
 			}
-			// Don't reset stuck count here, only on successful arrival or state change
 			this.lastPositionTime = gameTime;
 			this.lastCheckedPosition = myPos;
 		}
 
-		// 3. Absolute Timeout (30s)
 		if (gameTime - this.lastMoveTime > 30) {
 			this.CancelCurrentAction("Timeout");
 			return;
 		}
 
-		// 4. Follow waypoints
 		const waypoints = this.currentPath.GetWaypoints();
 		if (this.currentWaypointIndex < waypoints.size()) {
 			const wp = waypoints[this.currentWaypointIndex];
 			humanoid.MoveTo(wp.Position);
-
-			if (myPos.sub(wp.Position).Magnitude < 4) {
+			const waypointThreshold = math.clamp(humanoid.WalkSpeed / 12, 4, 15);
+			if (myPos.sub(wp.Position).Magnitude < waypointThreshold) {
 				this.currentWaypointIndex++;
 				if (wp.Action === Enum.PathWaypointAction.Jump) humanoid.Jump = true;
 			}
 		} else {
-			// Reached end of waypoints but not destination?
 			humanoid.MoveTo(targetPos);
 			if (myPos.sub(targetPos).Magnitude > 20) {
-				this.currentPath = undefined; // Too far from final target, recalc
+				this.currentPath = undefined;
 			}
 		}
 	}
 
-	private async Think(playerData: PlayerData, mapGenerator: MapGenerator) {
-		const context = this.GatherContext(playerData, mapGenerator);
-		const prompt = PROMPTS[this.Skill];
+	// ==========================================
+	// Deterministic Decision Logic
+	// ==========================================
+	private GetTargetBuilding(playerData: PlayerData, mapGenerator: MapGenerator): { type: "City" | "Town" | "Road", position?: Vector3 } | undefined {
+		const towns = playerData.BuildingManager.Towns;
 
-		try {
-			const decision = await this.llmService.GetDecision(this.Name, prompt, context);
-			if (decision) {
-				this.ExecuteAction(decision, playerData, mapGenerator);
+		// 1. Initial Town (Setup)
+		if (playerData.NeedsFirstTown) {
+			const spot = this.GetBestTownSpot(mapGenerator, true);
+			if (spot) return { type: "Town", position: spot };
+		}
+
+		// 2. expansion Selection: Find the best town spot we WANT to reach
+		// We use isInitial=false here to consider connection rules
+		const targetExpansionSpot = this.GetBestTownSpot(mapGenerator, false);
+
+		// 3. City Upgrade
+		// Focus on upgrades if we have a solid base (>= 3 towns).
+		if (towns.size() >= 3) {
+			// Find a town we own that isn't already a city
+			const townToUpgrade = towns.find(t => t.Type === "Town" && t.OwnerId === this.UserId);
+			if (townToUpgrade && this.CanAfford("City", playerData.ResourceManager.Resources)) {
+				return { type: "City", position: townToUpgrade.Position };
+			}
+		}
+
+		// 4. Expansion: If we have a target spot and are connected, build Town
+		if (targetExpansionSpot) {
+			const [vertex] = mapGenerator.FindNearestVertex(targetExpansionSpot);
+			if (vertex && this.IsConnectedToRoad(vertex, this.UserId)) {
+				return { type: "Town", position: targetExpansionSpot };
+			}
+		}
+
+		// 5. Road Building: If we have a target spot but aren't connected, build roads towards it
+		if (targetExpansionSpot) {
+			const edge = this.GetBestRoadSpot(playerData, targetExpansionSpot);
+			if (edge) return { type: "Road", position: edge };
+		}
+
+		// 6. Fallback: If no expansion target (rare), just upgrade to City or build random road
+		const fallbackTown = towns.find(t => t.Type === "Town");
+		if (fallbackTown) return { type: "City", position: fallbackTown.Position };
+
+		const randomEdge = this.GetBestRoadSpot(playerData);
+		if (randomEdge) return { type: "Road", position: randomEdge };
+
+		return undefined;
+	}
+
+	private GetResourceNeeds(targetType: "City" | "Town" | "Road", resources: Record<string, number>): Record<string, number> {
+		const needs: Record<string, number> = {};
+		const costs: Record<string, Record<string, number>> = {
+			City: { Wheat: 2, Ore: 3 },
+			Town: { Wood: 1, Brick: 1, Wheat: 1, Wool: 1 },
+			Road: { Wood: 1, Brick: 1 }
+		};
+
+		const cost = costs[targetType];
+		for (const [res, amt] of pairs(cost)) {
+			const have = resources[res as string] ?? 0;
+			if (have < (amt as number)) {
+				needs[res as string] = (amt as number) - have;
+			}
+		}
+		return needs;
+	}
+
+	private DecideAction(playerData: PlayerData, mapGenerator: MapGenerator, marketManager: MarketManager) {
+		const resources = playerData.ResourceManager.Resources;
+		const target = this.GetTargetBuilding(playerData, mapGenerator);
+		if (target) {
+			if (this.CanAfford(target.type, resources)) {
+				this.taskQueue.push({ type: "BUILD", buildingType: target.type, position: target.position ?? new Vector3() });
+				Logger.Info("AIPlayer", `${this.Name} decided to build ${target.type.upper()}`);
+				return;
 			} else {
-				this.State = "Idle";
+				// We want something but can't afford it yet.
+				// Try trading for it!
+				this.TryTradeForNeeds(playerData, target.type, marketManager);
 			}
-		} catch (e) {
-			Logger.Warn("AIPlayer", `[${this.Name}] Thinking failed: ${e}`);
-			this.State = "Idle";
+		}
+
+		// 5. General Trade Logic (Balancing)
+		this.TryTrade(playerData);
+		this.TryMarketTrade(playerData, marketManager);
+
+		// 6. Resource Collection (Opportunistic & Aggressive)
+		// If we are strictly waiting (no active build tasks), fill the queue with nearby resources
+		if (this.taskQueue.isEmpty() || this.taskQueue.every(t => t.type === "COLLECT")) {
+			const resourcesFolder = game.Workspace.FindFirstChild("Resources");
+			if (resourcesFolder) {
+				const ownedResources: { part: BasePart, dist: number }[] = [];
+				const myPos = this.Character!.PrimaryPart!.Position;
+
+				// Scan for all our resources in range
+				for (const res of resourcesFolder.GetChildren()) {
+					if (res.IsA("BasePart")) {
+						const ownerId = res.GetAttribute("OwnerId") as number | undefined;
+						if (ownerId === this.UserId) {
+							const dist = myPos.sub(res.Position).Magnitude;
+							if (dist < 3000) ownedResources.push({ part: res as BasePart, dist });
+						}
+					}
+				}
+
+				// Sort by distance and push the nearest 5 to the queue
+				ownedResources.sort((a, b) => a.dist < b.dist);
+				for (let i = 0; i < math.min(ownedResources.size(), 5); i++) {
+					const res = ownedResources[i].part;
+					// Only push if not already in queue (crude check via position)
+					if (!this.taskQueue.some(t => t.position === res.Position)) {
+						this.taskQueue.push({ type: "COLLECT", part: res, position: res.Position });
+					}
+				}
+
+				if (ownedResources.size() > 0) {
+					Logger.Info("AIPlayer", `${this.Name} queued ${math.min(ownedResources.size(), 5)} resources for collection`);
+				}
+			}
 		}
 	}
 
+	private CanAfford(building: "City" | "Town" | "Road", resources: Record<string, number>): boolean {
+		if (building === "City") return resources.Wheat >= 2 && resources.Ore >= 3;
+		if (building === "Town") return resources.Wood >= 1 && resources.Brick >= 1 && resources.Wheat >= 1 && resources.Wool >= 1;
+		if (building === "Road") return resources.Wood >= 1 && resources.Brick >= 1;
+		return false;
+	}
+
+	private IsConnectedToRoad(vertex: BasePart, ownerId: number): boolean {
+		const vertexKey = vertex.GetAttribute("Key") as string;
+		if (!vertexKey) return false;
+
+		const edgeFolder = game.Workspace.FindFirstChild("Edges");
+		const buildingsFolder = game.Workspace.FindFirstChild("Buildings");
+		if (!edgeFolder || !buildingsFolder) return false;
+
+		// Find all edges touching this vertex
+		for (const edge of edgeFolder.GetChildren()) {
+			if (edge.IsA("BasePart")) {
+				if (edge.GetAttribute("Vertex1") === vertexKey || edge.GetAttribute("Vertex2") === vertexKey) {
+					const edgeKey = edge.GetAttribute("Key") as string;
+
+					// Check if there's a road owned by the player on this edge
+					for (const building of buildingsFolder.GetChildren()) {
+						if (building.IsA("Model") && building.GetAttribute("Key") === edgeKey) {
+							if (building.GetAttribute("OwnerId") === ownerId) {
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private GetBestTownSpot(mapGenerator: MapGenerator, isInitial: boolean): Vector3 | undefined {
+		// Simplified scoring
+		let bestScore = -999;
+		let bestPos: Vector3 | undefined;
+
+		const towns = game.Workspace.FindFirstChild("Towns")?.GetChildren().filter(t => t.IsA("Model") && t.GetAttribute("OwnerId") === this.UserId) ?? [];
+		const needsConnection = !isInitial && towns.size() >= 2;
+
+		// Attempt 100 random samples (increased to ensure we find valid spots)
+		for (let i = 0; i < 100; i++) {
+			const v = mapGenerator.GetRandomVertex();
+			if (!v) continue;
+
+			// Skip known failed spots (within 5 studs)
+			let isFailed = false;
+			for (const failed of this.failedTownSpots) {
+				if (v.Position.sub(failed).Magnitude < 5) {
+					isFailed = true;
+					break;
+				}
+			}
+			if (isFailed) continue;
+
+			const adjCount = (v.GetAttribute("AdjacentTileCount") as number ?? 0);
+			if (adjCount < 2) continue;
+
+			// Check connection rule if applicable
+			if (needsConnection) {
+				if (!this.IsConnectedToRoad(v, this.UserId)) continue;
+			}
+
+			const score = this.CalculateSpotScore(v); // Reuse existing score logic
+			if (score > bestScore) {
+				bestScore = score;
+				bestPos = v.Position;
+			}
+		}
+		return bestPos;
+	}
+
+	private GetBestRoadSpot(playerData: PlayerData, targetTownPos?: Vector3): Vector3 | undefined {
+		// 1. Identify all road-end points (vertices that touch our roads or towns)
+		const edgesFolder = game.Workspace.FindFirstChild("Edges");
+		const buildingsFolder = game.Workspace.FindFirstChild("Buildings");
+		const townsFolder = game.Workspace.FindFirstChild("Towns");
+		if (!edgesFolder) return undefined;
+
+		const myEdges = new Set<string>();
+		if (buildingsFolder) {
+			for (const b of buildingsFolder.GetChildren()) {
+				if (b.IsA("Model") && b.GetAttribute("OwnerId") === this.UserId) {
+					const key = b.GetAttribute("Key") as string;
+					if (key) myEdges.add(key);
+				}
+			}
+		}
+
+		const myTownVertices = new Set<string>();
+		if (townsFolder) {
+			for (const t of townsFolder.GetChildren()) {
+				if (t.IsA("Model") && t.GetAttribute("OwnerId") === this.UserId) {
+					const key = t.GetAttribute("Key") as string;
+					if (key) myTownVertices.add(key);
+				}
+			}
+		}
+
+		// 2. Find valid empty edges connected to our network
+		const candidates: { pos: Vector3, score: number }[] = [];
+
+		for (const edgePart of edgesFolder.GetChildren()) {
+			if (!edgePart.IsA("BasePart")) continue;
+
+			const key = edgePart.GetAttribute("Key") as string;
+			// Skip if already occupied by anyone
+			let occupied = false;
+			if (buildingsFolder) {
+				for (const b of buildingsFolder.GetChildren()) {
+					if (b.IsA("Model") && b.GetAttribute("Key") === key) {
+						occupied = true;
+						break;
+					}
+				}
+			}
+			if (occupied) continue;
+
+			const v1 = edgePart.GetAttribute("Vertex1") as string;
+			const v2 = edgePart.GetAttribute("Vertex2") as string;
+
+			// Check if connected to our town
+			const connectedToTown = myTownVertices.has(v1) || myTownVertices.has(v2);
+
+			// Check if connected to our road (requires sharing a vertex with an owned edge)
+			let connectedToRoad = false;
+			if (!connectedToTown) {
+				for (const myEdgeKey of myEdges) {
+					const [mv1, mv2] = string.split(myEdgeKey, ":");
+					if (mv1 === v1 || mv1 === v2 || mv2 === v1 || mv2 === v2) {
+						connectedToRoad = true;
+						break;
+					}
+				}
+			}
+
+			if (connectedToTown || connectedToRoad) {
+				let score = 0;
+				if (targetTownPos) {
+					// Score based on distance to target - closer is better
+					const dist = edgePart.Position.sub(targetTownPos).Magnitude;
+					score = 1000 - dist;
+				} else {
+					// random fallback
+					score = math.random(1, 100);
+				}
+				candidates.push({ pos: edgePart.Position, score });
+			}
+		}
+
+		if (candidates.size() === 0) return undefined;
+
+		candidates.sort((a, b) => a.score > b.score);
+		return candidates[0].pos;
+	}
+
+	private TryTradeForNeeds(playerData: PlayerData, targetType: "City" | "Town" | "Road", marketManager: MarketManager) {
+		const resources = playerData.ResourceManager.Resources;
+		const needs = this.GetResourceNeeds(targetType, resources);
+
+		let nextNeed: string | undefined;
+		for (const [res, _] of pairs(needs)) {
+			nextNeed = res as string;
+			break;
+		}
+		if (!nextNeed) return;
+
+		// Find surplus resources (not needed for this building and > 1)
+		const surpluses: { res: string, amt: number }[] = [];
+		const costs: Record<string, Record<string, number>> = {
+			City: { Wheat: 2, Ore: 3 },
+			Town: { Wood: 1, Brick: 1, Wheat: 1, Wool: 1 },
+			Road: { Wood: 1, Brick: 1 }
+		};
+		const targetCost = costs[targetType];
+
+		for (const [res, amt] of pairs(resources)) {
+			const neededForTarget = targetCost[res as string] ?? 0;
+			if ((amt as number) > neededForTarget) {
+				surpluses.push({ res: res as string, amt: (amt as number) - neededForTarget });
+			}
+		}
+
+		if (surpluses.size() === 0) return;
+
+		// Sort surpluses by amount descending
+		surpluses.sort((a, b) => a.amt > b.amt);
+
+		// 1. Try Port Trade first (Internal)
+		for (const surplus of surpluses) {
+			const ratio = playerData.PortManager.GetBestTradeRatio(surplus.res);
+			if (surplus.amt >= ratio) {
+				const [success] = playerData.PortManager.ExecuteTrade(surplus.res, nextNeed);
+				if (success) {
+					Logger.Info("AIPlayer", `${this.Name} traded surplus ${surplus.res} for needed ${nextNeed} (Port)`);
+					return;
+				}
+			}
+		}
+
+		// 2. Try Posting to Market (External)
+		const myActiveOffers = marketManager.GetOffers().filter(o => o.posterId === this.UserId);
+		if (myActiveOffers.size() < 3) {
+			const alreadySeeking = myActiveOffers.some(o => o.wantType === nextNeed);
+			if (!alreadySeeking) {
+				for (const surplus of surpluses) {
+					if (surplus.amt >= 1) {
+						const giveDict: ResourceDict = { [surplus.res]: 1 };
+						const success = marketManager.PostOffer(this.UserId, giveDict, nextNeed as ResourceType, 1);
+						if (success) {
+							Logger.Info("AIPlayer", `${this.Name} posted market trade: 1 ${surplus.res} for 1 ${nextNeed}`);
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private TryMarketTrade(playerData: PlayerData, marketManager: MarketManager) {
+		const resources = playerData.ResourceManager.Resources;
+		const activeOffers = marketManager.GetOffers();
+
+		// Priority 1: Scan for trades that fill any immediate needs (even if not target building)
+		for (const offer of activeOffers) {
+			if (offer.posterId === this.UserId) continue;
+
+			let totalGive = 0;
+			for (const [_, amt] of pairs(offer.giveResources)) totalGive += (amt as number);
+
+			if (totalGive >= 1 && resources[offer.wantType] >= 2) {
+				// Check if this helps me with ANY resource I have 0 of
+				let helpsMe = false;
+				for (const [res, amt] of pairs(offer.giveResources)) {
+					if (resources[res as string] === 0 && (amt as number) > 0) {
+						helpsMe = true;
+						break;
+					}
+				}
+
+				if (helpsMe) {
+					const success = marketManager.AcceptOffer(this.UserId, offer.id);
+					if (success) {
+						Logger.Info("AIPlayer", `${this.Name} accepted market trade for ${offer.wantAmount} ${offer.wantType}`);
+						return;
+					}
+				}
+			}
+		}
+
+		// Priority 2: Post surplus if we have LOTS of something (global balancing)
+		const myActiveCount = activeOffers.filter(o => o.posterId === this.UserId).size();
+		if (myActiveCount < 2) {
+			for (const [res, amt] of pairs(resources)) {
+				if ((amt as number) > 4) { // Lowered from 6
+					// Find something I have 0 or 1 of
+					for (const [neededRes, neededAmt] of pairs(resources)) {
+						if ((neededAmt as number) <= 1 && neededRes !== res) {
+							const giveDict: ResourceDict = { [res as string]: 1 };
+							const success = marketManager.PostOffer(this.UserId, giveDict, neededRes as ResourceType, 1);
+							if (success) {
+								Logger.Info("AIPlayer", `${this.Name} posted balancing trade: 1 ${res} for 1 ${neededRes}`);
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private TryTrade(playerData: PlayerData) {
+		const res = playerData.ResourceManager.Resources;
+		// Basic Balancing: if > 4 of anything, trade for something we have 0 of
+		for (const [r, amt] of pairs(res)) {
+			if ((amt as number) > 4) {
+				// Find shortage
+				for (const [missing, mAmt] of pairs(res)) {
+					if ((mAmt as number) === 0) {
+						playerData.PortManager.ExecuteTrade(r as string, missing as string);
+						Logger.Info("AIPlayer", `Trade Balance: ${r} -> ${missing}`);
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	// Reused utility
 	private CalculateSpotScore(vertex: BasePart): number {
 		let totalScore = 0;
 		const mapFolder = game.Workspace.FindFirstChild("Map");
 		if (!mapFolder) return 0;
+		const key = vertex.GetAttribute("Key") as string;
 
-		// Settlement spots (vertices) touch up to 3 tiles
+		// Occupancy
+		const townsFolder = game.Workspace.FindFirstChild("Towns");
+		if (townsFolder) {
+			for (const s of townsFolder.GetChildren()) {
+				if (s.IsA("Model") && s.GetAttribute("Key") === key) return -100;
+				if (s.IsA("Model") && s.PrimaryPart) {
+					if (s.PrimaryPart.Position.sub(vertex.Position).Magnitude < 45) return -50;
+				}
+			}
+		}
+
+		// Tile score
 		for (let i = 1; i <= 3; i++) {
-			const q = vertex.GetAttribute(`Tile${i}Q`) as number | undefined;
-			const r = vertex.GetAttribute(`Tile${i}R`) as number | undefined;
+			const q = vertex.GetAttribute(`Tile${i}Q`) as number;
+			const r = vertex.GetAttribute(`Tile${i}R`) as number;
 			if (q === undefined) continue;
 
-			// Find tile with these coordinates
 			for (const tile of mapFolder.GetChildren()) {
 				if (tile.IsA("Model") && tile.PrimaryPart) {
 					if (tile.PrimaryPart.GetAttribute("Q") === q && tile.PrimaryPart.GetAttribute("R") === r) {
-						const diceNum = tile.PrimaryPart.GetAttribute("DiceNumber") as number | undefined;
-						const tileType = tile.PrimaryPart.GetAttribute("TileType") as string | undefined;
-
-						if (diceNum && tileType !== "Desert") {
-							// Probability score: 6 and 8 are best (5 dots), 2 and 12 are worst (1 dot)
-							const score = 6 - math.abs(7 - diceNum);
-							totalScore += score;
-						}
+						const diceNum = tile.PrimaryPart.GetAttribute("DiceNumber") as number;
+						if (diceNum) totalScore += (6 - math.abs(7 - diceNum));
 						break;
 					}
 				}
@@ -486,194 +921,34 @@ export class AIPlayer implements AIPlayerInterface {
 		return totalScore;
 	}
 
-	private GatherContext(playerData: PlayerData, mapGenerator: MapGenerator): string {
-		const resources = playerData.ResourceManager.Resources;
-		const settlements = playerData.BuildingManager.Settlements;
-		const buildings = playerData.BuildingManager.Buildings;
-
-		let context = `My Name: ${this.Name}\n`;
-		context += `Skill Level: ${this.Skill}\n`;
-		context += `Resources in Backpack: Wood=${resources.Wood}, Brick=${resources.Brick}, Wheat=${resources.Wheat}, Wool=${resources.Wool}, Ore=${resources.Ore}\n`;
-
-		// Resources on ground
-		const groundResources: Record<string, number> = {};
-		const resFolder = game.Workspace.FindFirstChild("Resources");
-		if (resFolder) {
-			// Get owned tiles using the proper system
-			const ownedTileKeys = playerData.TileOwnershipManager.GetPlayerTiles(playerData.Player);
-			const ownedSet = new Set<string>(ownedTileKeys);
-
-			for (const res of resFolder.GetChildren()) {
-				if (res.IsA("BasePart")) {
-					const q = res.GetAttribute("TileQ") as number | undefined;
-					const r = res.GetAttribute("TileR") as number | undefined;
-					if (q === undefined || r === undefined) continue;
-
-					const tileKey = `${q}_${r}`;
-					if (ownedSet.has(tileKey)) {
-						const resType = (res.GetAttribute("ResourceType") as string) ?? "Unknown";
-						groundResources[resType] = (groundResources[resType] ?? 0) + 1;
-					}
-				}
-			}
-		}
-
-		const groundList = [];
-		for (const [rt, count] of pairs(groundResources)) {
-			groundList.push(`${rt}=${count}`);
-		}
-		context += `Resources Grounded (Owned Tiles): ${groundList.size() > 0 ? groundList.join(", ") : "None"}\n`;
-		context += `Settlements: ${settlements.size()}\n`;
-
-		if (playerData.NeedsFirstSettlement) {
-			context += `STATUS: Must build INITIAL SETTLEMENT.\n`;
-			const spots: { name: string; score: number }[] = [];
-			for (let i = 0; i < 15; i++) {
-				const v = mapGenerator.GetRandomVertex();
-				if (v && (v.GetAttribute("AdjacentTileCount") as number ?? 0) >= 2) {
-					const score = this.CalculateSpotScore(v);
-					spots.push({ name: v.Name, score: score });
-				}
-			}
-			// Sort by score (descending) and take top 5
-			spots.sort((a, b) => a.score > b.score);
-
-			const suggestions: string[] = [];
-			for (let i = 0; i < math.min(5, spots.size()); i++) {
-				const s = spots[i];
-				suggestions.push(`${s.name} (Score: ${s.score})`);
-			}
-			context += `Best Available Start Locations: ${suggestions.join(", ")}\n`;
-			context += `(Score represents combined dice probability of adjacent tiles. Higher is better.)\n`;
-		} else {
-			context += `STATUS: Expanding.\n`;
-
-			// Find potential expansion spots with scores
-			const spots: { name: string; score: number }[] = [];
-			for (let i = 0; i < 10; i++) {
-				const v = mapGenerator.GetRandomVertex();
-				if (v) {
-					const score = this.CalculateSpotScore(v);
-					spots.push({ name: v.Name, score: score });
-				}
-			}
-			spots.sort((a, b) => a.score > b.score);
-
-			const suggestions: string[] = [];
-			for (let i = 0; i < math.min(5, spots.size()); i++) {
-				const s = spots[i];
-				suggestions.push(`${s.name} (Score: ${s.score})`);
-			}
-			context += `Potential Expansion Spots & Scores: ${suggestions.join(", ")}\n`;
-
-			const suggestedEdges = [];
-			if (settlements.size() > 0) {
-				const s = settlements[math.random(0, settlements.size() - 1)];
-				if (s && s.Position) {
-					suggestedEdges.push(`Edge near ${s.Id}`);
-				}
-			}
-			context += `Expansion Directions: ${suggestedEdges.join(", ")}\n`;
-		}
-
-		return context;
-	}
-
-	private ExecuteAction(decision: AIAction, playerData: PlayerData, mapGenerator: MapGenerator) {
-		const action = (decision.action as string ?? "WAIT").upper();
-		const reason = decision.reason ?? "No reason provided";
-		const target = decision.target as string | undefined;
-
-		Logger.Info("AIPlayer", `${this.Name} (${this.Skill}) Decided: ${action} because "${reason}"`);
-
-		if (action === "WAIT" || action === "END_TURN") {
-			this.State = "Idle";
-			return;
-		}
-
-		if (action === "TRADE") {
-			if (decision.resource_give && decision.resource_receive) {
-				playerData.PortManager.ExecuteTrade(decision.resource_give, decision.resource_receive);
-			}
-			this.State = "Idle";
-			return;
-		}
-
-		let targetPos: Vector3 | undefined;
-		let buildingType: string | undefined;
-
-		switch (action) {
-			case "BUILD_SETTLEMENT": {
-				buildingType = "Settlement";
-				if (target) {
-					const vertex = mapGenerator.FindVertexById(target);
-					if (vertex) targetPos = vertex.Position;
-				}
-				if (!targetPos) {
-					const v = mapGenerator.GetRandomVertex();
-					if (v) targetPos = v.Position;
-				}
-				break;
-			}
-			case "BUILD_ROAD": {
-				buildingType = "Road";
-				const settlements = playerData.BuildingManager.Settlements;
-				// Scan for vacant edges near settlements
-				for (const s of settlements) {
-					const edgesFolder = game.Workspace.FindFirstChild("Edges");
-					if (!edgesFolder) break;
-					for (const edge of edgesFolder.GetChildren()) {
-						if (edge.IsA("BasePart")) {
-							const dist = edge.Position.sub(s.Position).Magnitude;
-							if (dist < 45) {
-								const key = edge.GetAttribute("Key") as string;
-								const buildingsFolder = game.Workspace.FindFirstChild("Buildings");
-								let occupied = false;
-								if (buildingsFolder) {
-									for (const b of buildingsFolder.GetChildren()) {
-										if (b.GetAttribute("Key") === key) {
-											occupied = true;
-											break;
-										}
+	public HandleSetupTurn(step: "Town1" | "Road1" | "Town2" | "Road2", mapGenerator: MapGenerator, gameService: GameState) {
+		// Same Setup Logic
+		task.delay(1.0, () => {
+			if (step.sub(1, 4) === "Town") {
+				const bestPos = this.GetBestTownSpot(mapGenerator, true);
+				if (bestPos) gameService.OnSetupPlacement(this.UserId, "Town", bestPos);
+			} else {
+				// Road logic reused from previous
+				const playerData = gameService.PlayerData[this.UserId];
+				if (playerData) {
+					const towns = playerData.BuildingManager.GetTowns();
+					const lastTown = towns[towns.size() - 1];
+					if (lastTown) {
+						const edgesFolder = game.Workspace.FindFirstChild("Edges");
+						if (edgesFolder) {
+							for (const edge of edgesFolder.GetChildren()) {
+								if (edge.IsA("BasePart")) {
+									const dist = edge.Position.sub(lastTown.Position).Magnitude;
+									if (dist < 40) {
+										gameService.OnSetupPlacement(this.UserId, "Road", edge.Position);
+										return;
 									}
-								}
-								if (!occupied) {
-									targetPos = edge.Position;
-									break;
 								}
 							}
 						}
 					}
-					if (targetPos) break;
 				}
-				break;
 			}
-			case "BUILD_CITY": {
-				buildingType = "City";
-				const settlements = playerData.BuildingManager.Settlements;
-				if (settlements.size() > 0) {
-					const s = settlements[0];
-					if (s && s.Type === "Settlement") targetPos = s.Position;
-				}
-				break;
-			}
-			case "COLLECT_RESOURCE": {
-				const res = this.FindNearestOwnedResource(playerData);
-				if (res) {
-					this.taskQueue.push({ type: "COLLECT", part: res, position: res.Position });
-					Logger.Info("AIPlayer", `${this.Name} queued collection of ${res.GetAttribute("ResourceType")}`);
-				}
-				break;
-			}
-		}
-
-		if (targetPos && buildingType) {
-			this.taskQueue.push({ type: "BUILD", buildingType, position: targetPos });
-			Logger.Info("AIPlayer", `${this.Name} queued ${buildingType} at ${targetPos}`);
-		} else if (action !== "COLLECT_RESOURCE") {
-			Logger.Warn("AIPlayer", `${this.Name} couldn't find a valid target for ${action}`);
-		}
-
-		this.State = "Idle";
+		});
 	}
 }

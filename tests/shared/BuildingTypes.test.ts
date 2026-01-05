@@ -1,7 +1,7 @@
 
 // 1. Define Mocks locally
 class Vector3Mock {
-	constructor(public x: number, public y: number, public z: number) {}
+	constructor(public x: number, public y: number, public z: number) { }
 }
 
 // 2. Assign to global before ANY imports
@@ -51,10 +51,10 @@ describe("BuildingTypes", () => {
 		}
 	});
 
-	it("Settlement should have specific properties", () => {
-		const settlement = BuildingTypes.Settlement;
-		expect(settlement).toBeDefined();
-		expect(settlement.IsSettlement).toBe(true);
-		expect(settlement.ClaimRadius).toBeGreaterThan(0);
+	it("Town should have specific properties", () => {
+		const town = BuildingTypes.Town;
+		expect(town).toBeDefined();
+		expect(town.IsTown).toBe(true);
+		expect(town.ClaimRadius).toBeGreaterThan(0);
 	});
 });

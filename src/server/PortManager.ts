@@ -52,7 +52,7 @@ class PortManager {
 		giveResourceType: string,
 		receiveResourceType: string,
 		amount: number = 1,
-	): [boolean, string] {
+	): LuaTuple<[boolean, string]> {
 		// Validate resources
 		if (!ResourceTypes.Get(giveResourceType) || !ResourceTypes.Get(receiveResourceType)) {
 			return $tuple(false, "Invalid resource type");
@@ -101,8 +101,8 @@ class PortManager {
 		return $tuple(true, "Trade successful");
 	}
 
-	// Called when a player builds a settlement on a port intersection
-	ClaimPort(position: Vector3, settlementId: string) {
+	// Called when a player builds a town on a port intersection
+	ClaimPort(position: Vector3, townId: string) {
 		// Find any port that has a vertex near this position
 		for (const portLocation of this.PortLocations) {
 			for (const vertex of portLocation.Vertices) {
@@ -116,7 +116,7 @@ class PortManager {
 
 						Logger.Info(
 							"PortManager",
-							`${this.Player.Name} claimed ${portLocation.PortType} at settlement ${settlementId}`,
+							`${this.Player.Name} claimed ${portLocation.PortType} at town ${townId}`,
 						);
 
 						// Notify client about port ownership
@@ -131,7 +131,7 @@ class PortManager {
 		}
 	}
 
-	// Calculate Harbor Master points (Settlement = 1 point, City = 2 points)
+	// Calculate Harbor Master points (Town = 1 point, City = 2 points)
 	GetHarborMasterPoints(): number {
 		return this.OwnedPorts.size();
 	}

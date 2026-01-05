@@ -24,9 +24,66 @@ let lastValidPlacement: boolean | undefined; // Track to log only on change
 let lastLoggedKey: string | undefined; // Track location to log change
 let lastBlueprintSelectionTime = 0;
 let isGameStarted = false;
+let isMySetupTurn = false;
+let currentSetupStep: "Town1" | "Road1" | "Town2" | "Road2" | undefined;
+
+// Camera Focus for free placement view
+let cameraFocusPart: Part | undefined;
+const getCameraFocus = () => {
+	if (!cameraFocusPart) {
+		cameraFocusPart = new Instance("Part");
+		cameraFocusPart.Name = "CameraFocus";
+		cameraFocusPart.Anchored = true;
+		cameraFocusPart.CanCollide = false;
+		cameraFocusPart.Transparency = 1;
+		cameraFocusPart.Size = new Vector3(1, 1, 1);
+		cameraFocusPart.Position = new Vector3(0, 5, 0);
+		cameraFocusPart.Parent = game.Workspace;
+	}
+	return cameraFocusPart;
+};
+
+const updateCameraSubject = () => {
+	if (placementMode || (!isGameStarted && currentSetupStep !== undefined)) {
+		const focus = getCameraFocus();
+		if (camera.CameraSubject !== focus) {
+			// Center focus on character initially if we just entered
+			const char = player.Character;
+			if (char && char.PrimaryPart && focus.Position.Magnitude === 5) {
+				focus.Position = char.PrimaryPart.Position;
+			}
+			camera.CameraSubject = focus;
+			camera.CameraType = Enum.CameraType.Custom;
+		}
+	} else if (!isMapView) {
+		const char = player.Character;
+		const hum = char?.FindFirstChildOfClass("Humanoid");
+		if (hum && camera.CameraSubject !== hum) {
+			camera.CameraSubject = hum;
+			camera.CameraType = Enum.CameraType.Custom;
+		}
+	}
+};
 
 ClientEvents.GameStart.connect(() => {
 	isGameStarted = true;
+	isMySetupTurn = false;
+});
+
+ClientEvents.SetupTurnUpdate.connect((userId, step) => {
+	isMySetupTurn = (userId === player.UserId);
+	currentSetupStep = step;
+
+	if (isMySetupTurn) {
+		const blueprintToSelect = step.sub(1, 4) === "Town" ? "Town" : "Road";
+		selectedBlueprint = blueprintToSelect;
+		placementMode = true;
+		camera.CameraType = Enum.CameraType.Custom;
+		Logger.Info("PlayerController", `It's your setup turn! Please place a ${blueprintToSelect}.`);
+	} else if (placementMode) {
+		// Exit placement mode if it was their turn but now it's someone else's (safety)
+		exitPlacementMode();
+	}
 });
 
 // Wait for BlueprintBookUI to be available
@@ -54,6 +111,7 @@ task.spawn(() => {
 
 			selectedBlueprint = blueprintName;
 			placementMode = true;
+			camera.CameraType = Enum.CameraType.Custom;
 			Logger.Info("PlayerController", `[${player.Name}] Entering placement mode for: ${blueprintName}`);
 		});
 	} else {
@@ -63,9 +121,11 @@ task.spawn(() => {
 
 const player = Players.LocalPlayer;
 const camera = game.Workspace.CurrentCamera!;
-
 // Camera settings
+camera.CameraType = Enum.CameraType.Custom;
 camera.FieldOfView = 80;
+player.CameraMaxZoomDistance = 400; // Allow "free" zooming
+player.CameraMinZoomDistance = 0.5;
 
 // Zoom threshold - below this distance, lock mouse (FPV mode)
 const ZOOM_THRESHOLD = 5; // studs
@@ -77,6 +137,9 @@ const RUN_SPEED = 32;
 // Track current mode
 let isFirstPerson = false;
 let isSprinting = false;
+let isMapView = false;
+const MAP_CAMERA_HEIGHT = 300;
+const MAP_CAMERA_ANGLE = math.rad(-85);
 
 // Update player speed based on sprint state
 const updateSpeed = () => {
@@ -104,9 +167,12 @@ const updateMouseMode = () => {
 	}
 
 	// Don't lock mouse if blueprint book or placement mode is active
-	if ((BlueprintBookUI && BlueprintBookUI.IsOpen()) || placementMode) {
-		UserInputService.MouseBehavior = Enum.MouseBehavior.Default;
-		UserInputService.MouseIconEnabled = true;
+	// Also don't lock if in setup phase (to allow free camera)
+	if ((BlueprintBookUI && BlueprintBookUI.IsOpen()) || placementMode || isMapView || (!isGameStarted && currentSetupStep !== undefined)) {
+		if (UserInputService.MouseBehavior !== Enum.MouseBehavior.Default) {
+			UserInputService.MouseBehavior = Enum.MouseBehavior.Default;
+			UserInputService.MouseIconEnabled = true;
+		}
 		return;
 	}
 
@@ -121,13 +187,17 @@ const updateMouseMode = () => {
 
 		if (isFirstPerson) {
 			// First-person mode: lock mouse
-			UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter;
-			UserInputService.MouseIconEnabled = false;
+			if (UserInputService.MouseBehavior !== Enum.MouseBehavior.LockCenter) {
+				UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter;
+				UserInputService.MouseIconEnabled = false;
+			}
 			Logger.Debug("PlayerController", "Entered first-person mode");
 		} else {
 			// Third-person mode: free mouse
-			UserInputService.MouseBehavior = Enum.MouseBehavior.Default;
-			UserInputService.MouseIconEnabled = true;
+			if (UserInputService.MouseBehavior !== Enum.MouseBehavior.Default) {
+				UserInputService.MouseBehavior = Enum.MouseBehavior.Default;
+				UserInputService.MouseIconEnabled = true;
+			}
 			Logger.Debug("PlayerController", "Entered third-person mode (mouse unlocked)");
 		}
 	}
@@ -205,7 +275,7 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 		if (!key) {
 			return false;
 		}
-		const folders = ["Settlements", "Buildings"];
+		const folders = ["Towns", "Buildings"];
 		for (const folderName of folders) {
 			const folder = game.Workspace.FindFirstChild(folderName);
 			if (folder) {
@@ -222,6 +292,15 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 		return false;
 	};
 
+	// 1. Check for open sea (must touch at least one land tile)
+	if (blueprint.PlacementType === "edge") {
+		const adjLand = (marker.GetAttribute("AdjacentLandTileCount") as number);
+		if (adjLand === 0) return false;
+	} else if (blueprint.PlacementType === "3-way" || blueprintName === "Town") {
+		const adjLand = (marker.GetAttribute("AdjacentLandTileCount") as number);
+		if (adjLand === 0) return false;
+	}
+
 	// Adjacency rules
 	if (blueprint.PlacementType === "3-way") {
 		const myKey = marker.GetAttribute("Key") as string | undefined;
@@ -237,30 +316,34 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 			}
 		}
 
-		// Check if player has any existing buildings/foundations
-		const checkOwnedBuildings = (fName: string) => {
-			const f = game.Workspace.FindFirstChild(fName);
-			if (!f) {
-				return false;
-			}
-			for (const m of f.GetChildren()) {
-				if (m.IsA("Model")) {
-					const b = m.FindFirstChild("FoundationBase") ?? m.PrimaryPart;
-					if (b && b.IsA("BasePart") && b.GetAttribute("OwnerId") === player.UserId) {
-						return true;
+		// Check how many towns/foundations the player already has
+		const countOwnedTowns = () => {
+			let count = 0;
+			const folders = ["Towns", "Buildings"];
+			for (const folderName of folders) {
+				const f = game.Workspace.FindFirstChild(folderName);
+				if (f) {
+					for (const m of f.GetChildren()) {
+						if (m.IsA("Model")) {
+							const b = m.FindFirstChild("FoundationBase") ?? m.PrimaryPart;
+							const isActuallyTown = m.Name.find("Town")[0] !== undefined || m.Name.find("City")[0] !== undefined || b?.GetAttribute("BlueprintName") === "Town";
+							if (b && b.IsA("BasePart") && b.GetAttribute("OwnerId") === player.UserId && (m.Name.find("Town")[0] !== undefined || m.Name.find("City")[0] !== undefined)) {
+								count += 1;
+							}
+						}
 					}
 				}
 			}
-			return false;
+			return count;
 		};
 
-		const hasAnyBuildings = checkOwnedBuildings("Settlements") || checkOwnedBuildings("Buildings");
+		const ownedTownCount = countOwnedTowns();
 
-		if (!hasAnyBuildings) {
+		if (ownedTownCount < 2 || isMySetupTurn) {
 			return true;
 		}
 
-		// Subsequent settlements must be connected via road (standard Catan)
+		// Subsequent towns must be connected via road (standard Catan)
 		let ownedRoadFound = false;
 		const bFolder = game.Workspace.FindFirstChild("Buildings");
 		if (bFolder) {
@@ -269,9 +352,8 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 					const b = m.FindFirstChild("FoundationBase") ?? m.PrimaryPart;
 					if (b && b.IsA("BasePart") && b.GetAttribute("OwnerId") === player.UserId) {
 						const key = b.GetAttribute("Key") as string | undefined;
-						const findResult = key && myKey ? string.find(key, myKey) : undefined;
-						const found = findResult ? findResult[0] : undefined;
-						if (found !== undefined) {
+						// Road keys are "V1:V2". We check if our vertex key is part of it.
+						if (key && myKey && (key.find(myKey, 1, true)[0] !== undefined)) {
 							ownedRoadFound = true;
 							break;
 						}
@@ -286,12 +368,12 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 
 		return false;
 	} else if (blueprint.PlacementType === "edge") {
-		// Roads MUST connect to a settlement or road you own
+		// Roads MUST connect to a town or road you own
 		const v1 = marker.GetAttribute("Vertex1") as string | undefined;
 		const v2 = marker.GetAttribute("Vertex2") as string | undefined;
 
-		// Check for owned settlement at either vertex endpoint
-		const folders = ["Settlements", "Buildings"];
+		// Check for owned town at either vertex endpoint
+		const folders = ["Towns", "Buildings"];
 		for (const folder of folders) {
 			const f = game.Workspace.FindFirstChild(folder);
 			if (f) {
@@ -300,11 +382,11 @@ const isSnapPointValidForBlueprint = (marker: BasePart | undefined, blueprintNam
 						const base = model.FindFirstChild("FoundationBase") ?? model.PrimaryPart;
 						if (base && base.IsA("BasePart")) {
 							const ownerId = base.GetAttribute("OwnerId");
-							const settlementKey = base.GetAttribute("Key") as string | undefined;
+							const townKey = base.GetAttribute("Key") as string | undefined;
 
 							if (ownerId === player.UserId) {
-								// Check if settlement's key matches either vertex of this edge
-								if (settlementKey && (settlementKey === v1 || settlementKey === v2)) {
+								// Check if town's key matches either vertex of this edge
+								if (townKey && (townKey === v1 || townKey === v2)) {
 									return true;
 								}
 							}
@@ -522,7 +604,7 @@ const findNearbyFoundation = () => {
 	for (const object of game.Workspace.GetChildren()) {
 		// Also check inside folders if they exist
 		let searchArea = [object];
-		if (object.IsA("Folder") && (object.Name === "Buildings" || object.Name === "Settlements")) {
+		if (object.IsA("Folder") && (object.Name === "Buildings" || object.Name === "Towns")) {
 			searchArea = object.GetChildren();
 		}
 
@@ -560,9 +642,44 @@ const findNearbyFoundation = () => {
 };
 
 // Update every frame
-RunService.RenderStepped.Connect(() => {
+RunService.RenderStepped.Connect((deltaTime) => {
 	updateMouseMode();
 	updatePlacementPreview();
+	updateCameraSubject();
+
+	// Handle Map View (Locked Top-Down)
+	if (isMapView) {
+		camera.CameraType = Enum.CameraType.Scriptable;
+		const targetPos = new Vector3(0, 0, 0);
+		const targetCFrame = new CFrame(targetPos.add(new Vector3(0, MAP_CAMERA_HEIGHT, 0)))
+			.mul(CFrame.Angles(MAP_CAMERA_ANGLE, 0, 0));
+
+		camera.CFrame = camera.CFrame.Lerp(targetCFrame, 0.1);
+	}
+
+	// Handle Camera Panning in Placement/Setup Mode
+	if (placementMode || (!isGameStarted && currentSetupStep !== undefined)) {
+		const focus = getCameraFocus();
+		let moveDir = new Vector3(0, 0, 0);
+
+		// Use camera-relative movement for panning
+		const look = camera.CFrame.LookVector;
+		const right = camera.CFrame.RightVector;
+		const flatLook = new Vector3(look.X, 0, look.Z).Unit;
+		const flatRight = new Vector3(right.X, 0, right.Z).Unit;
+
+		if (UserInputService.IsKeyDown(Enum.KeyCode.W)) moveDir = moveDir.add(flatLook);
+		if (UserInputService.IsKeyDown(Enum.KeyCode.S)) moveDir = moveDir.sub(flatLook);
+		if (UserInputService.IsKeyDown(Enum.KeyCode.A)) moveDir = moveDir.sub(flatRight);
+		if (UserInputService.IsKeyDown(Enum.KeyCode.D)) moveDir = moveDir.add(flatRight);
+		if (UserInputService.IsKeyDown(Enum.KeyCode.Q)) moveDir = moveDir.add(new Vector3(0, 1, 0));
+		if (UserInputService.IsKeyDown(Enum.KeyCode.E)) moveDir = moveDir.sub(new Vector3(0, 1, 0));
+
+		if (moveDir.Magnitude > 0) {
+			const panSpeed = UserInputService.IsKeyDown(Enum.KeyCode.LeftShift) ? 200 : 100;
+			focus.Position = focus.Position.add(moveDir.Unit.mul(panSpeed * deltaTime));
+		}
+	}
 
 	// Check for nearby foundation (when not in placement mode)
 	if (!placementMode) {
@@ -602,21 +719,59 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 		}
 	}
 
-	// Cancel placement with Escape
-	if (input.KeyCode === Enum.KeyCode.Escape && placementMode) {
-		exitPlacementMode();
+	// Toggle Map View with 'M' key
+	if (input.KeyCode === Enum.KeyCode.M && isGameStarted) {
+		isMapView = !isMapView;
+		if (!isMapView) {
+			camera.CameraType = Enum.CameraType.Custom;
+			if (player.Character) {
+				const humanoid = player.Character.FindFirstChildOfClass("Humanoid");
+				if (humanoid) camera.CameraSubject = humanoid;
+			}
+		}
+		Logger.Info("PlayerController", `Map View: ${isMapView ? "Enabled" : "Disabled"}`);
 	}
 
-	// Place foundation with left mouse button
+	// Manual Camera Reset with 'V' key
+	if (input.KeyCode === Enum.KeyCode.V && isGameStarted) {
+		isMapView = false;
+		camera.CameraType = Enum.CameraType.Custom;
+		if (player.Character) {
+			const humanoid = player.Character.FindFirstChildOfClass("Humanoid");
+			if (humanoid) camera.CameraSubject = humanoid;
+		}
+		Logger.Info("PlayerController", "Camera manually reset");
+	}
+
+	// Cancel placement with Escape or C
+	if (placementMode) {
+		const isC = input.KeyCode === Enum.KeyCode.C;
+		const isEscape = input.KeyCode === Enum.KeyCode.Escape;
+		const altPressed = UserInputService.IsKeyDown(Enum.KeyCode.LeftAlt) || UserInputService.IsKeyDown(Enum.KeyCode.RightAlt);
+
+		if (isEscape || (isC && !altPressed)) {
+			exitPlacementMode();
+		}
+	}
+
+	// Place structure
 	if (placementMode && input.UserInputType === Enum.UserInputType.MouseButton1) {
 		if (currentVertex && isValidPlacement && selectedBlueprint) {
 			const rotation = currentVertex.Rotation;
 			const snapKey = currentVertex.GetAttribute("Key") as string | undefined;
-			ClientEvents.PlaceFoundation.fire(selectedBlueprint, currentVertex.Position, rotation, snapKey ?? "");
-			Logger.Info("PlayerController", `[${player.Name}] Placed foundation for ${selectedBlueprint}`);
+
+			if (isMySetupTurn) {
+				ClientEvents.SetupPlacement.fire(selectedBlueprint, currentVertex.Position);
+				Logger.Info("PlayerController", `[${player.Name}] Finalized setup placement for ${selectedBlueprint}`);
+				isMySetupTurn = false; // Reset locally to avoid double fire
+			} else {
+				ClientEvents.PlaceFoundation.fire(selectedBlueprint, currentVertex.Position, rotation, snapKey ?? "");
+				Logger.Info("PlayerController", `[${player.Name}] Placed foundation for ${selectedBlueprint}`);
+			}
+
 			exitPlacementMode();
 		} else {
-			Logger.Warn("PlayerController", `[${player.Name}] Invalid placement location`);
+			// Fail silently or play a sound, but don't spam warn logs
 		}
 	}
 
@@ -663,11 +818,7 @@ UserInputService.InputBegan.Connect((input, gameProcessed) => {
 		}
 	}
 
-	// Open Research with 'R' key
-	if (input.KeyCode === Enum.KeyCode.R && isGameStarted) {
-		ClientEvents.StartResearch.fire("ImprovedTools");
-		Logger.Debug("PlayerController", "Requested research: ImprovedTools");
-	}
+
 
 	// Sprint with Shift
 	if (input.KeyCode === Enum.KeyCode.LeftShift || input.KeyCode === Enum.KeyCode.RightShift) {

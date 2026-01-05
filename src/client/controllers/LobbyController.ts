@@ -8,14 +8,20 @@ export class LobbyController implements OnStart {
     onStart() {
         Logger.Info("LobbyController", "Initialized");
 
+        const lobby = Workspace.WaitForChild("Lobby", 5) as Folder | undefined;
+        if (!lobby) {
+            Logger.Info("LobbyController", "Lobby not found (game may already be in progress). Skipping lobby setup.");
+            return;
+        }
+
         // Listen for all clicks on "RemoveAI" buttons in the world SurfaceGuis
         // We'll use a DescendantAdded listener to catch dynamically created buttons
-        Workspace.WaitForChild("Lobby").DescendantAdded.Connect((descendant) => {
+        lobby.DescendantAdded.Connect((descendant) => {
             this.setupButton(descendant);
         });
 
         // Setup existing buttons
-        Workspace.WaitForChild("Lobby").GetDescendants().forEach(d => this.setupButton(d));
+        lobby.GetDescendants().forEach(d => this.setupButton(d));
     }
 
     private setupButton(instance: Instance) {

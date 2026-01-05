@@ -14,6 +14,11 @@ screenGui.ResetOnSpawn = false;
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
 screenGui.Parent = playerGui;
 
+let currentTurnUserId: number | undefined;
+let currentTurnStep: string | undefined;
+let isSetupPhase = false;
+let lastScores: { userId: number; name: string; score: number }[] = [];
+
 const mainFrame = new Instance("Frame");
 mainFrame.Name = "MainFrame";
 mainFrame.Size = new UDim2(0, 220, 0, 45); // Start small
@@ -52,10 +57,45 @@ divider.BackgroundTransparency = 0.6;
 divider.BorderSizePixel = 0;
 divider.Parent = mainFrame;
 
+const turnPanel = new Instance("Frame");
+turnPanel.Name = "TurnPanel";
+turnPanel.Size = new UDim2(1, -10, 0, 40);
+turnPanel.Position = new UDim2(0, 5, 0, 40);
+turnPanel.BackgroundColor3 = Color3.fromRGB(40, 40, 60);
+turnPanel.BackgroundTransparency = 0.4;
+turnPanel.BorderSizePixel = 0;
+turnPanel.Visible = false;
+turnPanel.Parent = mainFrame;
+
+const turnCorner = new Instance("UICorner");
+turnCorner.CornerRadius = new UDim(0, 6);
+turnCorner.Parent = turnPanel;
+
+const turnIcon = new Instance("TextLabel");
+turnIcon.Name = "Icon";
+turnIcon.Size = new UDim2(0, 30, 1, 0);
+turnIcon.Position = new UDim2(0, 5, 0, 0);
+turnIcon.BackgroundTransparency = 1;
+turnIcon.Text = "👉";
+turnIcon.TextSize = 18;
+turnIcon.Parent = turnPanel;
+
+const turnLabel = new Instance("TextLabel");
+turnLabel.Name = "TurnLabel";
+turnLabel.Size = new UDim2(1, -40, 1, 0);
+turnLabel.Position = new UDim2(0, 35, 0, 0);
+turnLabel.BackgroundTransparency = 1;
+turnLabel.TextColor3 = Color3.fromRGB(200, 200, 255);
+turnLabel.Font = Enum.Font.GothamMedium;
+turnLabel.TextSize = 13;
+turnLabel.TextXAlignment = Enum.TextXAlignment.Left;
+turnLabel.Text = "Waiting for game...";
+turnLabel.Parent = turnPanel;
+
 const playerList = new Instance("ScrollingFrame");
 playerList.Name = "PlayerList";
-playerList.Size = new UDim2(1, -10, 1, -45);
-playerList.Position = new UDim2(0, 5, 0, 40);
+playerList.Size = new UDim2(1, -10, 1, -85);
+playerList.Position = new UDim2(0, 5, 0, 80);
 playerList.BackgroundTransparency = 1;
 playerList.ScrollBarThickness = 2;
 playerList.CanvasSize = new UDim2(0, 0, 0, 0);
@@ -67,6 +107,7 @@ layout.SortOrder = Enum.SortOrder.LayoutOrder;
 layout.Parent = playerList;
 
 const updateScores = (scores: { userId: number; name: string; score: number }[]) => {
+    lastScores = scores;
     playerList.ClearAllChildren();
 
     const layout = new Instance("UIListLayout");
@@ -114,21 +155,77 @@ const updateScores = (scores: { userId: number; name: string; score: number }[])
             nameLabel.TextColor3 = Color3.fromRGB(100, 255, 100);
             scoreLabel.TextColor3 = Color3.fromRGB(100, 255, 100);
         }
+
+        // Highlight if it's their turn in setup phase
+        if (isSetupPhase && data.userId === currentTurnUserId) {
+            entry.BackgroundTransparency = 0.8;
+            entry.BackgroundColor3 = Color3.fromRGB(255, 255, 150);
+            nameLabel.TextColor3 = Color3.fromRGB(255, 255, 150);
+
+            // Add a small bulb or indicator
+            const turnIndicator = new Instance("Frame");
+            turnIndicator.Size = new UDim2(0, 4, 0.6, 0);
+            turnIndicator.Position = new UDim2(0, 0, 0.2, 0);
+            turnIndicator.BackgroundColor3 = Color3.fromRGB(255, 215, 0);
+            turnIndicator.BorderSizePixel = 0;
+            turnIndicator.Parent = entry;
+        }
     }
 
     playerList.CanvasSize = new UDim2(0, 0, 0, scores.size() * 34);
 
-    // Adjust frame height based on player count
-    const targetHeight = math.clamp(50 + scores.size() * 34, 50, 400);
+    // Adjust frame height based on player count and if setup phase
+    const baseHeight = isSetupPhase ? 90 : 50;
+    const targetHeight = math.clamp(baseHeight + scores.size() * 34, 50, 500);
     TweenService.Create(mainFrame, new TweenInfo(0.3), { Size: new UDim2(0, 220, 0, targetHeight) }).Play();
+};
+
+const updateTurnDisplay = () => {
+    if (isSetupPhase && currentTurnUserId !== undefined) {
+        turnPanel.Visible = true;
+        playerList.Position = new UDim2(0, 5, 0, 85);
+        playerList.Size = new UDim2(1, -10, 1, -90);
+
+        const currentPlayerName = lastScores.find(s => s.userId === currentTurnUserId)?.name ?? "Player";
+        const stepName = currentTurnStep?.gsub("%d", "")[0] ?? "Structure";
+        turnLabel.Text = `${currentPlayerName}: Place ${stepName}`;
+
+        if (currentTurnUserId === player.UserId) {
+            turnLabel.TextColor3 = Color3.fromRGB(255, 255, 150);
+            turnPanel.BackgroundColor3 = Color3.fromRGB(60, 60, 40);
+        } else {
+            turnLabel.TextColor3 = Color3.fromRGB(200, 200, 255);
+            turnPanel.BackgroundColor3 = Color3.fromRGB(40, 40, 60);
+        }
+    } else {
+        turnPanel.Visible = false;
+        playerList.Position = new UDim2(0, 5, 0, 40);
+        playerList.Size = new UDim2(1, -10, 1, -45);
+    }
+    updateScores(lastScores);
 };
 
 ClientEvents.ScoresUpdate.connect((scores) => {
     updateScores(scores);
 });
 
+ClientEvents.SetupTurnUpdate.connect((userId, step) => {
+    isSetupPhase = true;
+    currentTurnUserId = userId;
+    currentTurnStep = step;
+    updateTurnDisplay();
+});
+
+ClientEvents.TimerEvent.connect((seconds) => {
+    if (seconds > 0 && isSetupPhase) {
+        isSetupPhase = false;
+        updateTurnDisplay();
+    }
+});
+
 ClientEvents.GameStart.connect(() => {
     screenGui.Enabled = true;
+    isSetupPhase = false; // Will be set true by SetupTurnUpdate if it comes
 });
 
 screenGui.Enabled = false; // Wait for GameStart

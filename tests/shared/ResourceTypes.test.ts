@@ -1,3 +1,4 @@
+
 // Import mocks before any other imports
 import "../testUtils";
 
@@ -59,7 +60,7 @@ describe("ResourceTypes", () => {
 		});
 
 		it("should have correct building costs", () => {
-			expect(ResourceTypes.Brick.BuildingCost.Settlement).toBe(1);
+			expect(ResourceTypes.Brick.BuildingCost.Town).toBe(1);
 			expect(ResourceTypes.Brick.BuildingCost.Road).toBe(1);
 		});
 
@@ -86,7 +87,7 @@ describe("ResourceTypes", () => {
 		});
 
 		it("should have correct building costs", () => {
-			expect(ResourceTypes.Wood.BuildingCost.Settlement).toBe(1);
+			expect(ResourceTypes.Wood.BuildingCost.Town).toBe(1);
 			expect(ResourceTypes.Wood.BuildingCost.Road).toBe(1);
 		});
 	});
@@ -109,7 +110,7 @@ describe("ResourceTypes", () => {
 		});
 
 		it("should have correct building costs", () => {
-			expect(ResourceTypes.Wheat.BuildingCost.Settlement).toBe(1);
+			expect(ResourceTypes.Wheat.BuildingCost.Town).toBe(1);
 			expect(ResourceTypes.Wheat.BuildingCost.City).toBe(2);
 		});
 	});
@@ -133,7 +134,7 @@ describe("ResourceTypes", () => {
 
 		it("should have correct building costs", () => {
 			expect(ResourceTypes.Ore.BuildingCost.City).toBe(3);
-			expect(ResourceTypes.Ore.BuildingCost.Settlement).toBeUndefined();
+			expect(ResourceTypes.Ore.BuildingCost.Town).toBeUndefined();
 		});
 	});
 
@@ -155,7 +156,7 @@ describe("ResourceTypes", () => {
 		});
 
 		it("should have correct building costs", () => {
-			expect(ResourceTypes.Wool.BuildingCost.Settlement).toBe(1);
+			expect(ResourceTypes.Wool.BuildingCost.Town).toBe(1);
 		});
 	});
 

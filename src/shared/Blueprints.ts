@@ -33,10 +33,10 @@ const ResourceIcons: Record<string, string> = {
 };
 
 const Buildings: Record<string, BlueprintInfo> = {
-	Settlement: {
-		Name: "Settlement",
+	Town: {
+		Name: "Town",
 		Icon: "🏠",
-		Description: "A small village that claims adjacent tiles",
+		Description: "A small town that claims adjacent tiles",
 		PlacementType: "3-way", // Place on 3-way vertices
 		Cost: {
 			Wood: 1,
@@ -46,15 +46,15 @@ const Buildings: Record<string, BlueprintInfo> = {
 		},
 		Size: new Vector3(5, 4, 5),
 		ClaimsTiles: true,
-		FirstIsFree: true, // First settlement is free for new players
+		FirstIsFree: true, // First town is free for new players
 		Points: 1,
 	},
 	City: {
 		Name: "City",
 		Icon: "🏰",
-		Description: "Upgrade a settlement to double resource production",
-		PlacementType: "upgrade", // Must upgrade existing settlement
-		RequiresExisting: "Settlement",
+		Description: "Upgrade a town to double resource production",
+		PlacementType: "upgrade", // Must upgrade existing town
+		RequiresExisting: "Town",
 		Cost: {
 			Wheat: 2,
 			Ore: 3,
@@ -66,14 +66,14 @@ const Buildings: Record<string, BlueprintInfo> = {
 	Road: {
 		Name: "Road",
 		Icon: "🛣️",
-		Description: "Connect your settlements",
+		Description: "Connect your towns",
 		PlacementType: "edge", // Place on edges between vertices
 		Cost: {
 			Wood: 1,
 			Brick: 1,
 		},
 		Size: new Vector3(2, 1, 8),
-		RequiresConnection: true, // Must connect to existing road or settlement
+		RequiresConnection: true, // Must connect to existing road or town
 	},
 };
 

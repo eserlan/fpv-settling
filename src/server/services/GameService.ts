@@ -12,7 +12,9 @@ import { MapGenerator } from "./MapGenerator";
 import { PulseManager } from "./PulseManager";
 import { CollectionManager } from "./CollectionManager";
 import { TileOwnershipManager } from "./TileOwnershipManager";
+import { MarketManager } from "./MarketManager";
 import { LobbyGeneratorService } from "./LobbyGeneratorService";
+import ResourceTypes from "shared/ResourceTypes";
 import LogService = require("../LogService");
 import type { PlayerData } from "../PlayerData";
 import type { GameState } from "../GameState";
@@ -23,12 +25,26 @@ import type { GameEntity } from "shared/GameEntity";
 import { NetworkUtils } from "../NetworkUtils";
 import { SkillLevel } from "shared/GameTypes";
 
+const PLAYER_COLORS = [
+	Color3.fromRGB(255, 80, 80),   // Red
+	Color3.fromRGB(80, 80, 255),   // Blue
+	Color3.fromRGB(240, 240, 240), // White
+	Color3.fromRGB(255, 160, 20),  // Orange
+	Color3.fromRGB(80, 255, 80),   // Green
+	Color3.fromRGB(180, 80, 255),  // Purple
+];
+
 @Service({})
 export class GameService implements OnStart, GameState {
 	public PlayerData: Record<number, PlayerData> = {};
 	private isGameStarted = false;
 	private readonly MIN_PLAYERS_TO_START = 1;
 	private readonly TARGET_PLAYER_COUNT = 4; // AI fill target
+	private isSetupPhase = false;
+	private setupSequence: { userId: number, step: "Town1" | "Road1" | "Town2" | "Road2" }[] = [];
+	private currentSetupIndex = 0;
+	private lastPlacedTownPos: Vector3 | undefined;
+	private nextColorIndex = 0;
 
 	constructor(
 		private mapGenerator: MapGenerator,
@@ -36,6 +52,7 @@ export class GameService implements OnStart, GameState {
 		private collectionManager: CollectionManager,
 		private tileOwnershipManager: TileOwnershipManager,
 		private lobbyGenerator: LobbyGeneratorService,
+		private marketManager: MarketManager,
 	) { }
 
 	onStart() {
@@ -48,8 +65,21 @@ export class GameService implements OnStart, GameState {
 		this.lobbyGenerator.GenerateLobby();
 		this.pulseManager.SetGameManager(this);
 
+		this.marketManager.OnOfferPosted = (offer) => {
+			for (const [_, playerData] of pairs(this.PlayerData)) {
+				const entity = playerData.Player;
+				if (!typeIs(entity, "Instance")) { // Is AI
+					(entity as AIPlayer).EvaluateMarketOffer(offer, playerData, this.marketManager);
+				}
+			}
+		};
+
 		Players.PlayerAdded.Connect((player) => this.handlePlayerAdded(player));
 		Players.PlayerRemoving.Connect((player) => this.handlePlayerRemoving(player));
+
+		ServerEvents.SetupPlacement.connect((player, buildingType, position) => {
+			this.OnSetupPlacement(player.UserId, buildingType, position);
+		});
 
 		for (const player of Players.GetPlayers()) {
 			this.handlePlayerAdded(player);
@@ -74,6 +104,13 @@ export class GameService implements OnStart, GameState {
 		this.isGameStarted = true;
 		Logger.Info("GameManager", `Starting Room Game with ${entities.size()} entities...`);
 
+		// Shuffle entities for random snake draft order
+		for (let i = entities.size() - 1; i > 0; i--) {
+			const j = math.random(0, i);
+			const temp = entities[i];
+			entities[i] = entities[j];
+			entities[j] = temp;
+		}
 		// Generate the real map
 		this.mapGenerator.Generate();
 		this.pulseManager.AssignTileNumbers();
@@ -82,7 +119,8 @@ export class GameService implements OnStart, GameState {
 		for (const e of entities) {
 			if (e.isAI) {
 				const aiPlayer = new AIPlayer(e.userId, e.name, e.skill ?? "Intermediate");
-				this.initializePlayerData(aiPlayer);
+				const color = this.getNextColor(); // AI gets a color too
+				this.initializePlayerData(aiPlayer, color);
 				aiPlayer.Spawn(new Vector3(math.random(-50, 50), 150, math.random(-50, 50)));
 			} else {
 				const player = Players.GetPlayerByUserId(e.userId);
@@ -101,7 +139,7 @@ export class GameService implements OnStart, GameState {
 
 		NetworkUtils.Broadcast(ServerEvents.GameStart);
 		this.UpdateScores();
-		Logger.Info("GameManager", "Game Started!");
+		this.StartSetupPhase(entities.map(e => e.userId));
 	}
 
 	public StartGame() {
@@ -153,15 +191,16 @@ export class GameService implements OnStart, GameState {
 			const aiName = `AI_${skill}_${i}`;
 
 			const aiPlayer = new AIPlayer(aiId, aiName, skill);
-			this.initializePlayerData(aiPlayer);
+			const color = this.getNextColor();
+			this.initializePlayerData(aiPlayer, color);
 
 			Logger.Info("GameManager", `Spawned AI: ${aiName} (${skill})`);
 		}
 	}
 
-	private initializePlayerData(entity: GameEntity) {
+	private initializePlayerData(entity: GameEntity, color: Color3) {
 		const resourceManager = new ResourceManager(entity);
-		const buildingManager = new BuildingManager(entity, resourceManager, this.mapGenerator, this.tileOwnershipManager);
+		const buildingManager = new BuildingManager(entity, color, resourceManager, this.mapGenerator, this.tileOwnershipManager);
 		const npcManager = new NPCManager(entity, resourceManager);
 		const researchManager = new ResearchManager(entity, resourceManager);
 		const portManager = new PortManager(entity, resourceManager);
@@ -186,17 +225,25 @@ export class GameService implements OnStart, GameState {
 			TileOwnershipManager: this.tileOwnershipManager,
 			GameTime: 0,
 			PulseTimer: 0,
-			Settlements: [],
-			NeedsFirstSettlement: true,
+			Towns: [],
+			NeedsFirstTown: true,
 			Score: 0,
+			Color: color,
 		};
+	}
+
+	private getNextColor(): Color3 {
+		const color = PLAYER_COLORS[this.nextColorIndex % PLAYER_COLORS.size()];
+		this.nextColorIndex++;
+		return color;
 	}
 
 	private handlePlayerAdded(player: Player) {
 		Logger.Info("GameManager", `Player joined: ${player.Name}`);
 
 		// Initialize player data first so ResourceManager exists
-		this.initializePlayerData(player);
+		const color = this.getNextColor();
+		this.initializePlayerData(player, color);
 
 		// Then init collection with the resource manager
 		const playerData = this.PlayerData[player.UserId];
@@ -220,8 +267,8 @@ export class GameService implements OnStart, GameState {
 			}
 
 			const playerData = this.PlayerData[player.UserId];
-			if (playerData && playerData.NeedsFirstSettlement) {
-				Logger.Info("GameManager", `${player.Name} needs to place first settlement (Press B)`);
+			if (playerData && playerData.NeedsFirstTown) {
+				Logger.Info("GameManager", `${player.Name} needs to place first town (Press B)`);
 			}
 		});
 
@@ -260,7 +307,7 @@ export class GameService implements OnStart, GameState {
 			// Update AI Logic
 			const entity = playerData.Player;
 			if (!typeIs(entity, "Instance")) { // Is AI
-				(entity as AIPlayer).Update(deltaTime, playerData, this.mapGenerator);
+				(entity as AIPlayer).Update(deltaTime, playerData, this.mapGenerator, this.marketManager);
 			}
 		}
 
@@ -291,5 +338,81 @@ export class GameService implements OnStart, GameState {
 		}
 
 		NetworkUtils.Broadcast(ServerEvents.ScoresUpdate, scores);
+	}
+
+	public StartSetupPhase(playerIds: number[]) {
+		this.isSetupPhase = true;
+		this.setupSequence = [];
+		this.currentSetupIndex = 0;
+
+		// Forward round
+		for (const id of playerIds) {
+			this.setupSequence.push({ userId: id, step: "Town1" });
+			this.setupSequence.push({ userId: id, step: "Road1" });
+		}
+		// Reverse round
+		for (let i = playerIds.size() - 1; i >= 0; i--) {
+			const id = playerIds[i];
+			this.setupSequence.push({ userId: id, step: "Town2" });
+			this.setupSequence.push({ userId: id, step: "Road2" });
+		}
+
+		Logger.Info("GameManager", `Setup Phase Initialized with ${this.setupSequence.size()} steps for ${playerIds.size()} players`);
+		this.BroadcastSetupTurn();
+	}
+
+	private BroadcastSetupTurn() {
+		const current = this.setupSequence[this.currentSetupIndex];
+		if (current) {
+			Logger.Info("GameManager", `Setup: Turn for ${this.PlayerData[current.userId]?.Player.Name} - ${current.step}`);
+			NetworkUtils.Broadcast(ServerEvents.SetupTurnUpdate, current.userId, current.step);
+
+			// If AI, trigger AI placement logic
+			const playerData = this.PlayerData[current.userId];
+			if (playerData && !typeIs(playerData.Player, "Instance")) {
+				task.delay(1, () => (playerData.Player as AIPlayer).HandleSetupTurn(current.step, this.mapGenerator, this));
+			}
+		} else {
+			this.EndSetupPhase();
+		}
+	}
+
+	public OnSetupPlacement(userId: number, buildingType: string, position: Vector3): boolean {
+		if (!this.isSetupPhase) return false;
+		const current = this.setupSequence[this.currentSetupIndex];
+		if (!current || current.userId !== userId) return false;
+
+		const playerData = this.PlayerData[userId];
+		if (!playerData) return false;
+
+		// Place for free
+		const [success, err] = playerData.BuildingManager.StartBuilding(buildingType, position, true);
+		if (success) {
+			if (buildingType === "Town") {
+				this.lastPlacedTownPos = position;
+				playerData.NeedsFirstTown = false;
+			}
+			Logger.Info("GameManager", `Setup: Successful placement ${this.currentSetupIndex + 1}/${this.setupSequence.size()} for ${playerData.Player.Name}`);
+			this.currentSetupIndex++;
+			this.BroadcastSetupTurn();
+			return true;
+		} else {
+			Logger.Warn("GameManager", `Setup placement failed for ${playerData.Player.Name}: ${err}`);
+			// If AI, trigger AI placement logic again to pick a new spot
+			if (playerData && !typeIs(playerData.Player, "Instance")) {
+				const ai = playerData.Player as AIPlayer;
+				if (buildingType === "Town") {
+					ai.RecordFailedPlacement(position);
+				}
+				task.defer(() => ai.HandleSetupTurn(current.step, this.mapGenerator, this));
+			}
+			return false;
+		}
+	}
+
+	private EndSetupPhase() {
+		this.isSetupPhase = false;
+		Logger.Info("GameManager", "Setup Phase Completed! Starting game pulses...");
+		this.pulseManager.StartGame();
 	}
 }

@@ -7,8 +7,8 @@ type BuildingInfo = {
 	BuildTime: number;
 	Size: Vector3;
 	ClaimRadius?: number;
-	IsSettlement?: boolean;
-	RequiresSettlement?: boolean;
+	IsTown?: boolean;
+	RequiresTown?: boolean;
 	IsRoad?: boolean;
 	Capacity?: number;
 	StorageCapacity?: number;
@@ -16,8 +16,8 @@ type BuildingInfo = {
 };
 
 const BuildingTypes: Record<string, BuildingInfo> = {
-	Settlement: {
-		Name: "Settlement",
+	Town: {
+		Name: "Town",
 		Description: "Your base! Claims nearby tiles for resource collection",
 		Cost: {
 			Wood: 1,
@@ -25,15 +25,15 @@ const BuildingTypes: Record<string, BuildingInfo> = {
 			Wheat: 1,
 			Wool: 1,
 		},
-		BuildTime: 0, // Instant for first settlement
+		BuildTime: 0, // Instant for first town
 		Size: new Vector3(10, 8, 10),
 		ClaimRadius: 30, // Studs - claims tiles within this radius
-		IsSettlement: true,
+		IsTown: true,
 		Points: 1,
 	},
 	City: {
 		Name: "City",
-		Description: "Upgrade a settlement for double resources",
+		Description: "Upgrade a town for double resources",
 		Cost: {
 			Wheat: 2,
 			Ore: 3,
@@ -41,13 +41,13 @@ const BuildingTypes: Record<string, BuildingInfo> = {
 		BuildTime: 10,
 		Size: new Vector3(15, 12, 15),
 		ClaimRadius: 40,
-		IsSettlement: true,
-		RequiresSettlement: true, // Must be built on existing settlement
+		IsTown: true,
+		RequiresTown: true, // Must be built on existing town
 		Points: 2,
 	},
 	Road: {
 		Name: "Road",
-		Description: "Connects settlements, required for expansion",
+		Description: "Connects towns, required for expansion",
 		Cost: {
 			Wood: 1,
 			Brick: 1,

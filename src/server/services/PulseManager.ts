@@ -30,7 +30,7 @@ export class PulseManager implements OnStart, OnTick {
 	constructor(private robberManager: RobberManager, private tileOwnershipManager: TileOwnershipManager) { }
 
 	onStart() {
-		Logger.Info("PulseManager", "Initialized - Waiting for players to place settlements...");
+		Logger.Info("PulseManager", "Initialized - Waiting for players to place towns...");
 	}
 
 	onTick(deltaTime: number) {
@@ -40,15 +40,10 @@ export class PulseManager implements OnStart, OnTick {
 			this.waitTimer += deltaTime;
 			if (this.waitTimer >= 1) {
 				this.waitTimer = 0;
-				if (this.allPlayersReady()) {
-					this.gameStarted = true;
-					this.pulseTimer = PULSE_INTERVAL;
-					Logger.Info("PulseManager", "All players ready! Starting pulse timer...");
-					ServerEvents.TimerEvent.broadcast(math.floor(this.pulseTimer));
-				} else {
-					ServerEvents.TimerEvent.broadcast(-1);
-				}
+				// During setup phase, we just broadcast -1 to indicate game hasn't "started" its pulse cycle
+				ServerEvents.TimerEvent.broadcast(-1);
 			}
+			return;
 		} else {
 			this.pulseTimer -= deltaTime;
 			if (math.floor(this.pulseTimer) < math.floor(this.pulseTimer + deltaTime)) {
@@ -146,7 +141,7 @@ export class PulseManager implements OnStart, OnTick {
 		for (const tile of mapFolder.GetChildren()) {
 			if (tile.IsA("Model") && tile.PrimaryPart) {
 				const tileType = tile.PrimaryPart.GetAttribute("TileType") as string | undefined;
-				if (tileType !== "Desert") {
+				if (tileType !== "Desert" && tileType !== "Sea") {
 					const q = tile.PrimaryPart.GetAttribute("Q") as number;
 					const r = tile.PrimaryPart.GetAttribute("R") as number;
 					const key = `${q}_${r}`;
@@ -205,11 +200,11 @@ export class PulseManager implements OnStart, OnTick {
 				if (!tileType) continue;
 				const [resourceKey, resourceData] = ResourceTypes.GetByTileType(tileType);
 				if (resourceKey && resourceData) {
-					// Spawn one resource for EVERY settlement/city adjacent to this tile
+					// Spawn one resource for EVERY town/city adjacent to this tile
 					const owners = this.tileOwnershipManager.GetTileOwners(tileQ, tileR);
 
 					for (const owner of owners) {
-						this.SpawnResource(tile, resourceKey, resourceData);
+						this.SpawnResource(tile, resourceKey, resourceData, owner.playerUserId);
 						spawnedResources[resourceKey] = (spawnedResources[resourceKey] ?? 0) + 1;
 
 						if (!playerDrops[owner.playerUserId]) playerDrops[owner.playerUserId] = {};
@@ -256,7 +251,7 @@ export class PulseManager implements OnStart, OnTick {
 		return matching;
 	}
 
-	private SpawnResource(tile: Model, resourceKey: string, resourceData: import("shared/ResourceTypes").ResourceInfo) {
+	private SpawnResource(tile: Model, resourceKey: string, resourceData: import("shared/ResourceTypes").ResourceInfo, ownerUserId: number) {
 		const tilePos = tile.PrimaryPart!.Position;
 		const angle = math.random() * math.pi * 2;
 		const dist = math.random(5, 20);
@@ -267,11 +262,22 @@ export class PulseManager implements OnStart, OnTick {
 		resource.Size = new Vector3(3, 3, 3);
 		resource.Position = spawnPos;
 		resource.Color = resourceData.Color;
-		resource.Material = resourceData.Material;
+		resource.Material = Enum.Material.Neon; // Glow!
 		resource.Anchored = false;
 		resource.CanCollide = true;
+		resource.CollisionGroup = "Resources";
 		resource.SetAttribute("ResourceType", resourceKey);
 		resource.SetAttribute("Amount", 1);
+		resource.SetAttribute("OwnerId", ownerUserId);
+
+		const particles = new Instance("ParticleEmitter");
+		particles.Color = new ColorSequence(resourceData.Color);
+		particles.Size = new NumberSequence(0.5, 0);
+		particles.Transparency = new NumberSequence(0.5, 1);
+		particles.Lifetime = new NumberRange(1, 2);
+		particles.Speed = new NumberRange(1, 2);
+		particles.Rate = 5;
+		particles.Parent = resource;
 
 		const tileQ = tile.PrimaryPart!.GetAttribute("Q") as number;
 		const tileR = tile.PrimaryPart!.GetAttribute("R") as number;
@@ -281,9 +287,36 @@ export class PulseManager implements OnStart, OnTick {
 
 		const light = new Instance("PointLight");
 		light.Color = resourceData.Color;
-		light.Brightness = 2;
-		light.Range = 8;
+		light.Brightness = 5; // Increased from 2
+		light.Range = 12; // Increased from 8
+		light.Shadows = true;
 		light.Parent = resource;
+
+		const highlight = new Instance("Highlight");
+		highlight.FillColor = resourceData.Color;
+		highlight.OutlineColor = Color3.fromRGB(255, 255, 255);
+		highlight.FillTransparency = 0.5;
+		highlight.OutlineTransparency = 0;
+		highlight.Adornee = resource;
+		highlight.Parent = resource;
+
+		const billboard = new Instance("BillboardGui");
+		billboard.Name = "ResourceLabel";
+		billboard.Size = new UDim2(4, 0, 1, 0);
+		billboard.StudsOffset = new Vector3(0, 3, 0);
+		billboard.AlwaysOnTop = true;
+		billboard.MaxDistance = 100;
+		billboard.Parent = resource;
+
+		const label = new Instance("TextLabel");
+		label.Size = new UDim2(1, 0, 1, 0);
+		label.BackgroundTransparency = 1;
+		label.Text = `${resourceData.Icon} ${resourceKey}`;
+		label.TextColor3 = Color3.fromRGB(255, 255, 255);
+		label.TextStrokeTransparency = 0;
+		label.TextScaled = true;
+		label.Font = Enum.Font.GothamBold;
+		label.Parent = billboard;
 
 		const resourcesFolder = (game.Workspace.FindFirstChild("Resources") as Folder) ?? new Instance("Folder", game.Workspace);
 		resourcesFolder.Name = "Resources";
@@ -293,20 +326,12 @@ export class PulseManager implements OnStart, OnTick {
 		ServerEvents.ResourceSpawned.broadcast(resourceKey, spawnPos, tileQ, tileR);
 	}
 
-	private allPlayersReady() {
-		if (!this.GameManagerRef) return false;
 
-		const playerDataMap = this.GameManagerRef.PlayerData;
-		let count = 0;
-
-		for (const [userId, playerData] of pairs(playerDataMap)) {
-			count++;
-			if (!playerData.BuildingManager || !playerData.BuildingManager.HasPlacedFirstSettlement) {
-				return false;
-			}
-		}
-
-		return count > 0; // Don't start if no one is in the game
+	public StartGame() {
+		this.gameStarted = true;
+		this.pulseTimer = PULSE_INTERVAL;
+		Logger.Info("PulseManager", "Pulse Phase Started!");
+		ServerEvents.TimerEvent.broadcast(math.floor(this.pulseTimer));
 	}
 
 	public SetGameManager(gm: GameState) {
@@ -314,7 +339,7 @@ export class PulseManager implements OnStart, OnTick {
 	}
 
 	public GetTimer() {
-		return this.pulseTimer;
+		return this.gameStarted ? this.pulseTimer : -1;
 	}
 
 	public ForcePulse() {
