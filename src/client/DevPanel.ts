@@ -8,6 +8,7 @@ const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
 
 import * as Logger from "shared/Logger";
 import { ClientEvents } from "./ClientEvents";
+import { MakeDraggable } from "./UIUtils";
 
 const DevPanel = {} as Record<string, unknown>;
 
@@ -49,6 +50,8 @@ titleLabel.TextScaled = true;
 titleLabel.Font = Enum.Font.GothamBold;
 titleLabel.Text = "🛠️ DEV PANEL";
 titleLabel.Parent = panelFrame;
+
+MakeDraggable(panelFrame, titleLabel);
 
 const titleCorner = new Instance("UICorner");
 titleCorner.CornerRadius = new UDim(0, 12);
@@ -140,6 +143,32 @@ createSectionLabel("Pulse Controls");
 
 createActionButton("ForcePulse", "⚡ Force Dice Roll", () => {
 	ClientEvents.DevEvent.fire("ForcePulse");
+});
+
+// ========== ACTION: Toggle Terrain ==========
+createSectionLabel("Visual Controls");
+
+createToggleButton("ShowTerrain", "🌲 Show Dominating Terrain", true, (state) => {
+	const map = game.Workspace.FindFirstChild("Map");
+	if (!map) return;
+
+	for (const hex of map.GetChildren()) {
+		for (const asset of hex.GetChildren()) {
+			if (asset.GetAttribute("IsDominatingTerrain") === true) {
+				const setTransparency = (obj: Instance, transparency: number) => {
+					if (obj.IsA("BasePart")) {
+						obj.Transparency = transparency;
+					} else if (obj.IsA("Decal") || obj.IsA("Texture")) {
+						obj.Transparency = transparency;
+					}
+					for (const child of obj.GetChildren()) {
+						setTransparency(child, transparency);
+					}
+				};
+				setTransparency(asset, state ? 0 : 1);
+			}
+		}
+	}
 });
 
 // Toggle panel visibility

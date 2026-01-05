@@ -365,6 +365,10 @@ export class MapGenerator implements OnStart {
 				// Final safety pass - re-anchor everything just in case ScaleTo or other operations reset anything
 				anchorAllParts(clone, isObstacle, isObstacle);
 
+				if (clone && (assetPath.find("Trees") !== undefined || assetPath.find("Hill") !== undefined || assetPath.find("Rocks") !== undefined || assetPath.find("Grass") !== undefined)) {
+					clone.SetAttribute("IsDominatingTerrain", true);
+				}
+
 				return clone;
 			} else {
 				Logger.Warn("MapGenerator", `Asset not found: ${assetPath}`);
